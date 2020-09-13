@@ -3,7 +3,7 @@ This is used for proof of concept of a boolean tree that can process a sentence
 inputted by a user and then check the whole statement for if the trade should
 execute.
 
-Kevin Lai & Albert Cao
+Kevin Lai and Albert Cao
 """
 
 from typing import List
