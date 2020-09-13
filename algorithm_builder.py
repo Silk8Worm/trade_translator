@@ -8,6 +8,7 @@ Kevin Lai and Albert Cao
 
 from typing import List
 
+
 class TradeTree:
 
     """
