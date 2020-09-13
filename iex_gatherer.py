@@ -29,7 +29,7 @@ def get_technical(api_key: str, ticker: str, indicator: str, range: Optional[str
     url = f'https://{sand}.iexapis.com/stable/stock/{ticker}/indicator/{indicator}?range={range}&token={api_key}'
     r = requests.get(url)
     print(url)
-    return r.json()
+    return r.json()['chart']
 
 def get_price_data(api_key: str, ticker: str, date_value: str):
     """
@@ -55,4 +55,5 @@ def get_price_data(api_key: str, ticker: str, date_value: str):
     return ret
 
 
-print(get_price_data("Tpk_6ef4a75d2a6f4d95be047b5629cf964f","aapl","20200810",))
+# print(get_technical("Tpk_6ef4a75d2a6f4d95be047b5629cf964f", "aapl", "macd"))
+# print(get_price_data("Tpk_6ef4a75d2a6f4d95be047b5629cf964f","aapl","20200810"))
