@@ -16,7 +16,8 @@ class TradeTree:
     """
 
     # condition
-    and_bool: bool
+    and_bool: bool  # if this tree is type <and> or type <or>
+
     words: List
 
     def __init__(self, condition):
@@ -24,66 +25,98 @@ class TradeTree:
         """
         Initializing tree with just a condition. Until others are added, only
         the base condition matters.
+
+        >>> a = True
+        >>> b = False
+        >>> tree1 = TradeTree(a)
+        >>> tree2 = TradeTree(b)
+
+        >>> tree1.words
+        [True]
+
+        >>> tree2.words
+        [False]
         """
 
-        self.condition = condition
         self.and_bool = None
         self.words = []
+        self.words.append(condition)
 
-    #TODO Please add delete condition and possible further non-theoretical stuff?
-
-    def add_words(self, sub_trade_trees: List, and_bool: bool) -> None:
+    #  TODO Please add possible further non-theoretical stuff?
+    def remove_words(self, index) -> None:
 
         """
-        Knocks self's condition down and creates a list with it and all the new
-        other trade trees. All condition checks should be at leaf level.
+        Given an index, removes the appropriate part of the statement
+
+        If only one word remains, set <and_bool> as desired.
+
+        Do nothing if there are no words to remove
         """
+        if len(self.words) == 0:
+            return None
 
+        self.words.pop(index)
+
+        if len(self.words) == 0 or len(self.words) == 1:
+            self.and_bool = None
+
+    def add_words(self, to_add: List, and_bool: bool) -> None:
+
+        """
+        Equips the tree with one of: <and>, <or>.  Then adds the list of TradeTree to the sentence
+        """
         self.and_bool = and_bool
 
-        for sub_trade_tree in sub_trade_trees:
-            self.words.append(sub_trade_tree)
-
-        self.and_bool = and_bool
-        self.condition = None
+        for tree in to_add:
+            self.words.append(tree)
 
     def get_status(self) -> bool:
 
         """
         Goes through the tree and returns the tree's total value
 
-        >>> a = TradeTree('true')
-        >>> a.add_words([TradeTree('true'), TradeTree('false')], False)
-        >>> a.words[0].add_words([TradeTree('false'), TradeTree('true')], False)
-        >>> a.get_status()
+        >>> tree1 = TradeTree(False)
+        >>> tree1.add_words([True], False)
+        >>> tree2 = TradeTree(True)
+        >>> tree3 = TradeTree(False)
+
+        >>> tree = TradeTree(tree1)
+        >>> tree.add_words([tree2, tree3], False)
+
+        >>> tree.get_status()
         True
         """
 
-        if self.condition is not None:
-            return self.check(self.condition)
-
-        if self.and_bool:
+        if self.and_bool is False:
+            # Tree is type <or>
             for word in self.words:
-                if not word.get_status():
-                    return False
-            return True
+                if isinstance(word, TradeTree):
+                    if word.get_status():
+                        return True
+                else:  # word is a boolean
+                    if word:
+                        return True
 
-        else:
-            for word in self.words:
-                if word.get_status():
-                    return True
             return False
 
-    def check(self, condition) -> bool:
-
-        """
-        Used to check a condition that can be specified however. This processes
-        each individual condition. It could be a string, it's own class, etc.
-        """
-
-        if self.condition == "true":
+        elif self.and_bool is True:
+            # Tree is type <and>
+            for word in self.words:
+                if isinstance(word, TradeTree):
+                    if not word.get_status():
+                        return False
+                else:
+                    if not word:
+                        return False
             return True
-        return False
+
+        else:  # Less than 2 conditions
+            if len(self.words) == 0:
+                # No Words
+                return None
+
+            return self.words[0]
+
 
 if __name__ == '__main__':
 
