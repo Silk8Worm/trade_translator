@@ -24,19 +24,9 @@ class TradeTree:
         Initializing tree with just a condition. Until others are added, only
         the base condition matters.
 
-        >>> a = True
-        >>> b = False
-        >>> tree1 = TradeTree(a)
-        >>> tree2 = TradeTree(b)
-
-        >>> tree1.words
-        [True]
-
-        >>> tree2.words
-        [False]
         """
 
-        (fragments, and_bool) = parse_sentence(sentence) # If fragments is size 1, then its a leaf
+        (fragments, and_bool) = self.parse_sentence(sentence) # If fragments is size 1, then its a leaf
 
         self.children = []
 
@@ -44,11 +34,21 @@ class TradeTree:
             # <sentence> is a leaf
             self.children.append(fragments[0])
 
+            #TODO FOR DEBUGGING ONLY, DELETE AFTER
+            self.and_bool = 5
         else:
             # Well-Behaved Case
             self.and_bool = and_bool
-            for (child in fragments):
+            for child in fragments:
                 self.children.append(TradeTree(child))
+
+    def __str__(self):
+        ret = ''
+        ret += f"{self.and_bool}"
+        for child in self.children:
+            if not isinstance(child, str):
+                print(child)
+        return ret
 
     def parse_sentence(self, input: str):
         """
@@ -63,7 +63,7 @@ class TradeTree:
         input_copy = input
         fragments = []
 
-        if str.count('~') != 0:
+        if input.count('~') != 0:
             print("Don't use that character")
             return None
 
@@ -74,10 +74,12 @@ class TradeTree:
                 count += 1
             elif input[i] == ')':
                 count -= 1
-                if count == 0 and i != len(input) - 1:
+                if count == -1:
+                    break
+                elif count == 0 and i != len(input) - 1:
                     break
                 elif count == 0:
-                    return self.parse_sentence(input[1:-2])
+                    return self.parse_sentence(input[1:-1])
 
         count = 0
         # Making sure the bracket count is valid
@@ -87,11 +89,12 @@ class TradeTree:
             elif i == ')':
                 count -= 1
         if count != 0:
+            print("brackets invalid")
             return None
 
         # Returning a leaf
         if input.count('(') == 0 and input.count(' or ') == 0 and input.count(' and ') == 0:
-            return [input]
+            return [input], False
 
         # Exclude inner bracket strings
         if input.count('(') >= 1:
@@ -105,28 +108,27 @@ class TradeTree:
                     count -= 1
                     if count == 0:
                         # Completed section, breaking it off from parsing
-                        input_copy.replace(input_copy[start:i+1], '~' * (i-start+1))
+                        input_copy = input_copy.replace(input_copy[start:i+1], '~' * (i-start+1))
                         start = i + 1
-
         # Finding instances of or
         start = 0
         if input_copy.find(' or ', start) != -1:
             while input_copy.find(' or ', start) != -1:
                 fragments.append(input[start:input_copy.find(' or ')])
                 start = input_copy.find(' or ') + 4
+            fragments.append(input[start:])
+            return fragments, False
 
         # Finding instances of and
         elif input_copy.find(' and ', start) != -1:
             while input_copy.find(' and ', start) != -1:
-                fragments.append(input[start:input_copy.find(' or ')])
+                fragments.append(input[start:input_copy.find(' and ')])
                 start = input_copy.find(' and ') + 5
+            fragments.append(input[start:])
+            return fragments, True
 
-
-
-
-
-
-        return fragments[], and_bool
+        print("reached end, there is an error")
+        return None
 
     #  TODO Please add possible further non-theoretical stuff?
 
@@ -170,7 +172,7 @@ class TradeTree:
 
         else:
             # Tree is a leaf
-            if children[0] == "true":
+            if self.children[0] == "true":
                 return True
             else:
                 return False
@@ -178,9 +180,10 @@ class TradeTree:
 
 if __name__ == '__main__':
 
-    import doctest
-    doctest.testmod()
+    # import doctest
+    # doctest.testmod()
 
-    tree = TradeTree("(true and false or true) and (false and true or true)")
+    tree = TradeTree("((true and false or true) and (false and true or true))")
+    print(tree)
 
 """Catch A and B or C"""
