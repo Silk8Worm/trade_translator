@@ -26,12 +26,6 @@ class TradeTree:
         Initializing tree with just a condition. Until others are added, only
         the base condition matters.
 
-        - check for outside bracket
-        - remove outside bracket
-        - check for non-bracketed or statement
-        - check for non-bracketed and statement
-        - repeat (shave off ands/ors and store in object memory each time)
-
         >>> a = True
         >>> b = False
         >>> tree1 = TradeTree(a)
