@@ -123,6 +123,14 @@ class TradeTree:
 
             return self.words[0]
 
+def parse_sentence(input: str):
+    """
+        - check for outside bracket
+        - remove outside bracket
+        - check for non-bracketed or statement
+        - check for non-bracketed and statement
+        - repeat (shave off ands/ors and store in object memory each time)
+    """
 
 if __name__ == '__main__':
 
