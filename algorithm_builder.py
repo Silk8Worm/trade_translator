@@ -18,7 +18,7 @@ class TradeTree:
     and_bool: bool  # if this tree is type <and> or type <or>
     children: List
 
-    def __init__(self, conditions[], and_bool):
+    def __init__(self, sentence: str):
 
         """
         Initializing tree with just a condition. Until others are added, only
