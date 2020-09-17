@@ -42,6 +42,15 @@ class TradeTree:
         self.words = []
         self.words.append(condition)
 
+    def parse_sentence(input: str):
+        """
+            - check for outside bracket
+            - remove outside bracket
+            - check for non-bracketed or statement
+            - check for non-bracketed and statement
+            - repeat (shave off ands/ors and store in object memory each time)
+        """
+
     #  TODO Please add possible further non-theoretical stuff?
     def remove_words(self, index) -> None:
 
@@ -117,20 +126,12 @@ class TradeTree:
 
             return self.words[0]
 
-def parse_sentence(input: str):
-    """
-        - check for outside bracket
-        - remove outside bracket
-        - check for non-bracketed or statement
-        - check for non-bracketed and statement
-        - repeat (shave off ands/ors and store in object memory each time)
-    """
 
 if __name__ == '__main__':
 
     import doctest
     doctest.testmod()
 
-    parse_sentence("(true and false or true) and (false and true or true)")
+    tree = TradeTree("(true and false or true) and (false and true or true)")
 
 """Catch A and B or C"""
