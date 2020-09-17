@@ -129,32 +129,13 @@ class TradeTree:
         return fragments[], and_bool
 
     #  TODO Please add possible further non-theoretical stuff?
-    def remove_words(self, index) -> None:
 
-        """
-        Given an index, removes the appropriate part of the statement
-
-        If only one word remains, set <and_bool> as desired.
-
-        Do nothing if there are no words to remove
-        """
-        if len(self.words) == 0:
-            return None
-
-        self.words.pop(index)
-
-        if len(self.words) == 0 or len(self.words) == 1:
-            self.and_bool = None
-
-    def add_words(self, to_add: List, and_bool: bool) -> None:
+    def add_tree(self, to_add) -> None:
 
         """
         Equips the tree with one of: <and>, <or>.  Then adds the list of TradeTree to the sentence
         """
-        self.and_bool = and_bool
-
-        for tree in to_add:
-            self.words.append(tree)
+        self.children.append(to_add)
 
     def get_status(self) -> bool:
 
@@ -175,33 +156,24 @@ class TradeTree:
 
         if self.and_bool is False:
             # Tree is type <or>
-            for word in self.words:
-                if isinstance(word, TradeTree):
-                    if word.get_status():
-                        return True
-                else:  # word is a boolean
-                    if word:
-                        return True
-
+            for fragment in self.children:
+                if fragment.get_status():
+                    return True
             return False
 
         elif self.and_bool is True:
             # Tree is type <and>
-            for word in self.words:
-                if isinstance(word, TradeTree):
-                    if not word.get_status():
-                        return False
-                else:
-                    if not word:
-                        return False
+            for fragment in self.children:
+                if not fragment.get_status():
+                    return False
             return True
 
-        else:  # Less than 2 conditions
-            if len(self.words) == 0:
-                # No Words
-                return None
-
-            return self.words[0]
+        else:
+            # Tree is a leaf
+            if children[0] == "true":
+                return True
+            else:
+                return False
 
 
 if __name__ == '__main__':
