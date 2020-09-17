@@ -15,12 +15,10 @@ class TradeTree:
     This tree combines different market conditions into a boolean tree
     """
 
-    # condition
     and_bool: bool  # if this tree is type <and> or type <or>
+    children: List
 
-    words: List
-
-    def __init__(self, condition):
+    def __init__(self, conditions[], and_bool):
 
         """
         Initializing tree with just a condition. Until others are added, only
@@ -38,7 +36,7 @@ class TradeTree:
         [False]
         """
 
-        self.and_bool = None
+        self.and_bool = and_bool
         self.words = []
         self.words.append(condition)
 
