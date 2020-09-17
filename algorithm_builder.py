@@ -36,9 +36,19 @@ class TradeTree:
         [False]
         """
 
-        self.and_bool = and_bool
-        self.words = []
-        self.words.append(condition)
+        (fragments, and_bool) = parse_sentence(sentence) # If fragments is size 1, then its a leaf
+
+        self.children = []
+
+        if len(fragments) == 1:
+            # <sentence> is a leaf
+            self.children.append(fragments[0])
+
+        else:
+            # Well-Behaved Case
+            self.and_bool = and_bool
+            for (child in fragments):
+                self.children.append(TradeTree(child))
 
     def parse_sentence(input: str):
         """
