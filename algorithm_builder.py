@@ -50,18 +50,81 @@ class TradeTree:
             for (child in fragments):
                 self.children.append(TradeTree(child))
 
-    def parse_sentence(input: str):
+    def parse_sentence(self, input: str):
         """
+        Returns None if invalid bracket setup
+
             - check for outside bracket
             - remove outside bracket
             - check for non-bracketed or statement
             - check for non-bracketed and statement
             - repeat (shave off ands/ors and store in object memory each time)
         """
+        input_copy = input
+        fragments = []
+
+        if str.count('~') != 0:
+            print("Don't use that character")
+            return None
+
         count = 0
-        for char in input:
-            if char == '(':
+        # Checking to see if outside brackets are unnecessary
+        for i in range(len(input)):
+            if input[i] == '(':
                 count += 1
+            elif input[i] == ')':
+                count -= 1
+                if count == 0 and i != len(input) - 1:
+                    break
+                elif count == 0:
+                    return self.parse_sentence(input[1:-2])
+
+        count = 0
+        # Making sure the bracket count is valid
+        for i in input:
+            if i == '(':
+                count += 1
+            elif i == ')':
+                count -= 1
+        if count != 0:
+            return None
+
+        # Returning a leaf
+        if input.count('(') == 0 and input.count(' or ') == 0 and input.count(' and ') == 0:
+            return [input]
+
+        # Exclude inner bracket strings
+        if input.count('(') >= 1:
+            count = 0
+            start = 0
+            for i in range(len(input_copy)):
+                if input_copy[i] == '(':
+                    start = i
+                    count += 1
+                elif input_copy[i] == ')':
+                    count -= 1
+                    if count == 0:
+                        # Completed section, breaking it off from parsing
+                        input_copy.replace(input_copy[start:i+1], '~' * (i-start+1))
+                        start = i + 1
+
+        # Finding instances of or
+        start = 0
+        if input_copy.find(' or ', start) != -1:
+            while input_copy.find(' or ', start) != -1:
+                fragments.append(input[start:input_copy.find(' or ')])
+                start = input_copy.find(' or ') + 4
+
+        # Finding instances of and
+        elif input_copy.find(' and ', start) != -1:
+            while input_copy.find(' and ', start) != -1:
+                fragments.append(input[start:input_copy.find(' or ')])
+                start = input_copy.find(' and ') + 5
+
+
+
+
+
 
         return fragments[], and_bool
 
