@@ -85,9 +85,22 @@ class TradeTree:
             return True
         return False
 
+def parse_sentence(input: str):
+    """
+    - split sentence
+        - check for outside bracket
+        - remove outside bracket
+        - check for non-bracketed or statement
+        - check for non-bracketed and statement
+        - repeat (shave off ands/ors and store in object memory each time)
+    - create tree
+    """
+
 if __name__ == '__main__':
 
     import doctest
     doctest.testmod()
+
+    parse_sentence("(true and false or true) and (false and true or true)")
 
 """Catch A and B or C"""
