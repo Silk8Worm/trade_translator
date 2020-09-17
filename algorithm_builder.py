@@ -48,6 +48,12 @@ class TradeTree:
             - check for non-bracketed and statement
             - repeat (shave off ands/ors and store in object memory each time)
         """
+        count = 0
+        for char in input:
+            if char == '(':
+                count += 1
+
+        return fragments[], and_bool
 
     #  TODO Please add possible further non-theoretical stuff?
     def remove_words(self, index) -> None:
