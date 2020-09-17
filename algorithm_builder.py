@@ -129,6 +129,7 @@ def parse_sentence(input: str):
     - create tree
     """
 
+
 if __name__ == '__main__':
 
     import doctest
