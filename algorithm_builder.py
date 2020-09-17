@@ -26,6 +26,12 @@ class TradeTree:
         Initializing tree with just a condition. Until others are added, only
         the base condition matters.
 
+        - check for outside bracket
+        - remove outside bracket
+        - check for non-bracketed or statement
+        - check for non-bracketed and statement
+        - repeat (shave off ands/ors and store in object memory each time)
+
         >>> a = True
         >>> b = False
         >>> tree1 = TradeTree(a)
@@ -116,18 +122,6 @@ class TradeTree:
                 return None
 
             return self.words[0]
-
-
-def parse_sentence(input: str):
-    """
-    - split sentence
-        - check for outside bracket
-        - remove outside bracket
-        - check for non-bracketed or statement
-        - check for non-bracketed and statement
-        - repeat (shave off ands/ors and store in object memory each time)
-    - create tree
-    """
 
 
 if __name__ == '__main__':
