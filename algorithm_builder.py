@@ -61,7 +61,6 @@ class TradeTree:
         """
         input_copy = input
         fragments = []
-        print(input)
 
         if input.count('~') != 0:
             print("Don't use that character")
@@ -80,7 +79,6 @@ class TradeTree:
                     elif count == 0 and i != len(input) - 1:
                         break
                     elif count == 0:
-                        print("removed outside brackets")
                         return self.parse_sentence(input[1:-1])
 
 
