@@ -43,12 +43,11 @@ class TradeTree:
                 self.children.append(TradeTree(child))
 
     def __str__(self):
-        ret = ''
-        ret += f"{self.and_bool}"
+        s = ""
         for child in self.children:
-            if not isinstance(child, str):
-                print(child)
-        return ret
+            s += f"({str(child)} + {self.and_bool})"
+        return s
+
 
     def parse_sentence(self, input: str):
         """
@@ -62,6 +61,7 @@ class TradeTree:
         """
         input_copy = input
         fragments = []
+        print(input)
 
         if input.count('~') != 0:
             print("Don't use that character")
@@ -69,17 +69,20 @@ class TradeTree:
 
         count = 0
         # Checking to see if outside brackets are unnecessary
-        for i in range(len(input)):
-            if input[i] == '(':
-                count += 1
-            elif input[i] == ')':
-                count -= 1
-                if count == -1:
-                    break
-                elif count == 0 and i != len(input) - 1:
-                    break
-                elif count == 0:
-                    return self.parse_sentence(input[1:-1])
+        if input[0] == '(' and input[-1] == ')':
+            for i in range(len(input)):
+                if input[i] == '(':
+                    count += 1
+                elif input[i] == ')':
+                    count -= 1
+                    if count == -1:
+                        break
+                    elif count == 0 and i != len(input) - 1:
+                        break
+                    elif count == 0:
+                        print("removed outside brackets")
+                        return self.parse_sentence(input[1:-1])
+
 
         count = 0
         # Making sure the bracket count is valid
@@ -183,7 +186,5 @@ if __name__ == '__main__':
     # import doctest
     # doctest.testmod()
 
-    tree = TradeTree("((true and false or true) and (false and true or true))")
+    tree = TradeTree("(rsi above 50 or (this below 40 and macd below 10))")
     print(tree)
-
-"""Catch A and B or C"""
