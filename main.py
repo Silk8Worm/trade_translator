@@ -4,7 +4,7 @@ Download kivy: https://kivy.org/#download
 GUI designed for the trade translator based on design:
 https://www.figma.com/file/OKTVtYq4lWW2GOEMfP6k1t/Trade-Translator?node-id=17%3A0
 
-Potential solution that helped me (Kevin):
+Potential solution to downloading Kivy that helped me (Kevin):
 https://github.com/kivy/kivy/issues/4991
 """
 
@@ -23,7 +23,7 @@ class Login(Screen):
         app.password = passwordText
 
         self.manager.transition = NoTransition()
-        self.manager.current = 'connected'
+        self.manager.current = 'trade'
 
         app.config.read(app.get_application_config())
         app.config.write()
@@ -41,23 +41,37 @@ class Login(Screen):
         self.ids['login'].text = ""
         self.ids['password'].text = ""
 
-class Connected(Screen):
-    def disconnect(self):
-        self.manager.transition = NoTransition()
-        self.manager.current = 'login'
-        self.manager.get_screen('login').resetForm()
-
 class SignUp(Screen):
     def create_account(self, email, password):
         print(email)
         print(password)
         self.manager.transition = NoTransition()
-        self.manager.current = 'connected'
+        self.manager.current = 'trade'
 
     def return_to_login(self):
         self.manager.transition = NoTransition()
         self.manager.current = 'login'
         self.manager.get_screen('login').resetForm()
+
+class Trade(Screen):
+    def disconnect(self):
+        self.manager.transition = NoTransition()
+        self.manager.current = 'login'
+        self.manager.get_screen('login').resetForm()
+
+    def say_hi(self):
+        print("Hi")
+
+    def backtest(self, signal, trade, cover_signal, universe, take_profit, stop_loss, cover_trade):
+        print("backtest")
+        print(f'{signal},{trade},{cover_signal},{universe},{take_profit},{stop_loss},{cover_trade}')
+
+    def backtest_case(self, signal, trade, cover_signal, universe, take_profit, stop_loss, cover_trade):
+        print("backtest case")
+        print(f'{signal},{trade},{cover_signal},{universe},{take_profit},{stop_loss},{cover_trade}')
+
+    def account(self):
+        print("Account page not set up.")
 
 class LoginApp(App):
     username = StringProperty(None)
@@ -67,7 +81,7 @@ class LoginApp(App):
         manager = ScreenManager()
 
         manager.add_widget(Login(name='login'))
-        manager.add_widget(Connected(name='connected'))
+        manager.add_widget(Trade(name='trade'))
         manager.add_widget(SignUp(name='signup'))
 
         return manager

@@ -1,4 +1,4 @@
-#:include connected.kv
+#:include trade.kv
 #:include login.kv
 
 <SignUp>:
@@ -44,11 +44,11 @@
             text: 'Create Account'
             font_size: 24
 
-            on_press: root.create_account(login.text, password.text)
+            on_release: root.create_account(login.text, password.text)
 
         Button:
             text: 'Return to Login'
             font_size: 24
 
-            on_press: root.return_to_login()
+            on_release: root.return_to_login()
 
