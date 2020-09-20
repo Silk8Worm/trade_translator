@@ -1,9 +1,12 @@
+#:include backtest.kv
+
 <Trade>:
     BoxLayout:
         orientation: 'vertical'
 
         BoxLayout:
             orientation: 'horizontal'
+            size_hint: (1, .15)
 
             BoxLayout:
                 orientation: 'horizontal'
@@ -13,7 +16,6 @@
                     size: self.texture_size
                     halign: 'left'
                     allow_stretch: True
-                    keep_ratio: False
 
                 Label:
                     text: ''
@@ -35,87 +37,104 @@
                     halign: 'right'
 
                     on_release: root.account()
+        GridLayout:
+            cols: 2
+            padding: [20,20,20,20]
 
-        Label:
-            text: 'Signal'
-            font_size: 18
-            halign: 'left'
+            Label:
+                text: 'Signal'
+                font_size: 18
+                halign: 'left'
 
-        TextInput:
-            id: signal
-            multiline:False
-            font_size: 28
 
-        Label:
-            text: 'Trade'
-            font_size: 18
-            halign: 'left'
+            Label:
+                text: 'Trade'
+                font_size: 18
+                halign: 'left'
 
-        TextInput:
-            id: trade
-            multiline:False
-            font_size: 28
+            TextInput:
+                id: signal
+                multiline:False
+                font_size: 28
 
-        Label:
-            text: 'Cover Signal'
-            font_size: 18
-            halign: 'left'
+            TextInput:
+                id: trade
+                multiline:False
+                font_size: 28
 
-        TextInput:
-            id: cover_signal
-            multiline:False
-            font_size: 28
+            Label:
+                text: 'Cover Signal'
+                font_size: 18
+                halign: 'left'
 
-        Label:
-            text: 'Universe'
-            font_size: 18
-            halign: 'left'
+            Label:
+                text: 'Universe'
+                font_size: 18
+                halign: 'left'
 
-        TextInput:
-            id: universe
-            multiline:False
-            font_size: 28
+            TextInput:
+                id: cover_signal
+                multiline:False
+                font_size: 28
 
-        Label:
-            text: 'Take Profit'
-            font_size: 18
-            halign: 'left'
+            TextInput:
+                id: universe
+                multiline:False
+                font_size: 28
 
-        TextInput:
-            id: take_profit
-            multiline:False
-            font_size: 28
+            GridLayout:
+                cols: 2
 
-        Label:
-            text: 'Stop Loss'
-            font_size: 18
-            halign: 'left'
+                Label:
+                    text: 'Take Profit'
+                    font_size: 18
+                    halign: 'left'
 
-        TextInput:
-            id: stop_loss
-            multiline:False
-            font_size: 28
+                Label:
+                    text: 'Stop Loss'
+                    font_size: 18
+                    halign: 'left'
 
-        Label:
-            text: 'Cover Trade'
-            font_size: 18
-            halign: 'left'
+            Label:
+                text: 'Cover Trade'
+                font_size: 18
+                halign: 'left'
 
-        TextInput:
-            id: cover_trade
-            multiline:False
-            font_size: 28
+            GridLayout:
+                cols: 2
 
-        Button:
-            text: 'Backtest Case'
-            font_size: 24
-            background_color: 0,.3,.8,1
+                TextInput:
+                    id: take_profit
+                    multiline:False
+                    font_size: 28
 
-            on_release: root.backtest_case(signal.text, trade.text, cover_signal.text, universe.text, take_profit.text, stop_loss.text, cover_trade.text)
+                TextInput:
+                    id: stop_loss
+                    multiline:False
+                    font_size: 28
 
-        Button:
-            text: 'Backtest'
-            font_size: 24
-            background_color: 0,.3,.8,1
+            TextInput:
+                id: cover_trade
+                multiline:False
+                font_size: 28
 
-            on_release: root.backtest(signal.text, trade.text, cover_signal.text, universe.text, take_profit.text, stop_loss.text, cover_trade.text)
+            Label:
+                text: ''
+
+            BoxLayout:
+                orientation: 'horizontal'
+                padding: [20,20,20,20]
+
+                Button:
+                    text: 'Backtest Case'
+                    font_size: 18
+                    background_color: 0,.3,.8,1
+
+                    on_release: root.backtest_case(signal.text, trade.text, cover_signal.text, universe.text, take_profit.text, stop_loss.text, cover_trade.text)
+
+                Button:
+                    text: 'Backtest'
+                    font_size: 18
+                    background_color: 0,.3,.8,1
+
+                    on_release: root.backtest(signal.text, trade.text, cover_signal.text, universe.text, take_profit.text, stop_loss.text, cover_trade.text)

@@ -1,9 +1,8 @@
 #:include trade.kv
-#:include login.kv
+#:include tradetranslator.kv
 
 <SignUp>:
     BoxLayout
-        id: login_layout
         orientation: 'vertical'
         padding: [10,50,10,50]
         spacing: 50
@@ -22,7 +21,7 @@
                 text_size: root.width-20, 20
 
             TextInput:
-                id: login
+                id: signin
                 multiline:False
                 font_size: 28
 
@@ -44,11 +43,11 @@
             text: 'Create Account'
             font_size: 24
 
-            on_release: root.create_account(login.text, password.text)
+            on_release: root.create_account(signin.text, password.text)
 
         Button:
             text: 'Return to Login'
             font_size: 24
 
-            on_release: root.return_to_login()
+            on_release: root.return_to_signin()
 

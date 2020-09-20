@@ -13,91 +13,101 @@ https://github.com/kivy/kivy/issues/4991
 from kivy.app import App
 from kivy.properties import StringProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
+from kivy.uix.widget import Widget
+from kivy_garden.graph import Graph, MeshLinePlot
 import os
 
-class Login(Screen):
-    def do_login(self, loginText, passwordText):
+
+class TradeTranslator(Screen):
+    def do_signin(self, signinText, passwordText):
         app = App.get_running_app()
 
-        app.username = loginText
+        app.username = signinText
         app.password = passwordText
 
         self.manager.transition = NoTransition()
         self.manager.current = 'trade'
 
-        app.config.read(app.get_application_config())
-        app.config.write()
-
-    def do_signup(self, loginText, passwordText):
+    def do_signup(self, signinText, passwordText):
         app = App.get_running_app()
 
-        app.username = loginText
+        app.username = signinText
         app.password = passwordText
 
         self.manager.transition = NoTransition()
         self.manager.current = 'signup'
 
     def resetForm(self):
-        self.ids['login'].text = ""
+        self.ids['signin'].text = ""
         self.ids['password'].text = ""
+
 
 class SignUp(Screen):
     def create_account(self, email, password):
-        print(email)
-        print(password)
         self.manager.transition = NoTransition()
         self.manager.current = 'trade'
 
-    def return_to_login(self):
+    def return_to_signin(self):
         self.manager.transition = NoTransition()
-        self.manager.current = 'login'
-        self.manager.get_screen('login').resetForm()
+        self.manager.current = 'signin'
+        self.manager.get_screen('signin').resetForm()
+
 
 class Trade(Screen):
     def disconnect(self):
         self.manager.transition = NoTransition()
-        self.manager.current = 'login'
-        self.manager.get_screen('login').resetForm()
-
-    def say_hi(self):
-        print("Hi")
+        self.manager.current = 'signin'
+        self.manager.get_screen('signin').resetForm()
 
     def backtest(self, signal, trade, cover_signal, universe, take_profit, stop_loss, cover_trade):
         print("backtest")
         print(f'{signal},{trade},{cover_signal},{universe},{take_profit},{stop_loss},{cover_trade}')
 
+        self.manager.current = 'backtest'
+
     def backtest_case(self, signal, trade, cover_signal, universe, take_profit, stop_loss, cover_trade):
         print("backtest case")
         print(f'{signal},{trade},{cover_signal},{universe},{take_profit},{stop_loss},{cover_trade}')
 
+        self.manager.current = 'backtest'
+
     def account(self):
         print("Account page not set up.")
 
-class LoginApp(App):
+
+class BackTest(Screen):
+
+    final_equity = StringProperty()
+    cumulative_return = StringProperty()
+    sharpe_ratio = StringProperty()
+    sortino_ratio = StringProperty()
+
+    def account(self):
+        print("Account page not set up.")
+
+        self.final_equity = '$5000'
+        self.cumulative_return = '-50%'
+        self.sharpe_ratio = '1.2'
+        self.sortino_ratio = '2.3'
+
+    def display_values(self):
+        pass
+
+
+class TradeTranslatorApp(App):
     username = StringProperty(None)
     password = StringProperty(None)
 
     def build(self):
         manager = ScreenManager()
 
-        manager.add_widget(Login(name='login'))
+        manager.add_widget(TradeTranslator(name='signin'))
         manager.add_widget(Trade(name='trade'))
         manager.add_widget(SignUp(name='signup'))
+        manager.add_widget(BackTest(name='backtest'))
 
         return manager
 
-    def get_application_config(self):
-        if(not self.username):
-            return super(LoginApp, self).get_application_config()
-
-        conf_directory = self.user_data_dir + '/' + self.username
-
-        if(not os.path.exists(conf_directory)):
-            os.makedirs(conf_directory)
-
-        return super(LoginApp, self).get_application_config(
-            '%s/config.cfg' % (conf_directory)
-        )
 
 if __name__ == '__main__':
-    LoginApp().run()
+    TradeTranslatorApp().run()

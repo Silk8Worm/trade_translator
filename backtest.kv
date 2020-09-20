@@ -1,0 +1,93 @@
+<BackTest>:
+    BoxLayout:
+        orientation: 'vertical'
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: (1, .15)
+
+            BoxLayout:
+                orientation: 'horizontal'
+
+                Image:
+                    source: 'logo.png'
+                    size: self.texture_size
+                    halign: 'left'
+                    allow_stretch: True
+
+                Label:
+                    text: ''
+
+            Label:
+                text: 'Trade Translator'
+                font_size: 30
+                halign: 'left'
+
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: ''
+
+                Button:
+                    text: 'Account'
+                    font_size: 15
+                    background_color: 0,.3,.8,1
+                    halign: 'right'
+
+                    on_release: root.account()
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: (1, .1)
+
+            Label:
+                text: 'Final Equity'
+                font_size: 14
+
+            Label:
+                text: 'Cumulative Return'
+                font_size: 14
+
+            Label:
+                text: 'Sharpe Ratio'
+                font_size: 14
+
+            Label:
+                text: 'Sortino Ratio'
+                font_size: 14
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: (1, .2)
+
+            Label:
+                text: root.final_equity
+                font_size: 14
+                color: 0.8274,0.8274,0.8274,1
+                canvas.before:
+                    Color:
+                        rgba: 0.8274,0.8274,0.8274,1
+
+            Label:
+                text: root.cumulative_return
+                font_size: 14
+                color: 0.8274,0.8274,0.8274,1
+
+            Label:
+                text: root.sharpe_ratio
+                font_size: 14
+                color: 0.8274,0.8274,0.8274,1
+
+            Label:
+                text: root.sortino_ratio
+                font_size: 14
+                color: 0.8274,0.8274,0.8274,1
+
+        BoxLayout:
+
+            Image:
+                source: 'foo.png'
+                size: self.texture_size
+                halign: 'left'
+                allow_stretch: True
+                keep_ratio: False
