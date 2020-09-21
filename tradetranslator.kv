@@ -4,14 +4,14 @@
 <TradeTranslator>:
     BoxLayout:
         orientation: 'vertical'
-        padding: [30,10,30,30]
-        spacing: 50
+        padding: [420,180,420,170]
 
         BoxLayout:
+            spacing: -30
             orientation: 'vertical'
-            spacing: 30
 
             Label:
+                family_name: 'Arial'
                 text: 'Trade Translator'
                 font_size: 32
 
@@ -21,49 +21,62 @@
 
         BoxLayout:
             orientation: 'vertical'
-            padding: [30,0,0,0]
+            size_hint_y: None
+            height: 70
 
-            Label:
-                text: 'Email Address'
-                font_size: 18
-                halign: 'left'
-                text_size: root.width-20, 20
+            BoxLayout
+                padding: [545,0,0,0]
+
+                Label:
+                    text: 'Email Address'
+                    font_size: 15
+                    halign: 'left'
+                    text_size: root.width-20, 20
 
             TextInput:
                 id: signin
                 multiline:False
-                font_size: 28
+                font_size: 17
 
         BoxLayout:
             orientation: 'vertical'
-            padding: [30,0,0,0]
+            size_hint_y: None
+            height: 70
 
-            Label:
-                text: 'Password'
-                halign: 'left'
-                font_size: 18
-                text_size: root.width-20, 20
+            BoxLayout
+                padding: [545,0,0,0]
+
+                Label:
+                    text: 'Password'
+                    halign: 'left'
+                    font_size: 15
+                    text_size: root.width-20, 20
 
             TextInput:
                 id: password
                 multiline:False
                 password:True
-                font_size: 28
+                font_size: 17
 
         BoxLayout:
             orientation: 'vertical'
-            spacing: 20
-            padding: [50,0,50,0]
+            padding: [0,30,0,0]
             Button:
                 text: 'Sign In'
-                font_size: 24
-                background_color: 0,.3,.8,1
+                font_size: 15
+                background_color: [.2, .3647, .917647, 1]
 
                 on_release: root.do_signin(signin.text, password.text)
-            BoxLayout:
-                padding: [100,10,100,10]
+
+            RelativeLayout:
+
                 Button:
                     text: "Don't have an account? Sign up."
-                    font_size: 14
+                    pos_hint: {'center_x': 0.5}
+                    size_hint: None, None
+                    height: 20
+                    width: 180
+                    font_size: 12
+                    background_color: [0,0,0,0]
 
                     on_release: root.do_signup(signin.text, password.text)

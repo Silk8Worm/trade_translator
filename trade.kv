@@ -6,7 +6,6 @@
 
         BoxLayout:
             orientation: 'horizontal'
-            size_hint: (1, .15)
 
             BoxLayout:
                 orientation: 'horizontal'
@@ -22,7 +21,7 @@
 
             Label:
                 text: 'Trade Translator'
-                font_size: 30
+                font_size: 60
                 halign: 'left'
 
             BoxLayout:
@@ -37,94 +36,122 @@
                     halign: 'right'
 
                     on_release: root.account()
+
         GridLayout:
             cols: 2
-            padding: [20,20,20,20]
+            size_hint_y: None
+            height: 550
 
-            Label:
-                text: 'Signal'
-                font_size: 18
-                halign: 'left'
+            BoxLayout:
+                orientation: 'vertical'
+                padding: [30, 0, 15, 0]
 
-
-            Label:
-                text: 'Trade'
-                font_size: 18
-                halign: 'left'
-
-            TextInput:
-                id: signal
-                multiline:False
-                font_size: 28
-
-            TextInput:
-                id: trade
-                multiline:False
-                font_size: 28
-
-            Label:
-                text: 'Cover Signal'
-                font_size: 18
-                halign: 'left'
-
-            Label:
-                text: 'Universe'
-                font_size: 18
-                halign: 'left'
-
-            TextInput:
-                id: cover_signal
-                multiline:False
-                font_size: 28
-
-            TextInput:
-                id: universe
-                multiline:False
-                font_size: 28
-
-            GridLayout:
-                cols: 2
-
-                Label:
-                    text: 'Take Profit'
-                    font_size: 18
-                    halign: 'left'
-
-                Label:
-                    text: 'Stop Loss'
-                    font_size: 18
-                    halign: 'left'
-
-            Label:
-                text: 'Cover Trade'
-                font_size: 18
-                halign: 'left'
-
-            GridLayout:
-                cols: 2
+                BoxLayout:
+                    padding: [0,0,400,10]
+                    Label:
+                        text: 'Signal'
+                        font_size: 24
+                        size_hint_y: None
+                        height: 40
 
                 TextInput:
-                    id: take_profit
+                    id: signal
                     multiline:False
                     font_size: 28
 
+            BoxLayout:
+                orientation: 'vertical'
+
+                Label:
+                    text: 'Trade'
+                    font_size: 18
+                    halign: 'left'
+
                 TextInput:
-                    id: stop_loss
+                    id: trade
                     multiline:False
                     font_size: 28
 
-            TextInput:
-                id: cover_trade
-                multiline:False
-                font_size: 28
+            BoxLayout:
+                orientation: 'vertical'
 
-            Label:
-                text: ''
+                Label:
+                    text: 'Cover Signal'
+                    font_size: 18
+                    halign: 'left'
+
+                TextInput:
+                    id: cover_signal
+                    multiline:False
+                    font_size: 28
+
+            BoxLayout:
+                orientation: 'vertical'
+
+                Label:
+                    text: 'Universe'
+                    font_size: 18
+                    halign: 'left'
+
+                TextInput:
+                    id: universe
+                    multiline:False
+                    font_size: 28
 
             BoxLayout:
                 orientation: 'horizontal'
-                padding: [20,20,20,20]
 
+                BoxLayout:
+                    orientation: 'vertical'
+
+                    Label:
+                        text: 'Take Profit'
+                        font_size: 18
+                        halign: 'left'
+
+                    TextInput:
+                        id: take_profit
+                        multiline:False
+                        font_size: 28
+
+                BoxLayout:
+                    orientation: 'vertical'
+
+                    Label:
+                        text: 'Stop Loss'
+                        font_size: 18
+                        halign: 'left'
+
+                    TextInput:
+                        id: stop_loss
+                        multiline:False
+                        font_size: 28
+
+            BoxLayout:
+                orientation: 'vertical'
+
+                Label:
+                    text: 'Cover Trade'
+                    font_size: 18
+                    halign: 'left'
+
+                TextInput:
+                    id: cover_trade
+                    multiline:False
+                    font_size: 28
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: 100
+
+            Label:
+                font_size: 18
+            Label:
+                font_size: 18
+
+            BoxLayout:
+                padding: [20,20,30,20]
                 Button:
                     text: 'Backtest Case'
                     font_size: 18
@@ -132,6 +159,8 @@
 
                     on_release: root.backtest_case(signal.text, trade.text, cover_signal.text, universe.text, take_profit.text, stop_loss.text, cover_trade.text)
 
+            BoxLayout:
+                padding: [30,20,20,20]
                 Button:
                     text: 'Backtest'
                     font_size: 18
