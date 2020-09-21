@@ -26,7 +26,9 @@ reserved = {
     'to': 'TO',
     'above': 'ABOVE',
     'below': 'BELOW',
-    'crosses': 'CROSSES'
+    'crosses': 'CROSSES',
+    'and': "AND",
+    'or': "OR"
 }
 tokens += list(reserved.values())
 

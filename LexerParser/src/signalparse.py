@@ -19,12 +19,34 @@ def get_data(indicator, time=None):
     # Get from IEX (
 
 
-# current top layer grammar rule. TO BE UPDATED
-def p_subsignal(p):
-    'subsignal : IF comparison'
+# Sets the precedence for the LALR parser for and and or
+precedence = (
+    ('left', 'AND'),
+    ('left', 'OR')
+)
+
+
+# current top layer grammar rule
+def p_signal(p):
+    '''signal : IF subsignal'''
     p[0] = p[2]
-    # TODO Add additional layers so subsignals combined with
-    #  and/or make a signal. IF Signal ACTION make up the entire thing
+
+
+# A grammar rule defining a subsignal in terms of other
+# subsignals combined with and/or
+def p_subsignal_andor(p):
+    '''subsignal : subsignal AND subsignal
+                 | subsignal OR subsignal'''
+    if p[2] == 'and':
+        p[0] = p[1] and p[3]
+    else:
+        p[0] = p[1] or p[3]
+
+
+# A grammar rule defining a subsignal in terms of a single comparison value
+def p_subsignal_comp(p):
+    '''subsignal : comparison'''
+    p[0] = p[1]
 
 
 # A grammar rule defining a comparison between to lookups
@@ -124,11 +146,11 @@ def p_error(p):
 parser = yacc.yacc()
 
 # Different test data, (relies on the current value of get_data), uncomment to
-# try differnt ones
+# try different ones
 # s = 'if 30 day macd crosses above 13 day macd'
-s = 'if 30 day macd crosses below 17'
+# s = 'if 30 day macd crosses below 17'
 # s = "if rsi less than 56.1"
-# s = "if rsi greater than 10"
+s = "if rsi greater than 10 and rsi less than 50"
 
 # Set up a logging object
 logging.basicConfig(
