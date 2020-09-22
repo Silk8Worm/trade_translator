@@ -13,9 +13,11 @@ https://github.com/kivy/kivy/issues/4991
 from kivy.app import App
 from kivy.properties import StringProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
+from kivy.config import Config
 from kivy.uix.widget import Widget
 from kivy_garden.graph import Graph, MeshLinePlot
 import os
+from matplotlib import pyplot as plt
 
 
 class TradeTranslator(Screen):
@@ -64,12 +66,14 @@ class Trade(Screen):
         print(f'{signal},{trade},{cover_signal},{universe},{take_profit},{stop_loss},{cover_trade}')
 
         self.manager.current = 'backtest'
+        self.manager.get_screen('backtest').chart(5000, .5, 1.4, 2.3, [1,2,3], [5,6,7])
 
     def backtest_case(self, signal, trade, cover_signal, universe, take_profit, stop_loss, cover_trade):
         print("backtest case")
         print(f'{signal},{trade},{cover_signal},{universe},{take_profit},{stop_loss},{cover_trade}')
 
         self.manager.current = 'backtest'
+        self.manager.get_screen('backtest').chart(5000, .5, 1.4, 2.3, [1,2,3], [5,6,7])
 
     def account(self):
         print("Account page not set up.")
@@ -81,17 +85,25 @@ class BackTest(Screen):
     cumulative_return = StringProperty()
     sharpe_ratio = StringProperty()
     sortino_ratio = StringProperty()
+    image = StringProperty()
 
     def account(self):
         print("Account page not set up.")
 
-        self.final_equity = '$5000'
-        self.cumulative_return = '-50%'
-        self.sharpe_ratio = '1.2'
-        self.sortino_ratio = '2.3'
-
     def display_values(self):
         pass
+
+    def chart(self, final: float, cumulative: float, sharpe: float, sortino: float, x_vals: [], y_vals: []):
+
+        self.final_equity = f'${final}'
+        self.cumulative_return = f'{cumulative*100}%'
+        self.sharpe_ratio = f'{sharpe}'
+        self.sortino_ratio = f'{sortino}'
+
+        plt.plot(x_vals, y_vals)
+
+        plt.savefig('chart.png', bbox_inches='tight')
+        self.image = 'chart.png'
 
 
 class TradeTranslatorApp(App):
@@ -110,4 +122,8 @@ class TradeTranslatorApp(App):
 
 
 if __name__ == '__main__':
+    Config.set('graphics','resizable', False)
+    Config.set('graphics', 'width', 1100)
+    Config.set('graphics', 'height', 720)
+    Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
     TradeTranslatorApp().run()
