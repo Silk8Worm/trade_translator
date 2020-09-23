@@ -2,15 +2,16 @@ from alpha_vantage.timeseries import TimeSeries
 from alpha_vantage.techindicators import TechIndicators
 from alpha_vantage.fundamentaldata import FundamentalData
 
-api_key = 'EWWCPP3EGVVECDSZ'  # api key from alpha vantage
+import requests
+
+api_key = 'UD9DGIGLSXX7YVK7'  # api key from alpha vantage
 
 
 def get_technical(ticker: str, indicator: str, startDate: str = None, endDate: str = None):
 
     # date takes form: 'yyyy-mm-dd'
 
-    ts = TimeSeries(key=api_key)
-    ti = TechIndicators(key=api_key)
+    url = 'https://www.alphavantage.co/query?'
 
     if indicator == 'average daily volume':
         pass
@@ -31,10 +32,20 @@ def get_technical(ticker: str, indicator: str, startDate: str = None, endDate: s
         pass
 
     elif indicator == '52 week high':
-        pass
+        url += "function=OVERVIEW"
+        url += "&symbol=" + ticker
+        url += "&apikey=" + api_key
+
+        r = requests.get(url)
+        return r.json()['52WeekHigh']
 
     elif indicator == '52 week low':
-        pass
+        url += "function=OVERVIEW"
+        url += "&symbol=" + ticker
+        url += "&apikey=" + api_key
+
+        r = requests.get(url)
+        return r.json()['52WeekLow']
 
     elif indicator == 'forward dividend rate':
         pass
@@ -72,8 +83,13 @@ if __name__ == '__main__':
     ti = TechIndicators(key=api_key)
     fd = FundamentalData(key=api_key)
 
-    data, meta_data = fd.get_balance_sheet_annual(symbol="AAPL")
+    # r = requests.get('https://www.alphavantage.co/query?function=RSI&symbol=AAPL&interval=daily&time_period=14&series_type=close&apikey=UD9DGIGLSXX7YVK7')
+    # r = requests.get('https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol=GOOGL&apikey=UD9DGIGLSXX7YVK7')
+    # r = requests.get('https://www.alphavantage.co/query?function=OVERVIEW&symbol=IBM&apikey=UD9DGIGLSXX7YVK7')
+    # print(r.json())
 
-    print(data)
-    print('')
-    print(meta_data)
+    # print(r.json['EBITDA'])
+
+    print(get_technical('IBM', '52 week high'))
+    print(get_technical('IBM', '52 week low'))
+
