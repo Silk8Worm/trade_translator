@@ -34,10 +34,8 @@ def p_subsignal_andor(p):
                  | subsignal OR subsignal'''
     if p[2] == 'and':
         p[0] = BinOp(and_, p[1], p[3])
-        # p[0] = p[1] and p[3]
     else:
         p[0] = BinOp(or_, p[1], p[3])
-        # p[0] = p[1] or p[3]
 
 
 # A grammar rule defining a subsignal in terms of a single comparison value
@@ -55,19 +53,14 @@ def p_comparison_lookup(p):
                    | lookup below lookup'''
     if p[2] == 'gt':
         p[0] = BinOp(gt, p[1], p[3])
-        # p[0] = p[1] > p[3]
     elif p[2] == 'lt':
         p[0] = BinOp(lt, p[1], p[3])
-        # p[0] = p[1] < p[3]
     elif p[2] == 'eq':
         p[0] = BinOp(eq, p[1], p[3])
-        # p[0] = p[1] == p[3]
     elif p[2] == 'above':
         p[0] = BinOp(gt, p[1], p[3])
-        # p[0] = p[1] > p[3]
     elif p[2] == 'below':
         p[0] = BinOp(lt, p[1], p[3])
-        p[0] = p[1] < p[3]
 
 
 # A grammar rule defining a comparison between a lookup and a value
@@ -84,85 +77,78 @@ def p_comparison_literal(p):
                    | lookup eq INTEGER'''
     if p[2] == 'above':
         p[0] = BinOp(gt, p[1], p[3])
-        # p[0] = p[1] > p[3]
     elif p[2] == 'below':
         p[0] = BinOp(lt, p[1], p[3])
-        # p[0] = p[1] < p[3]
     elif p[2] == 'gt':
         p[0] = BinOp(gt, p[1], p[3])
-        # p[0] = p[1] > p[3]
     elif p[2] == 'lt':
         p[0] = BinOp(lt, p[1], p[3])
-        # p[0] = p[1] < p[3]
     elif p[2] == 'eq':
         p[0] = BinOp(eq, p[1], p[3])
-        # p[0] = p[1] == p[3]
 
 
 # A grammar rule defining lookup based on an Indicator and a length of time
 def p_lookup_time(p):
-    'lookup : time indicator'
-    # p[0] = get_data(p[2], p[1])
+    '''lookup : time indicator'''
     p[0] = Lookup(p[2], p[1])
 
 
 # A grammar rule defining lookup based on just an Indicator
 def p_lookup(p):
-    'lookup : indicator'
-    # p[0] = get_data(p[1])
+    '''lookup : indicator'''
     p[0] = Lookup(p[1])
 
 
 # A grammar rule defining a length of time (Ex. 5 days)
 def p_time(p):
-    'time : INTEGER LENGTH'
+    '''time : INTEGER LENGTH'''
     p[0] = (p[1], p[2])
 
 
 # Merges multi word tokens
 def p_gt(p):
-    'gt : GREATER THAN'
+    '''gt : GREATER THAN'''
     p[0] = "gt"
 
 
 def p_lt(p):
-    'lt : LESS THAN'
+    '''lt : LESS THAN'''
     p[0] = "lt"
 
 
 def p_eq(p):
-    'eq : EQUAL TO'
+    '''eq : EQUAL TO'''
     p[0] = "eq"
 
 
 def p_above(p):
-    'above : CROSSES ABOVE'
+    '''above : CROSSES ABOVE'''
     p[0] = "above"
 
 
 def p_below(p):
-    'below : CROSSES BELOW'
+    '''below : CROSSES BELOW'''
     p[0] = "below"
 
 
 # Combines all indicators, single and multi-word
 def p_indicator_combined_ma(p):
-    'indicator : MOVING AVERAGE'
+    '''indicator : MOVING AVERAGE'''
     p[0] = "moving average"
 
 
 def p_indicator_combined_ema(p):
-    'indicator : EXPONENTIAL MOVING AVERAGE'
+    '''indicator : EXPONENTIAL MOVING AVERAGE'''
     p[0] = "exponential moving average"
 
 
 def p_indicator_combined_bb(p):
-    'indicator : BOLLINGER BANDS'
+    '''indicator : BOLLINGER BANDS'''
     p[0] = "bollinger bands"
 
 
 def p_indicator_single(p):
-    'indicator : INDICATOR'
+    '''indicator : INDICATOR'''
     p[0] = p[1]
 
 

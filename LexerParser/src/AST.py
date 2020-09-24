@@ -1,7 +1,7 @@
 """
-    File name: signalparse.py
+    File name: AST.py
     Author: Ryan Goldberg
-    Date created: 20/09/2020
+    Date created: 23/09/2020
     Python Version: 3.8
 """
 
@@ -18,6 +18,9 @@ def get_data(indicator, time=None):
 class Expr:
     def evaluate(self):
         raise NotImplementedError
+
+    # def validate(self):
+    #     raise NotImplementedError
 
 
 # A class which looksup an indicator value (with a possible time range)
