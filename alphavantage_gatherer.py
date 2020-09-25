@@ -9,17 +9,20 @@ MARKET_URL = 'https://data.alpaca.markets'
 
 def get_technical(ticker: str, indicator: str = None, startDate: str = None, endDate: str = None):
 
-    bars_url = ('{}/v1/bars/minute?symbols=' + ticker + '&limit=1').format(MARKET_URL)
+    timeframe = 'minute'
+    bars_url = MARKET_URL + '/v1/bars/' + timeframe + '?symbols=' + ticker + '&limit=1'
+    # bars_url = ('{}/v1/bars/minute?symbols=' + ticker + '&limit=1').format(MARKET_URL)
+
     r = requests.get(bars_url, headers={'APCA-API-KEY-ID': API_KEY, 'APCA-API-SECRET-KEY': SECRET_API_KEY})
     r = r.json()
-    r = r[ticker]
+    r = r[ticker][0]
 
     # Pricing Bar Data
-    open = r[0]['o']
-    high = r[0]['h']
-    low = r[0]['l']
-    close = r[0]['c']
-    volume = r[0]['v']
+    open = r['o']
+    high = r['h']
+    low = r['l']
+    close = r['c']
+    volume = r['v']
 
     print('open: \t', open)
     print('high: \t', high)
@@ -84,4 +87,4 @@ def get_technical(ticker: str, indicator: str = None, startDate: str = None, end
         pass
 
 if __name__ == '__main__':
-    get_technical('AAPL')
+    get_technical('TSLA')
