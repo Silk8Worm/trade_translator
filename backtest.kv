@@ -4,90 +4,98 @@
 
         BoxLayout:
             orientation: 'horizontal'
-            size_hint: (1, .15)
+            size_hint_y: None
+            height: 140
 
             BoxLayout:
+                padding: [20,0,0,0]
                 orientation: 'horizontal'
-
                 Image:
                     source: 'logo.png'
-                    size: self.texture_size
-                    halign: 'left'
+                    size_hint_y: None
+                    height: 130
                     allow_stretch: True
-
-                Label:
-                    text: ''
+                    keep_ratio: True
+                BoxLayout:
 
             Label:
                 text: 'Trade Translator'
-                font_size: 30
+                font_size: 60
                 halign: 'left'
 
             BoxLayout:
-                orientation: 'horizontal'
-                Label:
-                    text: ''
+                orientation: 'vertical'
 
-                Button:
-                    text: 'Account'
-                    font_size: 15
-                    background_color: 0,.3,.8,1
-                    halign: 'right'
+                BoxLayout:
+                    size_hint_y: None
+                    height: 80
 
-                    on_release: root.account()
+                BoxLayout:
+                    orientation: 'horizontal'
+                    padding: [0,0,30,0]
+
+                    Label:
+
+                    Button:
+                        text: 'Account'
+                        font_size: 15
+                        background_color: 0,.3,.8,1
+                        halign: 'right'
+                        size_hint_y: None
+                        height: 70
+
+                        on_release: root.account()
+
+                BoxLayout:
 
         BoxLayout:
             orientation: 'horizontal'
             size_hint: (1, .1)
+            padding: [0,80,0,0]
 
             Label:
                 text: 'Final Equity'
-                font_size: 14
+                font_size: 20
 
             Label:
                 text: 'Cumulative Return'
-                font_size: 14
+                font_size: 20
 
             Label:
                 text: 'Sharpe Ratio'
-                font_size: 14
+                font_size: 20
 
             Label:
                 text: 'Sortino Ratio'
-                font_size: 14
+                font_size: 20
 
         BoxLayout:
             orientation: 'horizontal'
             size_hint: (1, .2)
+            padding: [0,0,0,0]
 
             Label:
                 text: root.final_equity
-                font_size: 14
+                font_size: 20
                 color: 0.8274,0.8274,0.8274,1
-                canvas.before:
-                    Color:
-                        rgba: 0.8274,0.8274,0.8274,1
 
             Label:
                 text: root.cumulative_return
-                font_size: 14
+                font_size: 20
                 color: 0.8274,0.8274,0.8274,1
 
             Label:
                 text: root.sharpe_ratio
-                font_size: 14
+                font_size: 20
                 color: 0.8274,0.8274,0.8274,1
 
             Label:
                 text: root.sortino_ratio
-                font_size: 14
+                font_size: 20
                 color: 0.8274,0.8274,0.8274,1
 
         BoxLayout:
-
+            padding: [0,0,0,20]
             Image:
                 source: root.image
-                size: self.texture_size
-                halign: 'left'
                 allow_stretch: True
-                keep_ratio: True
