@@ -12,7 +12,7 @@ QUOTE_URL = '{}/v1/last_quote/stocks/AAPL'.format(MARKET_URL)  # quote for AAPL
 STOCK = 'AAPL'
 BARS_URL = ('{}/v1/bars/minute?symbols='+STOCK+'&limit=5').format(MARKET_URL)
 
-get the vars 
+
 def get_technical(ticker: str, indicator: str, startDate: str = None, endDate: str = None):
 
     # date takes form: 'yyyy-mm-dd'
