@@ -1,5 +1,5 @@
 import requests
-import alpaca_trade_api as tradeapi
+
 
 API_KEY = 'PK4W268R10HW802W8SN9'  # keys from alpaca
 SECRET_API_KEY = 'oFK1SOul4uEqwj4phpdFBAZG0CZqRraijzYQUkZH'
@@ -30,61 +30,42 @@ def get_technical(ticker: str, indicator: str = None, startDate: str = None, end
     print('close: \t', close)
     print('volume: \t', volume)
 
-    pass
+    if indicator == 'open':
+        return open
 
-    if indicator == 'average daily volume':
+    elif indicator == 'close':
+        return close
+
+    elif indicator == 'high':
+        return high
+
+    elif indicator == 'low':
+        return low
+
+    elif indicator == 'volume':
+        return volume
+
+    elif indicator == 'moving average':
         pass
 
-    elif indicator == 'basic earnings per share':
+    elif indicator == 'exponential moving average':
         pass
 
-    elif indicator == 'book value per share':
+    elif indicator == 'bollinger band':
         pass
 
-    elif indicator == 'dividend yield':
+    elif indicator == 'ATR':
         pass
 
-    elif indicator == 'ebitda growth':
+    elif indicator == 'RSI':
         pass
 
-    elif indicator == 'eps growth':
+    elif indicator == 'OBV':
         pass
 
-    elif indicator == '52 week high':
+    elif indicator == 'MACD':
         pass
 
-    elif indicator == '52 week low':
-        pass
-
-    elif indicator == 'forward dividend rate':
-        pass
-
-    elif indicator == 'leverage ratio':
-        pass
-
-    elif indicator == 'net debt to ebitda':
-        pass
-
-    elif indicator == 'operating margin':
-        pass
-
-    elif indicator == 'price to book value':
-        pass
-
-    elif indicator == 'price to earnings':
-        pass
-
-    elif indicator == 'price to next year forecasted earnings':
-        pass
-
-    elif indicator == 'price to revenue':
-        pass
-
-    elif indicator == 'revenue growth':
-        pass
-
-    elif indicator == 'short interest':
-        pass
 
 if __name__ == '__main__':
     get_technical('TSLA')
