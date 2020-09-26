@@ -1,0 +1,61 @@
+<CasePopup>:
+    title: 'Backtest Cases'
+    size_hint: None, None
+    size: (500, 300)
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+
+            Label:
+                id: case1label
+                visible: root.case1enabled
+                text: 'Case 1'
+                opacity: 1 if self.visible else 0
+            BoxLayout:
+                padding: [20,20,20,20]
+                Button:
+                    id: case1button
+                    visible: root.case1enabled
+                    text: 'Backtest'
+                    opacity: 1 if self.visible else 0
+                    disabled: not self.visible
+                    on_release: root.dismiss()
+                    on_release: root.root.case1()
+
+        BoxLayout:
+            orientation: 'horizontal'
+
+            Label:
+                id: case2label
+                visible: root.case2enabled
+                text: 'Case 2'
+                opacity: 1 if self.visible else 0
+            BoxLayout:
+                padding: [20,20,20,20]
+                Button:
+                    id: case2button
+                    visible: root.case2enabled
+                    text: 'Backtest'
+                    opacity: 1 if self.visible else 0
+                    disabled: not self.visible
+                    on_release: root.case2()
+
+        BoxLayout:
+            orientation: 'horizontal'
+
+            Label:
+                id: case3label
+                visible: root.case3enabled
+                text: 'Case 3'
+                opacity: 1 if self.visible else 0
+
+            BoxLayout:
+                padding: [20,20,20,20]
+                Button:
+                    id: case3button
+                    visible: root.case3enabled
+                    text: 'Backtest'
+                    opacity: 1 if self.visible else 0
+                    disabled: not self.visible
+                    on_release: root.case3()
