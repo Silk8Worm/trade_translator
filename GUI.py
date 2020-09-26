@@ -10,10 +10,10 @@ https://github.com/kivy/kivy/issues/4991
 
 #TODO Graphing: https://github.com/kivy-garden/garden.graph
 
-import kivy
 from kivy.app import App
-from kivy.properties import StringProperty
+from kivy.properties import StringProperty, BooleanProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
+from kivy.uix.popup import Popup
 # Use this if you need to import TextInput
 # from kivy.core.window import Window
 from kivy.config import Config # Better implementation of window size
@@ -59,7 +59,7 @@ class SignUp(Screen):
 
 class Trade(Screen):
 
-    word_list = "this is a test for suggestion text".split(' ')
+    word_list = "apple amass avoid".split(' ')
 
     def disconnect(self):
         self.manager.transition = NoTransition()
@@ -77,8 +77,9 @@ class Trade(Screen):
         print("backtest case")
         print(f'{signal},{trade},{cover_signal},{universe},{take_profit},{stop_loss},{cover_trade}')
 
-        self.manager.current = 'backtest'
-        self.manager.get_screen('backtest').chart(5000, 10000, 1.4, 2.3, [1,2,3], [5,6,7])
+        popup = CasePopup()
+        popup.open()
+
 
     def account(self):
         print("Account page not set up.")
@@ -112,6 +113,25 @@ class Trade(Screen):
 
     def set_cursor(self, instance, dt):
         instance.cursor = (len(instance.text), 0)
+
+
+class CasePopup(Popup):
+    case1enabled = BooleanProperty(True)
+    case2enabled = BooleanProperty(False)
+    case3enabled = BooleanProperty(True)
+
+    def case1(self):
+        self.manager.current = 'backtesting case 1'
+        self.manager.get_screen('backtest').chart(5000, 10000, 1.4, 2.3, [1,2,3], [5,6,7])
+
+    def case2(self):
+        self.manager.current = 'backtesting case 2'
+        self.manager.get_screen('backtest').chart(5000, 10000, 1.4, 2.3, [1,2,3], [5,6,7])
+
+    def case3(self):
+        self.manager.current = 'backtesting case 3'
+        self.manager.get_screen('backtest').chart(5000, 10000, 1.4, 2.3, [1,2,3], [5,6,7])
+
 
 class BackTest(Screen):
 
@@ -153,12 +173,12 @@ class TradeTranslatorApp(App):
         Config.set('graphics', 'minimum_height', '720')
         Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
-        manager = ScreenManager()
+        self.manager = ScreenManager()
 
-        manager.add_widget(TradeTranslator(name='signin'))
-        manager.add_widget(Trade(name='trade'))
-        manager.add_widget(SignUp(name='signup'))
-        manager.add_widget(BackTest(name='backtest'))
+        self.manager.add_widget(TradeTranslator(name='signin'))
+        self.manager.add_widget(Trade(name='trade'))
+        self.manager.add_widget(SignUp(name='signup'))
+        self.manager.add_widget(BackTest(name='backtest'))
 
         # Use this if you need to import TextInput
         # Window.size = (1100, 720)
@@ -167,7 +187,7 @@ class TradeTranslatorApp(App):
         # Window.top = Window.top-60
 
 
-        return manager
+        return self.manager
 
 
 if __name__ == '__main__':
