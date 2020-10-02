@@ -8,6 +8,7 @@ from ta.volatility import BollingerBands
 from ta.momentum import RSIIndicator
 from ta.volume import OnBalanceVolumeIndicator
 from ta.trend import MACD
+from ta.trend import EMAIndicator
 
 # ta documentation
 # https://technical-analysis-library-in-python.readthedocs.io/en/latest/ta.html#volatility-indicators
@@ -20,7 +21,7 @@ TECHNICAL_DATABASE = {}  # dictionaries allow you to assume a key already exists
 #  TECHNICAL_DATABASE[ticker][indicator][date][value] <- whats being used
 #  TODO: Make pull_data search Database first
 #  TODO: Make Database behave well with holidays
-#  Alpaca does not not behave well with stock splits
+#  Alpaca does not not behave well with stock splits!!
 
 
 def pull_data(ticker: str, indicator: str, indicator_range_specification: int, startdate: str, enddate: str):
@@ -60,9 +61,6 @@ def pull_data(ticker: str, indicator: str, indicator_range_specification: int, s
         d['Volume'].append(day['v'])
 
     output = get_technical(indicator, indicator_range_specification, duration, d, startdate)
-    if output is None:
-        # Problem in <get_technical>
-        return
 
     # Update Database
     if ticker not in TECHNICAL_DATABASE:
@@ -113,7 +111,19 @@ def get_technical(indicator: str, period: int, duration: int, d: dict, startdate
         obv = ta.volume.on_balance_volume(df["Close"], df["Volume"], fillna=True)
         output = obv[len(obv)-duration:]
 
-    elif indicator in ['MACD', 'proper MACD', 'MACD proper']:  # Moving Average Convergence Divergence
+    elif indicator == 'EMA':  # Exponential Moving Average
+        ema = ta.trend.EMAIndicator(df["Close"], n=period, fillna=True)
+
+    elif indicator == 'MACD':  # Moving Average Convergence Divergence
+        ema1 = ta.trend.EMAIndicator(df["Close"], n=12, fillna=True)
+        ema2 = ta.trend.EMAIndicator(df["Close"], n=26, fillna=True)
+        ema1 = Series.tolist(ema1)
+        ema2 = Series.tolist(ema2)
+        output = []
+        for i in range(12):
+            output.append(ema1[i] - ema2[i+14])
+
+    elif indicator in ['proper MACD', 'MACD proper']:
         macd_proper = ta.trend.macd(df["Close"], n_fast=period, n_slow=period, fillna=True)
         output = macd_proper[len(macd_proper) - duration:]
 
@@ -124,10 +134,6 @@ def get_technical(indicator: str, period: int, duration: int, d: dict, startdate
     elif indicator in ['divergent MACD', 'MACD divergent']:
         macd_divergence = ta.trend.macd_signal(df["Close"], n_fast=period, n_slow=period, fillna=True)
         output = macd_divergence[len(macd_divergence) - duration:]
-
-    else:
-        print('Invalid Indicator')
-        return
 
     # Return in dictionary with mapping [date:value]
     data = {}
