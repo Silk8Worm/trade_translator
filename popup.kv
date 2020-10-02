@@ -21,7 +21,7 @@
                     opacity: 1 if self.visible else 0
                     disabled: not self.visible
                     on_release: root.dismiss()
-                    on_release: root.root.case1()
+                    on_release: root.case1()
 
         BoxLayout:
             orientation: 'horizontal'
@@ -39,6 +39,7 @@
                     text: 'Backtest'
                     opacity: 1 if self.visible else 0
                     disabled: not self.visible
+                    on_release: root.dismiss()
                     on_release: root.case2()
 
         BoxLayout:
@@ -58,4 +59,5 @@
                     text: 'Backtest'
                     opacity: 1 if self.visible else 0
                     disabled: not self.visible
+                    on_release: root.dismiss()
                     on_release: root.case3()
