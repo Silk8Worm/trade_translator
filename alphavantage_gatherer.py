@@ -60,6 +60,9 @@ def pull_data(ticker: str, indicator: str, indicator_range_specification: int, s
         d['Volume'].append(day['v'])
 
     output = get_technical(indicator, indicator_range_specification, duration, d, startdate)
+    if output is None:
+        # Problem in <get_technical>
+        return
 
     # Update Database
     if ticker not in TECHNICAL_DATABASE:
@@ -90,11 +93,11 @@ def get_technical(indicator: str, period: int, duration: int, d: dict, startdate
     elif indicator == 'volume':
         output = d['Volume'][len(d['Open']) - duration:]
 
-    elif indicator == 'low BB' or indicator == 'BB low':  # Lower Bollinger Band
+    elif indicator in ['low BB', 'BB low']:  # Lower Bollinger Band
         bb_low = ta.volatility.bollinger_lband(df["Close"], n=period, ndev=2, fillna=True)
         output = bb_low[len(bb_low)-duration:]
 
-    elif indicator == 'high BB' or indicator == 'BB high':  # Higher Bollinger Band
+    elif indicator in ['high BB', 'BB high']:  # Higher Bollinger Band
         bb_high = ta.volatility.bollinger_hband(df["Close"], n=period, ndev=2, fillna=True)
         output = bb_high[len(bb_high) - duration:]
 
@@ -110,23 +113,26 @@ def get_technical(indicator: str, period: int, duration: int, d: dict, startdate
         obv = ta.volume.on_balance_volume(df["Close"], df["Volume"], fillna=True)
         output = obv[len(obv)-duration:]
 
-    elif indicator == 'MACD':  # Moving Average Convergence Divergence
+    elif indicator in ['MACD', 'proper MACD', 'MACD proper']:  # Moving Average Convergence Divergence
         macd_proper = ta.trend.macd(df["Close"], n_fast=period, n_slow=period, fillna=True)
         output = macd_proper[len(macd_proper) - duration:]
 
-    elif indicator == 'signal MACD' or indicator == 'MACD signal':
+    elif indicator in ['signal MACD', 'MACD signal']:
         macd_signal = ta.trend.macd_diff(df["Close"], n_fast=period, n_slow=period, fillna=True)
         output = macd_signal[len(macd_signal) - duration:]
 
-    elif indicator == 'divergent MACD' or indicator == 'MACD divergent':
+    elif indicator in ['divergent MACD', 'MACD divergent']:
         macd_divergence = ta.trend.macd_signal(df["Close"], n_fast=period, n_slow=period, fillna=True)
         output = macd_divergence[len(macd_divergence) - duration:]
+
+    else:
+        print('Invalid Indicator')
+        return
 
     # Return in dictionary with mapping [date:value]
     data = {}
 
     if isinstance(output, Series):
-        # <output> is a series
         output = Series.tolist(output)
     # <output> is a list
     key = startdate
