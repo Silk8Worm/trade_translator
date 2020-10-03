@@ -18,6 +18,7 @@ from kivy.config import Config # Better implementation of window size
 from kivy.clock import Clock
 from functools import partial
 from matplotlib import pyplot as plt
+import Zippy
 
 
 class TradeTranslator(Screen):
@@ -45,10 +46,10 @@ class Trade(Screen):
 
     def backtest(self, signal, trade, cover_signal, universe, take_profit, stop_loss, cover_trade):
         print("backtest")
-        print(f'{signal},{trade},{cover_signal},{universe},{take_profit},{stop_loss},{cover_trade}')
 
         self.manager.current = 'backtest'
-        self.manager.get_screen('backtest').chart(5000, 10000, 1.4, 2.3, [1,2,3], [1,4,9])
+        a, b, c, d, e, f = Zippy.zippy(signal,trade,cover_signal,universe,take_profit,stop_loss,cover_trade)
+        self.manager.get_screen('backtest').chart(a, b, c, d, e, f)
 
     def backtest_case(self, signal, trade, cover_signal, universe, take_profit, stop_loss, cover_trade):
         popup = CasePopup()
