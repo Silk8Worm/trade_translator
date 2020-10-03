@@ -33,9 +33,9 @@ def p_subsignal_andor(p):
     '''subsignal : subsignal AND subsignal
                  | subsignal OR subsignal'''
     if p[2] == 'and':
-        p[0] = BinOp(and_, p[1], p[3])
+        p[0] = BinOp(state, and_, p[1], p[3])
     else:
-        p[0] = BinOp(or_, p[1], p[3])
+        p[0] = BinOp(state, or_, p[1], p[3])
 
 
 # A grammar rule defining a subsignal in terms of a single comparison value
@@ -52,15 +52,15 @@ def p_comparison_lookup(p):
                    | lookup above lookup
                    | lookup below lookup'''
     if p[2] == 'gt':
-        p[0] = BinOp(gt, p[1], p[3])
+        p[0] = BinOp(state, gt, p[1], p[3])
     elif p[2] == 'lt':
-        p[0] = BinOp(lt, p[1], p[3])
+        p[0] = BinOp(state, lt, p[1], p[3])
     elif p[2] == 'eq':
-        p[0] = BinOp(eq, p[1], p[3])
+        p[0] = BinOp(state, eq, p[1], p[3])
     elif p[2] == 'above':
-        p[0] = BinOp(gt, p[1], p[3])
+        p[0] = BinOp(state, gt, p[1], p[3])
     elif p[2] == 'below':
-        p[0] = BinOp(lt, p[1], p[3])
+        p[0] = BinOp(state, lt, p[1], p[3])
 
 
 # A grammar rule defining a comparison between a lookup and a value
@@ -76,27 +76,27 @@ def p_comparison_literal(p):
                    | lookup lt INTEGER
                    | lookup eq INTEGER'''
     if p[2] == 'above':
-        p[0] = BinOp(gt, p[1], p[3])
+        p[0] = BinOp(state, gt, p[1], p[3])
     elif p[2] == 'below':
-        p[0] = BinOp(lt, p[1], p[3])
+        p[0] = BinOp(state, lt, p[1], p[3])
     elif p[2] == 'gt':
-        p[0] = BinOp(gt, p[1], p[3])
+        p[0] = BinOp(state, gt, p[1], p[3])
     elif p[2] == 'lt':
-        p[0] = BinOp(lt, p[1], p[3])
+        p[0] = BinOp(state, lt, p[1], p[3])
     elif p[2] == 'eq':
-        p[0] = BinOp(eq, p[1], p[3])
+        p[0] = BinOp(state, eq, p[1], p[3])
 
 
 # A grammar rule defining lookup based on an Indicator and a length of time
 def p_lookup_time(p):
     '''lookup : time indicator'''
-    p[0] = Lookup(p[2], p[1])
+    p[0] = Lookup(state, p[2], p[1])
 
 
 # A grammar rule defining lookup based on just an Indicator
 def p_lookup(p):
     '''lookup : indicator'''
-    p[0] = Lookup(p[1])
+    p[0] = Lookup(state, p[1])
 
 
 # A grammar rule defining a length of time (Ex. 5 days)
@@ -158,30 +158,61 @@ def p_error(p):
     exit(1)
 
 
-# Build the parser
-parser = yacc.yacc()
+###############################################################################
+# The function to build an abstract syntax tree
+def build_ast(str_input: str, _state: ASTState, debug=False):
+    # Build the parser
+    parser = yacc.yacc()
+    global state
+    state = _state
 
-# Different test data, (relies on the current value of get_data), uncomment to
-# try different ones
-# s = 'if 30 day macd crosses above 13 day macd'
-# s = 'if 30 day macd crosses below 17'
-# s = "if rsi less than 56.1"
-s = "if rsi greater than 70 or 10 day macd crosses below 60"
-# s = "if 5 day bollinger bands greater than 20"
+    # Parses in debug/ non-debug mode
+    if debug:
+        # Set up a logging object
+        logging.basicConfig(
+            level=logging.DEBUG,
+            filename="parselog.txt",
+            filemode="w",
+            format="%(filename)10s:%(lineno)4d:%(message)s"
+        )
+        log = logging.getLogger()
 
-# Set up a logging object
-logging.basicConfig(
-    level=logging.DEBUG,
-    filename="parselog.txt",
-    filemode="w",
-    format="%(filename)10s:%(lineno)4d:%(message)s"
-)
-log = logging.getLogger()
+        yacc.yacc(debug=True, debuglog=log)
+        return parser.parse(str_input.lower(), debug=log)
+    else:
+        yacc.yacc()
+        return parser.parse(str_input.lower())
 
-# Create a compiler, run in debug mode (creates a debug log file) and then
-yacc.yacc(debug=True, debuglog=log)
-result = parser.parse(s.lower(), debug=log)
 
-# print the boolean result
-print(result)
-print(result.evaluate())
+# FIXME: To remove, this is how to interact with the AST/Parser
+if __name__ == '__main__':
+    # s = 'if 30 day macd crosses above 13 day macd'
+    # s = 'if 30 day macd crosses below 17'
+    # s = "if rsi less than 56.1"
+    # s = "if rsi greater than 70 or 10 day macd crosses below 60"
+    s = "if 5 day bollinger bands greater than 20"
+    # s = "if 5 day macd equal to 30 day macd"
+
+    # Will be gotten from the GUI
+    startday = "01/01/2020"
+    endday = "03/01/2020"
+    universe = ["APPL", "TSLA", "GOOG"]
+
+    # Make the state
+    state = ASTState(startday, endday, universe)
+
+    # Build the AST
+    ast = build_ast(s, state, debug=True)
+
+    # Iterate over the tickers, and then the dates (that list will be provided by zipline?)
+    for ticker in universe:
+        # Updates the ticker being processed
+        state.ticker = ticker
+        for day in [startday, "02/01/2020", endday]:
+            # TODO, this will obviously be generated and use a different date format
+            # Updates the date
+            state.current_day = day
+
+            print(ast)
+            # Runs evaluate over the tree, with the given state
+            print(ast.evaluate())

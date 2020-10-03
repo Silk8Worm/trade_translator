@@ -18,7 +18,7 @@ Tree(signal, universe)
 	LexerParser
 
 - call pull data for each indicator
-	- pull data (ticker: [str], indicator: str, indicator_range_specification: int, startdate, enddate)
+	- pull data (ticker: List[str], indicator: str, indicator_range_specification: int, startdate, enddate)
 
 	Data Gatherer
 
