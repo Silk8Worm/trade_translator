@@ -11,7 +11,7 @@ import ply.lex as lex
 tokens = [
     'FLOAT',
     'INTEGER',
-    'SYMBOL',
+    'UNKNOWN',
     'INDICATOR',
     'LENGTH'
 ]
@@ -39,8 +39,8 @@ def t_INTEGER(t):
     return t
 
 
-def t_SYMBOL(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
+def t_STRING(t):
+    r'[^\s\\]+'
     # Check for reserved words
     if t.value in ['open', 'close', 'high', 'low', 'volume', 'obv',
                    'atr', 'rsi', 'macd']:
@@ -48,7 +48,7 @@ def t_SYMBOL(t):
     elif t.value in ['days', 'months', "years", "day", "month", "year"]:
         t.type = 'LENGTH'
     else:
-        t.type = reserved.get(t.value, 'SYMBOL')
+        t.type = reserved.get(t.value, 'UNKNOWN')
     return t
 
 
@@ -69,8 +69,8 @@ def t_eof(t):
 
 # Error handling rule
 def t_error(t):
-    print("Syntax error found")
     t.lexer.skip(1)
+    return t
 
 
 # Build the lexer

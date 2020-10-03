@@ -159,7 +159,7 @@ def get_technical(indicator: str, period: int, duration: int, d: dict, startdate
 
     return data
 
-def get_data(tickers: [], indicator: str, start_date: str, end_date: str, period: int):
+def get_data(tickers: list, indicator: str, start_date: str, end_date: str, period: int):
 
     data_dict = {}
     for ticker in tickers:

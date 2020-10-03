@@ -27,8 +27,8 @@ class Expr:
     def evaluate(self) -> Any:
         raise NotImplementedError
 
-    # def validate(self):
-    #     raise NotImplementedError
+    def valid(self) -> bool:
+        return True
 
 
 # A class which looks up an indicator value (with a possible time range)
@@ -56,13 +56,12 @@ class Lookup(Expr):
                   f'{self.state.start},'  # Start date
                   f'{self.state.end})')  # End date
             # FIXME: Example data based on hardcoded inputs
-            # TODO get_data example: get_data(['AAPL','MSFT','TSLA'],'BB high','30/06/2019','10/07/2019', 5)
-            self.data = {"01/01/2020": {"APPL": 65, "TSLA": 61, "GOOG": 69},
-                         "02/01/2020": {"APPL": 62, "TSLA": 90, "GOOG": 1},
-                         "03/01/2020": {"APPL": 45, "TSLA": 65, "GOOG": 99}}
-            # self.data = alphavantage_gatherer.get_data(['AAPL','TSLA','GOOG'],'RSI','01/01/2020','04/01/2020', 5)
-            print(self.data)
-
+            self.data = {"01/01/2020": {"AAPL": 65, "TSLA": 61, "GOOG": 69},
+                         "02/01/2020": {"AAPL": 62, "TSLA": 90, "GOOG": 1},
+                         "03/01/2020": {"AAPL": 45, "TSLA": 65, "GOOG": 99}}
+            # FIXME @ ALBERT I think this is the format the data call should be in. Lmk
+            # self.data = alphavantage_gatherer.get_data(self.state.universe,
+            # self.args[0], self.state.start, self.state.end, num_days)
 
         # Does the data lookup form the preinitialized list of values, self.data
         day = self.state.current_day
@@ -107,3 +106,22 @@ class BinOp(Expr):
     def __str__(self) -> str:
         return f'({self.left.__str__()} {self.fxn.__name__} ' \
                f'{self.right.__str__()})'
+
+
+# A class which holds Nodes containing errors
+class Error(Expr):
+    def __init__(self, state: ASTState, value: list):
+        Expr.__init__(self, state)
+        self.value = value
+
+    def evaluate(self):
+        return self.value
+
+    def __str__(self):
+        return f'(Errors: {self.value})'
+
+    def __repr__(self):
+        return f'(Errors: {self.value})'
+
+    def valid(self) -> bool:
+        return False
