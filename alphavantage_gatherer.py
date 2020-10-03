@@ -24,7 +24,7 @@ TECHNICAL_DATABASE = {}  # dictionaries allow you to assume a key already exists
 #  Alpaca does not not behave well with stock splits!!
 
 
-def pull_data(ticker: str, indicator: str, indicator_range_specification: int, startdate: str, enddate: str):
+def pull_data(ticker: str, indicator: str, startdate: str, enddate: str, indicator_range_specification: int):
 
     time_frame = '1D'
 
@@ -159,7 +159,25 @@ def get_technical(indicator: str, period: int, duration: int, d: dict, startdate
 
     return data
 
+def get_data(tickers: [], indicator: str, start_date: str, end_date: str, period: int):
+
+    data_dict = {}
+    for ticker in tickers:
+        data_dict[ticker] = pull_data(ticker, indicator, start_date, end_date, period)
+
+    output = {}
+
+    for ticker, data in data_dict.items():
+        for date, value in data.items():
+            output[date] = {}
+
+    for ticker, data in data_dict.items():
+        for date, value in data.items():
+            output[date][ticker] = value
+
+    return output
+
+
 if __name__ == '__main__':
-    x = pull_data('TSLA', 'BB high', 7, "21-09-2018", "01-10-2020")
-    print(x)
+    print(get_data(['AAPL','MSFT','TSLA'],'RSI','30/06/2019','10/07/2019', 5))
 

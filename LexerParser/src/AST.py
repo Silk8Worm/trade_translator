@@ -6,6 +6,7 @@
 """
 
 from typing import Union, Any
+import alphavantage_gatherer
 
 
 # The current state held by the abstract syntax tree
@@ -55,9 +56,13 @@ class Lookup(Expr):
                   f'{self.state.start},'  # Start date
                   f'{self.state.end})')  # End date
             # FIXME: Example data based on hardcoded inputs
+            # TODO get_data example: get_data(['AAPL','MSFT','TSLA'],'BB high','30/06/2019','10/07/2019', 5)
             self.data = {"01/01/2020": {"APPL": 65, "TSLA": 61, "GOOG": 69},
                          "02/01/2020": {"APPL": 62, "TSLA": 90, "GOOG": 1},
                          "03/01/2020": {"APPL": 45, "TSLA": 65, "GOOG": 99}}
+            # self.data = alphavantage_gatherer.get_data(['AAPL','TSLA','GOOG'],'RSI','01/01/2020','04/01/2020', 5)
+            print(self.data)
+
 
         # Does the data lookup form the preinitialized list of values, self.data
         day = self.state.current_day

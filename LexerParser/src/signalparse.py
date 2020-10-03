@@ -185,18 +185,27 @@ def build_ast(str_input: str, _state: ASTState, debug=False):
 
 
 # FIXME: To remove, this is how to interact with the AST/Parser
-if __name__ == '__main__':
+
+# if __name__ == '__main__':
+#     # s = 'if 30 day macd crosses above 13 day macd'
+#     # s = 'if 30 day macd crosses below 17'
+#     # s = "if rsi less than 56.1"
+#     # s = "if rsi greater than 70 or 10 day macd crosses below 60"
+#     s = "if 5 day bollinger bands greater than 20"
+#     # s = "if 5 day macd equal to 30 day macd"
+#
+#     # Will be gotten from the GUI
+#     startday = "01/01/2020"
+#     endday = "03/01/2020"
+#     universe = ["APPL", "TSLA", "GOOG"]
+
+def create_tree(startday, endday, universe, s):
     # s = 'if 30 day macd crosses above 13 day macd'
     # s = 'if 30 day macd crosses below 17'
     # s = "if rsi less than 56.1"
     # s = "if rsi greater than 70 or 10 day macd crosses below 60"
-    s = "if 5 day bollinger bands greater than 20"
+    # s = "if 5 day bollinger bands greater than 20"
     # s = "if 5 day macd equal to 30 day macd"
-
-    # Will be gotten from the GUI
-    startday = "01/01/2020"
-    endday = "03/01/2020"
-    universe = ["APPL", "TSLA", "GOOG"]
 
     # Make the state
     state = ASTState(startday, endday, universe)
