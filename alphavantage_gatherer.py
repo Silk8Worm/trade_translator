@@ -150,7 +150,7 @@ def get_technical(indicator: str, period: int, duration: int, d: dict, startdate
             # <key is a friday>
             friday = True
         # keys are strings, if you want datetime object as key then remove .isoformat()
-        data[key.isoformat()] = output[i]
+        data[key.strftime("%d/%m/%Y")] = output[i]
         key = key + datetime.timedelta(days=1)
         if friday:
             # key = np.busday_offset(key, 1, roll='backward')
