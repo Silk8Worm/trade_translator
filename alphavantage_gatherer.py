@@ -37,7 +37,7 @@ def pull_data(ticker: str, indicator: str, startdate: str, enddate: str, indicat
     # Create URL
     bars_url = MARKET_URL + '/v1/bars/' + time_frame + '?symbols=' + ticker
     #  Obtain extra days of data; some indicators calculate from previous day and duration is off by one
-    bars_url = bars_url + '&limit=' + str(indicator_range_specification + duration + 2)
+    bars_url = bars_url + '&limit=' + str(indicator_range_specification + duration)
     bars_url = bars_url + '&end=' + enddate.isoformat() + "T09:30:00-04:00"
     # print(bars_url)
 
@@ -48,7 +48,7 @@ def pull_data(ticker: str, indicator: str, startdate: str, enddate: str, indicat
 
     # Print obtained data
     # for d in r:
-    # print(d)
+        # print(d)
 
     # Get Bars
     # Creating Dataframe from Pricing Bar Values
@@ -112,16 +112,18 @@ def get_technical(indicator: str, period: int, duration: int, d: dict, startdate
         output = obv[len(obv)-duration:]
 
     elif indicator == 'EMA':  # Exponential Moving Average
-        ema = ta.trend.EMAIndicator(df["Close"], n=period, fillna=True)
+        ema = ta.trend.ema_indicator(df["Close"], n=period, fillna=True)
+        output = ema[len(ema)-duration:]
 
     elif indicator == 'MACD':  # Moving Average Convergence Divergence
-        ema1 = ta.trend.EMAIndicator(df["Close"], n=12, fillna=True)
-        ema2 = ta.trend.EMAIndicator(df["Close"], n=26, fillna=True)
+        ema1 = ta.trend.ema_indicator(df["Close"], n=period/2, fillna=True)
+        ema2 = ta.trend.ema_indicator(df["Close"], n=period, fillna=True)
         ema1 = Series.tolist(ema1)
         ema2 = Series.tolist(ema2)
         output = []
-        for i in range(12):
-            output.append(ema1[i] - ema2[i+14])
+        for i in range(len(ema1)):
+            output.append(ema1[i]-ema2[i])
+        output = output[len(output) - duration:]
 
     elif indicator in ['proper MACD', 'MACD proper']:
         macd_proper = ta.trend.macd(df["Close"], n_fast=period, n_slow=period, fillna=True)
@@ -153,11 +155,13 @@ def get_technical(indicator: str, period: int, duration: int, d: dict, startdate
         data[key.strftime("%d/%m/%Y")] = output[i]
         key = key + datetime.timedelta(days=1)
         if friday:
+            # Set key to next business day
             # key = np.busday_offset(key, 1, roll='backward')
-            key = key + datetime.timedelta(days=2)
+            key = key + datetime.timedelta(days=2)  # TODO: Use <busday>, this is bad with holidays and 3-day weekends
             friday = False
 
     return data
+
 
 def get_data(tickers: list, indicator: str, start_date: str, end_date: str, period: int):
 
@@ -179,5 +183,8 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    print(get_data(['AAPL','MSFT','TSLA'],'RSI','30/06/2019','10/07/2019', 5))
+    x = get_data(['AAPL'], 'ATR', '10/09/2020', '25/09/2020', 5)
+
+    for date in x:
+        print(date, x[date])
 
