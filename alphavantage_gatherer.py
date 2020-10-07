@@ -31,7 +31,7 @@ def pull_data(ticker: str, indicator: str, startdate: str, enddate: str, indicat
     # Create Datetime's
     startdate = datetime.date(int(startdate[6:]), int(startdate[3:5]), int(startdate[:2]))
     enddate = datetime.date(int(enddate[6:]), int(enddate[3:5]), int(enddate[:2]))
-    duration = np.busday_count(startdate, enddate) + 1
+    duration = np.busday_count(startdate, enddate)
     # print(duration)
 
     # Create URL
@@ -77,45 +77,45 @@ def get_technical(indicator: str, period: int, duration: int, d: dict, startdate
 
     # Get Technical Indicator
     if indicator == 'open':
-        output = d['Open'][len(d['Open'])-duration:]
+        output = d['Open'][len(d['Open'])-duration-1:]
 
     elif indicator == 'close':
-        output = d['Close'][len(d['Open']) - duration:]
+        output = d['Close'][len(d['Close']) - duration-1:]
 
     elif indicator == 'high':
-        output = d['High'][len(d['Open']) - duration:]
+        output = d['High'][len(d['High']) - duration-1:]
 
     elif indicator == 'low':
-        output = d['Low'][len(d['Open']) - duration:]
+        output = d['Low'][len(d['Low']) - duration-1:]
 
     elif indicator == 'volume':
-        output = d['Volume'][len(d['Open']) - duration:]
+        output = d['Volume'][len(d['Volume']) - duration-1:]
 
     elif indicator in ['low BB', 'BB low']:  # Lower Bollinger Band
         bb_low = ta.volatility.bollinger_lband(df["Close"], n=period, ndev=2, fillna=True)
-        output = bb_low[len(bb_low)-duration:]
+        output = bb_low[len(bb_low)-duration-1:]
 
     elif indicator in ['high BB', 'BB high']:  # Higher Bollinger Band
         bb_high = ta.volatility.bollinger_hband(df["Close"], n=period, ndev=2, fillna=True)
-        output = bb_high[len(bb_high) - duration:]
+        output = bb_high[len(bb_high) - duration-1:]
 
     elif indicator == 'ATR':  # Average True Range
         atr = ta.volatility.average_true_range(df["High"], df["Low"], df["Close"], n=period, fillna=True)
-        output = atr[len(atr)-duration:]
+        output = atr[len(atr)-duration-1:]
 
-    elif indicator == 'RSI':  # Relative Strength Index
+    elif indicator == 'RSI':  # Relative Strength Index  # TODO: verify
         rsi = ta.momentum.rsi(df["Close"], n=period, fillna=True)
-        output = rsi[len(rsi)-duration:]
+        output = rsi[len(rsi)-duration-1:]
 
     elif indicator == 'OBV':  # On-Balance Volume
-        obv = ta.volume.on_balance_volume(df["Close"], df["Volume"], fillna=True)
-        output = obv[len(obv)-duration:]
+        obv = ta.volume.on_balance_volume(df["Close"][4:], df["Volume"][4:], fillna=True)  # Splice Redundant Data
+        output = obv[len(obv)-duration-1:]
 
-    elif indicator == 'EMA':  # Exponential Moving Average
+    elif indicator == 'EMA':  # Exponential Moving Average  # TODO: verify
         ema = ta.trend.ema_indicator(df["Close"], n=period, fillna=True)
-        output = ema[len(ema)-duration:]
+        output = ema[len(ema)-duration-1:]
 
-    elif indicator == 'MACD':  # Moving Average Convergence Divergence
+    elif indicator == 'MACD':  # Moving Average Convergence Divergence  # TODO: verify
         ema1 = ta.trend.ema_indicator(df["Close"], n=period/2, fillna=True)
         ema2 = ta.trend.ema_indicator(df["Close"], n=period, fillna=True)
         ema1 = Series.tolist(ema1)
@@ -123,19 +123,19 @@ def get_technical(indicator: str, period: int, duration: int, d: dict, startdate
         output = []
         for i in range(len(ema1)):
             output.append(ema1[i]-ema2[i])
-        output = output[len(output) - duration:]
+        output = output[len(output) - duration-1:]
 
     elif indicator in ['proper MACD', 'MACD proper']:
         macd_proper = ta.trend.macd(df["Close"], n_fast=period, n_slow=period, fillna=True)
-        output = macd_proper[len(macd_proper) - duration:]
+        output = macd_proper[len(macd_proper) - duration-1:]
 
     elif indicator in ['signal MACD', 'MACD signal']:
         macd_signal = ta.trend.macd_diff(df["Close"], n_fast=period, n_slow=period, fillna=True)
-        output = macd_signal[len(macd_signal) - duration:]
+        output = macd_signal[len(macd_signal) - duration-1:]
 
     elif indicator in ['divergent MACD', 'MACD divergent']:
         macd_divergence = ta.trend.macd_signal(df["Close"], n_fast=period, n_slow=period, fillna=True)
-        output = macd_divergence[len(macd_divergence) - duration:]
+        output = macd_divergence[len(macd_divergence) - duration-1:]
 
     # Return in dictionary with mapping [date:value]
     data = {}
@@ -143,7 +143,7 @@ def get_technical(indicator: str, period: int, duration: int, d: dict, startdate
     if isinstance(output, Series):
         output = Series.tolist(output)
     # <output> is a list
-    key = startdate
+    key = startdate  # <key> is a datetime object
     friday = False
     for i in range(0, len(output)):
         left = np.busday_offset(key, 1, roll='backward')
@@ -183,8 +183,11 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    x = get_data(['AAPL'], 'ATR', '10/09/2020', '25/09/2020', 5)
+    get_data(['AAPL'], 'BB low', '09/09/2020', '25/09/2020', 5)
+    get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
+    get_data(['TSLA'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    for date in x:
-        print(date, x[date])
+    print('end.')
+    # for date in x:
+        # print(date, x[date])
 
