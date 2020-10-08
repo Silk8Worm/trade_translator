@@ -43,25 +43,27 @@ class Lookup(Expr):
         if not self.data:
             # Processes the number of days this indicator considers
             if len(self.args) == 1:
-                num_days = 1
+                num_days = 14
             else:
                 # FIXME: Weeks and Months???
                 num_days = self.args[1][0]
 
             # TODO: This is where Albert's data call will be made
-            print(f'\tFirst data call: getData('
-                  f'{self.state.universe},'  # A list
-                  f'{self.args[0]},'  # The indicator
-                  f'{num_days},'  # The indicator range (Ex. 10 day) otherwise its 1
-                  f'{self.state.start},'  # Start date
-                  f'{self.state.end})')  # End date
+            # print(f'\tFirst data call: getData('
+            #       f'{self.state.universe},'  # A list
+            #       f'{self.args[0]},'  # The indicator
+            #       f'{num_days},'  # The indicator range (Ex. 10 day) otherwise its 1
+            #       f'{self.state.start},'  # Start date
+            #       f'{self.state.end})')  # End date
             # FIXME: Example data based on hardcoded inputs
-            self.data = {"01/01/2020": {"AAPL": 65, "TSLA": 61, "GOOG": 69},
-                         "02/01/2020": {"AAPL": 62, "TSLA": 90, "GOOG": 1},
-                         "03/01/2020": {"AAPL": 45, "TSLA": 65, "GOOG": 99}}
-            # FIXME @ ALBERT I think this is the format the data call should be in. Lmk
-            # self.data = alphavantage_gatherer.get_data(self.state.universe,
-            # self.args[0], self.state.start, self.state.end, num_days)
+            # self.data = {"01/01/2020": {"AAPL": 65, "TSLA": 61, "GOOG": 69},
+            #              "02/01/2020": {"AAPL": 62, "TSLA": 90, "GOOG": 1},
+            #              "03/01/2020": {"AAPL": 45, "TSLA": 65, "GOOG": 99}}
+            self.data = alphavantage_gatherer.get_data(self.state.universe,
+            self.args[0].upper(), self.state.start, self.state.end, num_days)
+            print(self.data)
+
+
 
         # Does the data lookup form the preinitialized list of values, self.data
         day = self.state.current_day

@@ -14,7 +14,7 @@ Zippy
 
 Tree(signal, universe)
 - build an abstract syntax tree
-	
+
 	LexerParser
 
 - call pull data for each indicator
