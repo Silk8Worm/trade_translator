@@ -3,10 +3,14 @@ from signalparse import build_ast
 from datetime import datetime
 import backtrader as bt
 
+"""
+IF A TRADE WOULD GIVE THE USER A NEGATIVE CASH BALANCE, THE TRADE DOES
+NOT EXECUTE.
+"""
 
 def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
-          t_profit: float, s_loss: float,
-          cover_trade: str, cover_amt):
+          t_profit: float, s_loss: float, cover_trade: str, cover_amt,
+          first_date: str, second_date: str):
     global start_date
     global end_date
     global start_date_pre
@@ -14,9 +18,15 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     global buy_bool
     global cover_buy_bool
     global amount
-    amount = int(amt)
+    if amt == "":
+        amount = 0
+    else:
+        amount = int(amt)
     global cover_amount
-    cover_amount = int(cover_amt)
+    if cover_amt == "":
+        cover_amount = 0
+    else:
+        cover_amount = int(cover_amt)
     global state
     global ast
     global cover_ast
@@ -25,9 +35,15 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     global other_signal
     other_signal = cover_signal
     global take_profit
-    take_profit = float(t_profit)/100
+    if t_profit == "":
+        take_profit=1000
+    else:
+        take_profit = float(t_profit)/100
     global stop_loss
-    stop_loss = float(s_loss)/100
+    if s_loss == "":
+        stop_loss=1000
+    else:
+        stop_loss = float(s_loss)/100
 
     if trade == 'sell':
         buy_bool = False
@@ -44,9 +60,9 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     cerebro.broker.setcommission(.01)
 
 
-    start_date_pre = "01/01/2020"
+    start_date_pre = first_date
     start_date = datetime.strptime(start_date_pre, '%d/%m/%Y')
-    end_date_pre = "10/01/2020"
+    end_date_pre = second_date
     end_date = datetime.strptime(end_date_pre, '%d/%m/%Y')
 
     # FIXME: Validate input?? --> There is a max # of tickers you can input (11?)
@@ -154,12 +170,12 @@ def saveplots(cerebro, numfigs=1, iplot=True, start=None, end=None,
 if __name__ == '__main__':
     # signal = 'if 30 day macd crosses above 13 day macd'
     # signal = 'if 30 day macd crosses below 17'
-    signal = "if rsi less than 56.1"
+    signal = "if rsi less than 90.1"
     # signal = "if rsi greater than 70 or 10 day macd crosses below 60"
     # signal = "if 5 day macd equal to 70"
     # signal = "if 5 day bollinger bands greater than 20"
 
     universe = "AAPL,TSLA,GOOG"
 
-    zippy(signal, 'buy', '10', 'if rsi greater than 0', universe, .05, .02,
-          'sell', '10')
+    zippy(signal, 'sell', '100', 'if rsi greater than 0', universe, .05, .02,
+          'sell', '10', '01/06/2020', '10/06/2020')

@@ -64,17 +64,17 @@ class Trade(Screen):
         self.manager.get_screen('signin').resetForm()
 
     def backtest(self, signal, trade, cover_signal, universe, take_profit, stop_loss, cover_trade):
-        popup2 = BacktestPopup()
-        popup2.open()
-        popup2.signal = signal
-        popup2.trade = trade
-        popup2.cover_signal = cover_signal
-        popup2.universe = universe
-        popup2.take_profit = take_profit
-        popup2.stop_loss = stop_loss
-        popup2.cover_trade = cover_trade
-        popup2.buy = self.trade
-        popup2.cover_buy = self.cover_trade
+        popup = BackTestPopup()
+        popup.open()
+        popup.signal = signal
+        popup.trade = trade
+        popup.cover_signal = cover_signal
+        popup.universe = universe
+        popup.take_profit = take_profit
+        popup.stop_loss = stop_loss
+        popup.cover_trade = cover_trade
+        popup.buy = self.trade
+        popup.cover_buy = self.cover_trade
 
     def backtest_case(self, signal, trade, cover_signal, universe, take_profit, stop_loss, cover_trade):
         popup = CasePopup()
@@ -120,16 +120,21 @@ class Trade(Screen):
         instance.cursor = (len(instance.text), 0)
 
 
-class BacktestPopup(Popup):
+class BackTestPopup(Popup):
 
-    def backtest(self):
+    def backtest(self, first_date, second_date):
+
+        # print(f'{self.signal},{self.buy},{self.trade},{self.cover_signal},{self.universe},{self.take_profit},{self.stop_loss},{self.cover_trade},{self.cover_buy},{first_date}, {second_date}')
+
         a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
                                  self.cover_signal,self.universe,
                                  self.take_profit,self.stop_loss,
-                                 self.cover_trade,self.cover_buy)
+                                 self.cover_buy,self.cover_trade,
+                                 first_date, second_date)
+
         app = App.get_running_app()
         app.manager.current = 'backtest'
-        app.manager.get_screen('backtest').chart(a, b, 3.0, 5.0)
+        app.manager.get_screen('backtest').chart(a, b, c, d)
 
 
 class CasePopup(Popup):
@@ -140,39 +145,45 @@ class CasePopup(Popup):
     case3enabled = BooleanProperty(True)
 
     case1start = "01/01/2020"
-    case1end = "03/01/2020"
+    case1end = "10/01/2020"
     case2start = "01/01/2020"
-    case2end = "03/01/2020"
+    case2end = "12/01/2020"
     case3start = "01/01/2020"
-    case3end = "03/01/2020"
+    case3end = "14/01/2020"
 
     def case1(self):
-
-        print("backtest case 1")
-        print(f'{self.signal},{self.trade},{self.cover_signal},{self.universe},{self.take_profit},{self.stop_loss},{self.cover_trade}')
+        a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
+                                 self.cover_signal,self.universe,
+                                 self.take_profit,self.stop_loss,
+                                 self.cover_buy,self.cover_trade,
+                                 self.case1start, self.case1end)
 
         app = App.get_running_app()
         app.manager.current = 'backtest'
-        app.manager.get_screen('backtest').chart(5000, 10000, 1.4, 2.3, [1,2,3], [5,6,7])
+        app.manager.get_screen('backtest').chart(a, b, c, d)
 
     def case2(self):
-
-        print("backtest case 2")
-        print(f'{self.signal},{self.trade},{self.cover_signal},{self.universe},{self.take_profit},{self.stop_loss},{self.cover_trade}')
+        a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
+                                 self.cover_signal,self.universe,
+                                 self.take_profit,self.stop_loss,
+                                 self.cover_buy,self.cover_trade,
+                                 self.case2start, self.case2end)
 
         app = App.get_running_app()
         app.manager.current = 'backtest'
-        app.manager.get_screen('backtest').chart(6000, 10000, 1.4, 2.3, [1,2,3], [5,6,7])
+        app.manager.get_screen('backtest').chart(a, b, c, d)
 
     def case3(self):
 
-        print("backtest case 3")
-        print(f'{self.signal},{self.trade},{self.cover_signal},{self.universe},{self.take_profit},{self.stop_loss},{self.cover_trade}')
+        a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
+                                 self.cover_signal,self.universe,
+                                 self.take_profit,self.stop_loss,
+                                 self.cover_buy,self.cover_trade,
+                                 self.case3start, self.case3end)
 
         app = App.get_running_app()
         app.manager.current = 'backtest'
-        app.manager.get_screen('backtest').chart(7000, 10000, 1.4, 2.3, [1,2,3], [5,6,7])
-
+        app.manager.get_screen('backtest').chart(a, b, c, d)
 
 class BackTest(Screen):
 
@@ -222,7 +233,6 @@ class TradeTranslatorApp(App):
         # Window.minimum_width, Window.minimum_height = Window.size
         # Window.left = Window.left-150
         # Window.top = Window.top-60
-
 
         return self.manager
 
