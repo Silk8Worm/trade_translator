@@ -38,6 +38,25 @@ class TradeTranslator(Screen):
 class Trade(Screen):
 
     word_list = "atr rsi obv macd".split(' ')
+    trade = StringProperty()
+    cover_trade = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(Screen, self).__init__(**kwargs)
+        self.trade = "Buy"
+        self.cover_trade = "Sell"
+
+    def change_trade(self):
+        if self.trade == "Buy":
+            self.trade = "Sell"
+        else:
+            self.trade = "Buy"
+
+    def change_cover_trade(self):
+        if self.cover_trade == "Buy":
+            self.cover_trade = "Sell"
+        else:
+            self.cover_trade = "Buy"
 
     def disconnect(self):
         self.manager.transition = NoTransition()

@@ -4,14 +4,15 @@ from signalparse import build_ast
 
 def zippy(signal: str, trade: str, cover_signal: str, universe: str,
           take_profit: float, stop_loss: float,
-          cover_trade: str):
+          cover_trade: str):\
 
     # FIXME: Will use differnt datetime format?
     start_date = "01/01/2020"
     end_date = "03/01/2020"
 
     # FIXME: Validate input??
-    tickers = universe.split(',')
+    tickers_pre = universe.split(',')
+    tickers = [x.strip() for x in tickers_pre]
 
     # Make the state
     state = ASTState(start_date, end_date, tickers)

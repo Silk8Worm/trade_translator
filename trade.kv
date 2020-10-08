@@ -83,12 +83,23 @@
                         font_size: 24
                         size_hint_y: None
                         height: 40
+                BoxLayout:
+                    orientation: 'horizontal'
+                    BoxLayout:
+                        padding: [40,20,40,20]
 
-                TextInput:
-                    id: trade
-                    multiline:True
-                    font_size: 28
-                    on_text: root.on_text(self, self.text)
+                        Button:
+                            background_color: (1,1,1,1)
+                            font_size: 30
+                            text: root.trade
+                            on_release: root.change_trade()
+
+                    TextInput:
+                        id: trade
+                        multiline:True
+                        font_size: 28
+                        input_filter: 'int'
+                        on_text: root.on_text(self, self.text)
 
             BoxLayout:
                 orientation: 'vertical'
@@ -121,16 +132,29 @@
 
                     Label:
                         text_size: self.size
-                        text: 'Universe'
+                        text: 'Cover Trade'
                         font_size: 24
                         size_hint_y: None
                         height: 40
+                BoxLayout:
+                    orientation: 'horizontal'
 
-                TextInput:
-                    id: universe
-                    multiline:True
-                    font_size: 28
-                    on_text: root.on_text(self, self.text)
+                    BoxLayout:
+                        padding: [40,20,40,20]
+
+                        Button:
+                            background_color: (1,1,1,1)
+                            font_size: 30
+                            text: root.cover_trade
+                            on_release: root.change_cover_trade()
+
+                    TextInput:
+                        id: cover_trade
+                        multiline:True
+                        font_size: 28
+                        input_filter: 'int'
+                        on_text: root.on_text(self, self.text)
+
 
             BoxLayout:
                 orientation: 'horizontal'
@@ -150,11 +174,26 @@
                             size_hint_y: None
                             height: 40
 
-                    TextInput:
-                        id: take_profit
-                        multiline:True
-                        font_size: 28
-                        on_text: root.on_text(self, self.text)
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        padding: [0,35,0,30]
+
+                        TextInput:
+                            size_hint_y: None
+                            height: 50
+                            id: take_profit
+                            multiline:False
+                            font_size: 30
+                            input_filter: 'float'
+                            on_text: root.on_text(self, self.text)
+
+                        Label:
+                            size_hint_y: None
+                            height: 50
+                            size_hint_x: None
+                            width: 60
+                            text: '%'
+                            font_size: 46
 
                 BoxLayout:
                     orientation: 'vertical'
@@ -171,11 +210,27 @@
                             size_hint_y: None
                             height: 40
 
-                    TextInput:
-                        id: stop_loss
-                        multiline:True
-                        font_size: 28
-                        on_text: root.on_text(self, self.text)
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        padding: [0,35,0,30]
+
+                        TextInput:
+                            size_hint_y: None
+                            height: 50
+                            id: stop_loss
+                            multiline:False
+                            font_size: 30
+                            input_filter: 'float'
+                            on_text: root.on_text(self, self.text)
+
+                        Label:
+                            size_hint_y: None
+                            height: 50
+                            size_hint_x: None
+                            width: 60
+                            text: '%'
+                            font_size: 46
+
 
             BoxLayout:
                 orientation: 'vertical'
@@ -187,13 +242,13 @@
 
                     Label:
                         text_size: self.size
-                        text: 'Cover Trade'
+                        text: 'Universe'
                         font_size: 24
                         size_hint_y: None
                         height: 40
 
                 TextInput:
-                    id: cover_trade
+                    id: universe
                     multiline:True
                     font_size: 28
                     on_text: root.on_text(self, self.text)
