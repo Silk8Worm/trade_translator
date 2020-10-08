@@ -1,0 +1,11 @@
+<BacktestPopup>:
+    title: "Select Backtest Dates"
+    size_hint: None, None
+    size: (500, 300)
+
+    BoxLayout:
+        orientation: 'verical'
+        Button:
+            id: backtestbutton
+            text: 'Backtest'
+            on_release: root.backtest()

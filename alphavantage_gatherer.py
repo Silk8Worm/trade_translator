@@ -178,7 +178,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
     for ticker, data in data_dict.items():
         for date, value in data.items():
             output[date][ticker] = value
-
+    print(output)
     return output
 
 

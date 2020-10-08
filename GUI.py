@@ -64,11 +64,17 @@ class Trade(Screen):
         self.manager.get_screen('signin').resetForm()
 
     def backtest(self, signal, trade, cover_signal, universe, take_profit, stop_loss, cover_trade):
-        print("backtest")
-
-        self.manager.current = 'backtest'
-        a, b, c, d, e, f = Zippy.zippy(signal,trade,cover_signal,universe,take_profit,stop_loss,cover_trade)
-        self.manager.get_screen('backtest').chart(a, b, c, d, e, f)
+        popup2 = BacktestPopup()
+        popup2.open()
+        popup2.signal = signal
+        popup2.trade = trade
+        popup2.cover_signal = cover_signal
+        popup2.universe = universe
+        popup2.take_profit = take_profit
+        popup2.stop_loss = stop_loss
+        popup2.cover_trade = cover_trade
+        popup2.buy = self.trade
+        popup2.cover_buy = self.cover_trade
 
     def backtest_case(self, signal, trade, cover_signal, universe, take_profit, stop_loss, cover_trade):
         popup = CasePopup()
@@ -80,6 +86,8 @@ class Trade(Screen):
         popup.take_profit = take_profit
         popup.stop_loss = stop_loss
         popup.cover_trade = cover_trade
+        popup.buy = self.trade
+        popup.cover_buy = self.cover_trade
 
     def on_text(self, instance, value):
         """ Include all current text from textinput into the word list to
@@ -112,12 +120,31 @@ class Trade(Screen):
         instance.cursor = (len(instance.text), 0)
 
 
+class BacktestPopup(Popup):
+
+    def backtest(self):
+        a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
+                                 self.cover_signal,self.universe,
+                                 self.take_profit,self.stop_loss,
+                                 self.cover_trade,self.cover_buy)
+        app = App.get_running_app()
+        app.manager.current = 'backtest'
+        app.manager.get_screen('backtest').chart(a, b, 3.0, 5.0)
+
+
 class CasePopup(Popup):
 
     # Set True to False to disable cases
     case1enabled = BooleanProperty(True)
     case2enabled = BooleanProperty(False)
     case3enabled = BooleanProperty(True)
+
+    case1start = "01/01/2020"
+    case1end = "03/01/2020"
+    case2start = "01/01/2020"
+    case2end = "03/01/2020"
+    case3start = "01/01/2020"
+    case3end = "03/01/2020"
 
     def case1(self):
 
@@ -158,15 +185,13 @@ class BackTest(Screen):
     def back(self):
         self.manager.current = 'trade'
 
-    def chart(self, final: float, cumulative: float, sharpe: float, sortino: float, x_vals: [], y_vals: []):
+    def chart(self, final: float, cumulative: float, sharpe: float, sortino: float):
 
         self.final_equity = f'${final:.2f}'
         self.cumulative_return = f'${cumulative:.2f}'
         self.sharpe_ratio = f'{sharpe:.3f}'
         self.sortino_ratio = f'{sortino:.3f}'
 
-        plt.plot(x_vals, y_vals)
-        plt.savefig('chart.png', bbox_inches='tight')
         self.image = 'chart.png'
 
 
