@@ -124,7 +124,7 @@ class BackTestPopup(Popup):
 
     def backtest(self, first_date, second_date):
 
-        # print(f'{self.signal},{self.buy},{self.trade},{self.cover_signal},{self.universe},{self.take_profit},{self.stop_loss},{self.cover_trade},{self.cover_buy},{first_date}, {second_date}')
+        print(f'{self.signal},{self.buy},{self.trade},{self.cover_signal},{self.universe},{self.take_profit},{self.stop_loss},{self.cover_buy},{self.cover_trade},{first_date}, {second_date}')
 
         a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
                                  self.cover_signal,self.universe,

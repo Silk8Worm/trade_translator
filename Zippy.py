@@ -2,6 +2,7 @@ from AST import *
 from signalparse import build_ast
 from datetime import datetime
 import backtrader as bt
+from PIL import Image
 
 """
 IF A TRADE WOULD GIVE THE USER A NEGATIVE CASH BALANCE, THE TRADE DOES
@@ -9,7 +10,7 @@ NOT EXECUTE.
 """
 
 def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
-          t_profit: float, s_loss: float, cover_trade: str, cover_amt,
+          t_profit: str, s_loss: str, cover_trade: str, cover_amt: str,
           first_date: str, second_date: str):
     global start_date
     global end_date
@@ -27,6 +28,8 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
         cover_amount = 0
     else:
         cover_amount = int(cover_amt)
+    global starting_cash
+    starting_cash = 500000.0
     global state
     global ast
     global cover_ast
@@ -44,20 +47,19 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
         stop_loss=1000
     else:
         stop_loss = float(s_loss)/100
-
-    if trade == 'sell':
+    if trade == 'Sell':
         buy_bool = False
     else:
         buy_bool = True
 
-    if cover_trade == 'sell':
+    if cover_trade == 'Sell':
         cover_buy_bool = False
     else:
         cover_buy_bool = True
 
     cerebro = bt.Cerebro()
-    cerebro.broker.setcash(500000.0)
-    cerebro.broker.setcommission(.01)
+    cerebro.broker.setcash(starting_cash)
+    cerebro.broker.setcommission(0.01)
 
 
     start_date_pre = first_date
@@ -90,9 +92,13 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
         cerebro.addstrategy(TreeSignalStrategy)
     cerebro.run()
 
-    saveplots(cerebro, file_path = 'chart.png')
+    saveplots(cerebro, file_path='chart.png', start=start_date, end=end_date)
+    img = Image.open("chart.png")
+    area = (0,0,691,244)
+    cropped_img = img.crop(area)
+    cropped_img.save('chart.png')
 
-    return cerebro.broker.getvalue(), cerebro.broker.getvalue()-1000000, 3.0, 2.0
+    return cerebro.broker.getvalue(), cerebro.broker.getvalue()-starting_cash, 3.0, 2.0
 
 
 class TreeSignalStrategy(bt.Strategy):
@@ -100,52 +106,36 @@ class TreeSignalStrategy(bt.Strategy):
     def __init__(self):
         self._addobserver(True, bt.observers.BuySell)
 
-
-    def notify_order(self, order):
-        if not order.status == order.Completed:
-            return  # discard any other notification
-
-        if not self.position:  # we left the market
-            return
-
-        if buy_bool:
-            stop_price = order.executed.price * (1.0 - stop_loss)
-            self.sell(exectype=bt.Order.Stop, price=stop_price)
-        else:
-            stop_price = order.executed.price * (1.0 + stop_loss)
-            self.buy(exectype=bt.Order.Stop, price=stop_price)
-
-        if buy_bool:
-            take_price = order.executed.price * (1.0 + take_profit)
-            self.sell(exectype=bt.Order.Stop, price=take_price)
-        else:
-            take_price = order.executed.price * (1.0 - take_profit)
-            self.buy(exectype=bt.Order.Stop, price=take_price)
-        # TODO: Trailing?
-        # self.sell(exectype=bt.Order.StopTrail, trailamount=stop_loss)
-
-
     def next(self):
-
         date_data = self.datetime.date(ago=0)
         state.current_day = date_data.strftime('%d/%m/%Y')
 
         print(date_data)
+        close = self.data.close[0]
 
-        if not self.position:
-            if ast.evaluate():
-                if buy_bool:
-                    self.buy(size=int(amount))
-                else:
-                    self.sell(size=int(amount))
+        if ast.evaluate():
+            if buy_bool:
+                self.buy_bracket(size=amount,
+                                 exectype=bt.Order.Market,
+                                 limitprice=close*(1+take_profit),
+                                 stopprice=close*(1-stop_loss))
+            else:
+                self.sell_bracket(size=amount,
+                                  exectype=bt.Order.Market,
+                                  limitprice=close*(1-take_profit),
+                                  stopprice=close*(1+stop_loss))
 
-        if self.position:
-            if cover_ast.evaluate():
-                if cover_buy_bool:
-                    self.buy(size=int(cover_amount))
-                else:
-                    self.sell(size=int(cover_amount))
-
+        if cover_ast.evaluate():
+            if cover_buy_bool:
+                self.buy_bracket(size=cover_amount,
+                                 exectype=bt.Order.Market,
+                                 limitprice=close*(1+take_profit),
+                                 stopprice=close*(1-stop_loss))
+            else:
+                self.sell_bracket(size=cover_amount,
+                                  exectype=bt.Order.Market,
+                                  limitprice=close*(1-take_profit),
+                                  stopprice=close*(1+stop_loss))
 
 
 def saveplots(cerebro, numfigs=1, iplot=True, start=None, end=None,
@@ -173,12 +163,14 @@ def saveplots(cerebro, numfigs=1, iplot=True, start=None, end=None,
 if __name__ == '__main__':
     # signal = 'if 30 day macd crosses above 13 day macd'
     # signal = 'if 30 day macd crosses below 17'
-    signal = "if rsi less than 90.1"
+    # signal = "if rsi less than 90.1"
     # signal = "if rsi greater than 70 or 10 day macd crosses below 60"
     # signal = "if 5 day macd equal to 70"
     # signal = "if 5 day bollinger bands greater than 20"
 
-    universe = "AAPL,TSLA,GOOG,MSFT,BABA,FB,NVDA,CRM,INTC"
+    # universe = "AAPL, TSLA, GOOG, TTM, XOM, F, T, MSFT, AMZN, COTY, GE, GM, NIO, ALL, NVDA, REAL, NFLX, BAC, BABA"
+    universe = "AAPL,TSLA,GOOG"
 
-    zippy(signal, 'sell', '1000', 'if rsi greater than 50', universe, .05, .02,
-          'sell', '10', '18/03/2020', '18/04/2020')
+    zippy('if rsi less than 90.1', 'Sell', '1000', 'if rsi greater than 0',
+          universe, '100', '100',
+          'Buy', '1000', '18/03/2020', '18/04/2020')
