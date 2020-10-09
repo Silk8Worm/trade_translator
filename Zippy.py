@@ -59,7 +59,7 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
 
     cerebro = bt.Cerebro()
     cerebro.broker.setcash(starting_cash)
-    cerebro.broker.setcommission(0.01)
+    cerebro.broker.setcommission(0)
 
 
     start_date_pre = first_date
@@ -113,7 +113,7 @@ class TreeSignalStrategy(bt.Strategy):
         print(date_data)
         close = self.data.close[0]
 
-        if ast.evaluate():
+        if amount > 0 and ast.evaluate():
             if buy_bool:
                 self.buy_bracket(size=amount,
                                  exectype=bt.Order.Market,
@@ -125,7 +125,7 @@ class TreeSignalStrategy(bt.Strategy):
                                   limitprice=close*(1-take_profit),
                                   stopprice=close*(1+stop_loss))
 
-        if cover_ast.evaluate():
+        if cover_amount > 0 and cover_ast.evaluate():
             if cover_buy_bool:
                 self.buy_bracket(size=cover_amount,
                                  exectype=bt.Order.Market,
@@ -171,6 +171,6 @@ if __name__ == '__main__':
     # universe = "AAPL, TSLA, GOOG, TTM, XOM, F, T, MSFT, AMZN, COTY, GE, GM, NIO, ALL, NVDA, REAL, NFLX, BAC, BABA"
     universe = "AAPL,TSLA,GOOG"
 
-    zippy('if rsi less than 90.1', 'Sell', '1000', 'if rsi greater than 0',
-          universe, '100', '100',
-          'Buy', '1000', '18/03/2020', '18/04/2020')
+    zippy('if rsi greater than 100', 'Buy', '1000', 'if rsi less than 0',
+          universe, '100', '5',
+          'Sell', '1000', '18/03/2020', '18/10/2020')

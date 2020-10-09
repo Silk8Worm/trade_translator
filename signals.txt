@@ -1,0 +1,23 @@
+rsi is greater than 50
+5 day macd crosses above 20 day macd
+if 1 day open greater than close
+if 3 day ema less than 20 day sma
+if rsi less than macd
+macd greater than 10
+if bbands high less than 50
+if bbands low greater than bbands high # should never execute
+if bbands high greater than bbands low # should always execute
+if rsi is greater 70
+if rsi less than 40 and 5 day macd greater than 0
+rsi is greater than 30 or 20 day atr greater than .5
+if rsi greater than 10 and atr less than 50 or rsi is greater 70
+if atr less than 30 and if 5 day macd greater than 20 day macd # should fail?
+if 20 day ema greater than 5 day ema
+if 20 day sma greater than 5 day ema
+if 20 day ema greater than 5 day ema or 20 day sma greater than 5 day ema and rsi greater than 0
+if 20 day ema crosses above 5 day sma
+if 20 day sma crosses below 5 day ema
+if 20 day ema crosses above 5 day sma or 20 day sma crosses below 5 day ema
+30 day rsi less than 10 day rsi
+macd crosses above rsi
+
