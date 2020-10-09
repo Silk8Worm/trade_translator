@@ -56,7 +56,7 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
         cover_buy_bool = True
 
     cerebro = bt.Cerebro()
-    cerebro.broker.setcash(1000000.0)
+    cerebro.broker.setcash(500000.0)
     cerebro.broker.setcommission(.01)
 
 
@@ -130,6 +130,8 @@ class TreeSignalStrategy(bt.Strategy):
         date_data = self.datetime.date(ago=0)
         state.current_day = date_data.strftime('%d/%m/%Y')
 
+        print(date_data)
+
         if not self.position:
             if ast.evaluate():
                 if buy_bool:
@@ -143,6 +145,7 @@ class TreeSignalStrategy(bt.Strategy):
                     self.buy(size=int(cover_amount))
                 else:
                     self.sell(size=int(cover_amount))
+
 
 
 def saveplots(cerebro, numfigs=1, iplot=True, start=None, end=None,
@@ -175,7 +178,7 @@ if __name__ == '__main__':
     # signal = "if 5 day macd equal to 70"
     # signal = "if 5 day bollinger bands greater than 20"
 
-    universe = "AAPL,TSLA,GOOG"
+    universe = "AAPL,TSLA,GOOG,MSFT,BABA,FB,NVDA,CRM,INTC"
 
-    zippy(signal, 'sell', '100', 'if rsi greater than 0', universe, .05, .02,
-          'sell', '10', '01/06/2020', '10/06/2020')
+    zippy(signal, 'sell', '1000', 'if rsi greater than 50', universe, .05, .02,
+          'sell', '10', '18/03/2020', '18/04/2020')

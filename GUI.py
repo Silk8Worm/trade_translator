@@ -141,8 +141,8 @@ class CasePopup(Popup):
 
     # Set True to False to disable cases
     case1enabled = BooleanProperty(True)
-    case2enabled = BooleanProperty(False)
-    case3enabled = BooleanProperty(True)
+    case2enabled = BooleanProperty(True)
+    case3enabled = BooleanProperty(False)
 
     case1start = "01/01/2020"
     case1end = "10/01/2020"
