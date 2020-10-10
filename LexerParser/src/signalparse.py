@@ -9,6 +9,7 @@ import logging
 
 import ply.yacc as yacc
 from singallex import tokens
+from ply.lex import LexToken
 
 # Used for building the AST
 from AST import *
@@ -154,17 +155,37 @@ def p_indicator_single(p):
 
 # Error rule for syntax errors
 def p_error(p):
-    print(p)
-    exit(1)
+    errors = []
+    tok = p
+    # Handles the empty input
+    if tok is None:
+        errors.append(("", -1, "Input Too Short. Missing tokens"))
+    # This means that the first error was a syntax error
+    elif tok.type != 'UNKNOWN':
+        errors.append((tok.value, tok.lexpos, "Unexpected Token"))
+    while tok is not None:
+        if tok.type == 'UNKNOWN':
+            errors.append((tok.value, tok.lexpos, "Invalid Token"))
+        tok = parser.token()
+
+    # Clears the current parse stack and sets the error state to ok
+    parser.symstack = parser.symstack[:1]
+    generated_tree.value = errors
 
 
 ###############################################################################
 # The function to build an abstract syntax tree
 def build_ast(str_input: str, _state: ASTState, debug=False):
+    # Global variables used in the parser algorithm
+    global parser, state, generated_tree
+
     # Build the parser
     parser = yacc.yacc()
-    global state
     state = _state
+
+    # The output tree is originally an error Node, and it will be updated
+    # if the value of generated_tree is None i.e no errors
+    generated_tree = Error(state, None)
 
     # Parses in debug/ non-debug mode
     if debug:
@@ -178,7 +199,28 @@ def build_ast(str_input: str, _state: ASTState, debug=False):
         log = logging.getLogger()
 
         yacc.yacc(debug=True, debuglog=log)
-        return parser.parse(str_input.lower(), debug=log)
+        temp_tree = parser.parse(str_input.lower(), debug=log)
     else:
         yacc.yacc()
-        return parser.parse(str_input.lower())
+        temp_tree = parser.parse(str_input.lower())
+
+    # If the value is None then this tree has no errors
+    if generated_tree.value is None:
+        # The parsed, error free signal's AST
+        generated_tree = temp_tree
+    return generated_tree
+
+
+# if __name__ == '__main__':
+#     s = ""
+#     s = "if rsa greater than 4"
+#     s = "if ras gpraper than 4"
+#     s = "fi rsi greater than 4.9"
+#     s = "rsi if less than 3"
+#     s = "i ras greaf tha 3"
+#     s = "If RSI MACD crosses above"
+#     s = "if exponential moving average crosses below"
+#     # s = "if rsi greater than 30 or 5 day macd crosses below 50 and moving average equal to 43"
+#     ast = build_ast(s, ASTState("", "", ""), debug=True)
+#
+# # TODO: ADD > ,< , open yesterday/ close yesterday, fundamentals,, remove word to
