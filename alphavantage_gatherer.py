@@ -185,7 +185,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 if __name__ == '__main__':
     get_data(['AAPL'], 'BB low', '09/09/2020', '25/09/2020', 5)
     get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
-    get_data(['TSLA'], 'ATR', '14/09/2020', '29/09/2020', 20)
+    get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
     print('end.')
     # for date in x:
