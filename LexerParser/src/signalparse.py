@@ -24,8 +24,10 @@ precedence = (
 
 # current top layer grammar rule
 def p_signal(p):
-    '''signal : IF subsignal'''
-    p[0] = p[2]
+    '''signal : IF subsignal
+              | subsignal'''
+    # Return the subsignal itself, regardless of the word if
+    p[0] = list(p)[-1]
 
 
 # A grammar rule defining a subsignal in terms of other
@@ -108,17 +110,20 @@ def p_time(p):
 
 # Merges multi word tokens
 def p_gt(p):
-    '''gt : GREATER THAN'''
+    '''gt : GREATER THAN
+          | GREATERSYM '''
     p[0] = "gt"
 
 
 def p_lt(p):
-    '''lt : LESS THAN'''
+    '''lt : LESS THAN
+          | LESSSYM '''
     p[0] = "lt"
 
 
 def p_eq(p):
-    '''eq : EQUAL TO'''
+    '''eq : EQUAL TO
+          | EQUALSYM '''
     p[0] = "eq"
 
 
@@ -133,23 +138,17 @@ def p_below(p):
 
 
 # Combines all indicators, single and multi-word
-def p_indicator_combined_ma(p):
-    '''indicator : MOVING AVERAGE'''
-    p[0] = "moving average"
-
-
-def p_indicator_combined_ema(p):
-    '''indicator : EXPONENTIAL MOVING AVERAGE'''
-    p[0] = "exponential moving average"
-
-
 def p_indicator_combined_bb(p):
-    '''indicator : BOLLINGER BANDS'''
-    p[0] = "bollinger bands"
+    '''indicator : BBANDS
+                 | BBANDS HIGH
+                 | BBANDS LOW'''
+    p[0] = " ".join(p[1:])
 
 
 def p_indicator_single(p):
-    '''indicator : INDICATOR'''
+    '''indicator : INDICATOR
+                 | LOW
+                 | HIGH'''
     p[0] = p[1]
 
 
@@ -211,16 +210,24 @@ def build_ast(str_input: str, _state: ASTState, debug=False):
     return generated_tree
 
 
-# if __name__ == '__main__':
-#     s = ""
-#     s = "if rsa greater than 4"
-#     s = "if ras gpraper than 4"
-#     s = "fi rsi greater than 4.9"
-#     s = "rsi if less than 3"
-#     s = "i ras greaf tha 3"
-#     s = "If RSI MACD crosses above"
-#     s = "if exponential moving average crosses below"
-#     # s = "if rsi greater than 30 or 5 day macd crosses below 50 and moving average equal to 43"
-#     ast = build_ast(s, ASTState("", "", ""), debug=True)
-#
-# # TODO: ADD > ,< , open yesterday/ close yesterday, fundamentals,, remove word to
+if __name__ == '__main__':
+    # s = ""
+    # s = "if rsa greater than 4"
+    # s = "if ras gpraper than 4"
+    # s = "fi rsi greater than 4.9"
+    # s = "rsi if less than 3"
+    # s = "i ras greaf tha 3"
+    # s = "If RSI MACD crosses above"
+    # s = "if exponential moving average crosses below"
+    s = "if rsi = 100"
+    # s = "if rsi greater than 30 or 5 day macd crosses below 50 and moving average equal to 43"
+    ast = build_ast(s, ASTState("", "", ""), debug=True)
+    print(ast)
+
+# TODO
+'''
+Add Open yesterday
+Add close yesterday
+add fundamentals
+Remove word 'to'
+'''
