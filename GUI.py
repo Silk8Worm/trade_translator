@@ -17,7 +17,7 @@ from kivy.uix.popup import Popup
 from kivy.config import Config # Better implementation of window size
 from kivy.clock import Clock
 from functools import partial
-from matplotlib import pyplot as plt
+from kivy.cache import Cache
 import Zippy
 
 
@@ -117,7 +117,7 @@ class Trade(Screen):
             pass
 
     def set_cursor(self, instance, dt):
-        instance.cursor = (len(instance.text), 0)
+        instance.cursor = (len(instance.text), 50)
 
 
 class BackTestPopup(Popup):
@@ -145,7 +145,7 @@ class CasePopup(Popup):
     case3enabled = BooleanProperty(False)
 
     case1start = "01/01/2020"
-    case1end = "10/01/2020"
+    case1end = "10/03/2020"
     case2start = "01/01/2020"
     case2end = "12/01/2020"
     case3start = "01/01/2020"
@@ -195,6 +195,7 @@ class BackTest(Screen):
 
     def back(self):
         self.manager.current = 'trade'
+        self.image = 'logo.png'
 
     def chart(self, final: float, cumulative: float, sharpe: float, sortino: float):
 
@@ -202,7 +203,10 @@ class BackTest(Screen):
         self.cumulative_return = f'${cumulative:.2f}'
         self.sharpe_ratio = f'{sharpe:.3f}'
         self.sortino_ratio = f'{sortino:.3f}'
-
+        Cache._categories['kv.image']['limit'] = 0
+        Cache._categories['kv.image']['timeout'] = 1
+        Cache._categories['kv.texture']['limit'] = 0
+        Cache._categories['kv.texture']['timeout'] = 1
         self.image = 'chart.png'
 
 

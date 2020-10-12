@@ -130,4 +130,3 @@ def income_statement(api_key: str, ticker: str, period: Optional[str] = 'quarter
     r = requests.get(url)
     return r.json()
 
-print(json.dumps(balance_sheet("Tpk_6ef4a75d2a6f4d95be047b5629cf964f", "AAPL")))

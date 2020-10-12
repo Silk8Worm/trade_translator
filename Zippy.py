@@ -71,6 +71,8 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     tickers_pre = universe.split(',')
     tickers = [x.strip() for x in tickers_pre]
     state = ASTState(start_date_pre, end_date_pre, tickers)
+
+    # This is where the error is passed
     ast = build_ast(main_signal, state, debug=False)
     cover_ast = build_ast(other_signal, state, debug=False)
 
