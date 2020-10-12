@@ -3,7 +3,7 @@ from signalparse import build_ast
 from datetime import datetime
 import backtrader as bt
 from PIL import Image
-
+from sys import stderr
 """
 IF A TRADE WOULD GIVE THE USER A NEGATIVE CASH BALANCE, THE TRADE DOES
 NOT EXECUTE.
@@ -78,8 +78,11 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
 
     # TODO: Add check for syntax errors (Will be done soon - Ryan)
     if not ast.valid():
-        print(ast.evaluate())
-        exit(-42)
+        print(ast.evaluate(), file=stderr)
+        exit(-1)
+    if not cover_ast.valid():
+        print(cover_ast.evaluate(), file=stderr)
+        exit(-1)
 
     # Iterate over the tickers, and then the dates (that list will be provided by zipline?)
     for ticker in tickers:

@@ -9,6 +9,7 @@ import logging
 
 import ply.yacc as yacc
 from singallex import tokens
+from ply.lex import LexToken
 
 # Used for building the AST
 from AST import *
@@ -23,8 +24,10 @@ precedence = (
 
 # current top layer grammar rule
 def p_signal(p):
-    '''signal : IF subsignal'''
-    p[0] = p[2]
+    '''signal : IF subsignal
+              | subsignal'''
+    # Return the subsignal itself, regardless of the word if
+    p[0] = list(p)[-1]
 
 
 # A grammar rule defining a subsignal in terms of other
@@ -107,17 +110,20 @@ def p_time(p):
 
 # Merges multi word tokens
 def p_gt(p):
-    '''gt : GREATER THAN'''
+    '''gt : GREATER THAN
+          | GREATERSYM '''
     p[0] = "gt"
 
 
 def p_lt(p):
-    '''lt : LESS THAN'''
+    '''lt : LESS THAN
+          | LESSSYM '''
     p[0] = "lt"
 
 
 def p_eq(p):
-    '''eq : EQUAL TO'''
+    '''eq : EQUAL TO
+          | EQUALSYM '''
     p[0] = "eq"
 
 
@@ -132,39 +138,53 @@ def p_below(p):
 
 
 # Combines all indicators, single and multi-word
-def p_indicator_combined_ma(p):
-    '''indicator : MOVING AVERAGE'''
-    p[0] = "moving average"
-
-
-def p_indicator_combined_ema(p):
-    '''indicator : EXPONENTIAL MOVING AVERAGE'''
-    p[0] = "exponential moving average"
-
-
 def p_indicator_combined_bb(p):
-    '''indicator : BOLLINGER BANDS'''
-    p[0] = "bollinger bands"
+    '''indicator : BBANDS
+                 | BBANDS HIGH
+                 | BBANDS LOW'''
+    p[0] = " ".join(p[1:])
 
 
 def p_indicator_single(p):
-    '''indicator : INDICATOR'''
+    '''indicator : INDICATOR
+                 | LOW
+                 | HIGH'''
     p[0] = p[1]
 
 
 # Error rule for syntax errors
 def p_error(p):
-    print(p)
-    exit(1)
+    errors = []
+    tok = p
+    # Handles the empty input
+    if tok is None:
+        errors.append(("", -1, "Input Too Short. Missing tokens"))
+    # This means that the first error was a syntax error
+    elif tok.type != 'UNKNOWN':
+        errors.append((tok.value, tok.lexpos, "Unexpected Token"))
+    while tok is not None:
+        if tok.type == 'UNKNOWN':
+            errors.append((tok.value, tok.lexpos, "Invalid Token"))
+        tok = parser.token()
+
+    # Clears the current parse stack and sets the error state to ok
+    parser.symstack = parser.symstack[:1]
+    generated_tree.value = errors
 
 
 ###############################################################################
 # The function to build an abstract syntax tree
 def build_ast(str_input: str, _state: ASTState, debug=False):
+    # Global variables used in the parser algorithm
+    global parser, state, generated_tree
+
     # Build the parser
     parser = yacc.yacc()
-    global state
     state = _state
+
+    # The output tree is originally an error Node, and it will be updated
+    # if the value of generated_tree is None i.e no errors
+    generated_tree = Error(state, None)
 
     # Parses in debug/ non-debug mode
     if debug:
@@ -178,7 +198,36 @@ def build_ast(str_input: str, _state: ASTState, debug=False):
         log = logging.getLogger()
 
         yacc.yacc(debug=True, debuglog=log)
-        return parser.parse(str_input.lower(), debug=log)
+        temp_tree = parser.parse(str_input.lower(), debug=log)
     else:
         yacc.yacc()
-        return parser.parse(str_input.lower())
+        temp_tree = parser.parse(str_input.lower())
+
+    # If the value is None then this tree has no errors
+    if generated_tree.value is None:
+        # The parsed, error free signal's AST
+        generated_tree = temp_tree
+    return generated_tree
+
+
+if __name__ == '__main__':
+    # s = ""
+    # s = "if rsa greater than 4"
+    # s = "if ras gpraper than 4"
+    # s = "fi rsi greater than 4.9"
+    # s = "rsi if less than 3"
+    # s = "i ras greaf tha 3"
+    # s = "If RSI MACD crosses above"
+    # s = "if exponential moving average crosses below"
+    s = "if rsi = 100"
+    # s = "if rsi greater than 30 or 5 day macd crosses below 50 and moving average equal to 43"
+    ast = build_ast(s, ASTState("", "", ""), debug=True)
+    print(ast)
+
+# TODO
+'''
+Add Open yesterday
+Add close yesterday
+add fundamentals
+Remove word 'to'
+'''
