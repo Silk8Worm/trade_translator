@@ -2,6 +2,7 @@ import requests
 import datetime
 import numpy as np
 import pandas as pd
+import pandas_datareader as pdr
 from pandas import Series
 import ta
 from ta.volatility import BollingerBands
@@ -27,41 +28,19 @@ TECHNICAL_DATABASE = {}  # dictionaries allow you to assume a key already exists
 
 def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: str, indicator_range_specification: int):
 
-    time_frame = '1D'
+    # Pull with pandas data reader
+    startdate = datetime.datetime.strptime(startdate, '%d/%m/%Y')
+    enddate = datetime.datetime.strptime(enddate, '%d/%m/%Y')
+    duration = np.busday_count(startdate.isoformat()[:10], enddate.isoformat()[:10]) + 1
 
-    # Create Datetime's
-    startdate = datetime.date(int(startdate[6:]), int(startdate[3:5]), int(startdate[:2]))
-    enddate = datetime.date(int(enddate[6:]), int(enddate[3:5]), int(enddate[:2]))
-    duration = np.busday_count(startdate, enddate)
-    # print(duration)
+    # <firstdate> obtains extra days of data; some indicators calculate from preexisting values
+    firstdate = np.busday_offset(startdate.isoformat()[:10], -(indicator_range_specification-1), roll='forward')
+    firstdate = datetime.datetime.strptime(str(firstdate), '%Y-%m-%d')
 
-    # Create URL
-    bars_url = MARKET_URL + '/v1/bars/' + time_frame + '?symbols=' + ticker
-    #  Obtain extra days of data; some indicators calculate from previous day and duration is off by one
-    bars_url = bars_url + '&limit=' + str(indicator_range_specification + duration)
-    bars_url = bars_url + '&end=' + enddate.isoformat() + "T09:30:00-04:00"
-    # print(bars_url)
+    df = pdr.get_data_yahoo(ticker, firstdate, enddate)
+    # print(type(df)) # pandas dataframe data type
 
-    # Request Data
-    r = requests.get(bars_url, headers={'APCA-API-KEY-ID': API_KEY, 'APCA-API-SECRET-KEY': SECRET_API_KEY})
-    r = r.json()
-    r = r[ticker]
-
-    # Print obtained data
-    # for d in r:
-        # print(d)
-
-    # Get Bars
-    # Creating Dataframe from Pricing Bar Values
-    d = {'Open': [], 'High': [], 'Low': [], 'Close': [], 'Volume': []}
-    for day in r:
-        d['Open'].append(day['o'])
-        d['High'].append(day['h'])
-        d['Low'].append(day['l'])
-        d['Close'].append(day['c'])
-        d['Volume'].append(day['v'])
-
-    output = get_technical(indicator, indicator_range_specification, duration, d, startdate)
+    output = get_technical(indicator, indicator_range_specification, duration, df, startdate)
 
     # Update Database
     if ticker not in TECHNICAL_DATABASE:
@@ -71,8 +50,7 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
     return output
 
 
-# def get_technical(indicator: str, period: int, startdate: str, enddate: str):
-def get_technical(indicator: str, period: int, duration: int, d: dict, startdate: datetime):
+def get_technical(indicator: str, period: int, duration: int, d: str, startdate: datetime):
 
     df = pd.DataFrame(data=d)
 
@@ -147,7 +125,7 @@ def get_technical(indicator: str, period: int, duration: int, d: dict, startdate
     key = startdate  # <key> is a datetime object
     friday = False
     for i in range(0, len(output)):
-        left = np.busday_offset(key, 1, roll='backward')
+        left = np.busday_offset(key, 1, roll='backward')  # TODO: I think this is suppose to be 'forward'
         right = key + datetime.timedelta(days=1)
         if not (left == right):
             # <key is a friday>
@@ -162,6 +140,7 @@ def get_technical(indicator: str, period: int, duration: int, d: dict, startdate
             friday = False
 
     return data
+
 
 def pull_fundamental_data(ticker: str, indicator: str, start_date: str, end_date: str):
     api_key = "Tpk_6ef4a75d2a6f4d95be047b5629cf964f"
@@ -265,7 +244,6 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash):
         return None
 
 
-
 def get_data(tickers: list, indicator: str, start_date: str, end_date: str, period: int):
 
     data_dict = {}
@@ -305,7 +283,7 @@ if __name__ == '__main__':
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    print(get_data(['AAPL', 'MSFT'], 'EBITDA', '09/09/2020', '25/09/2020', 1))
+    print(get_data(['AAPL', 'MSFT'], 'ATR', '06/10/2020', '09/10/2020', 3))
     print('end.')
     # for date in x:
         # print(date, x[date])
