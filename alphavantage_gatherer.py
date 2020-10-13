@@ -28,7 +28,7 @@ TECHNICAL_DATABASE = {}  # dictionaries allow you to assume a key already exists
 
 def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: str, indicator_range_specification: int):
 
-    # Pull with pandas data reader
+    # Handle dates with datetime
     startdate = datetime.datetime.strptime(startdate, '%d/%m/%Y')
     enddate = datetime.datetime.strptime(enddate, '%d/%m/%Y')
     duration = np.busday_count(startdate.isoformat()[:10], enddate.isoformat()[:10]) + 1
@@ -37,6 +37,7 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
     firstdate = np.busday_offset(startdate.isoformat()[:10], -(indicator_range_specification-1), roll='forward')
     firstdate = datetime.datetime.strptime(str(firstdate), '%Y-%m-%d')
 
+    # Fetch with pandas data reader
     df = pdr.get_data_yahoo(ticker, firstdate, enddate)
     # print(type(df)) # pandas dataframe data type
 
@@ -50,25 +51,24 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
     return output
 
 
-def get_technical(indicator: str, period: int, duration: int, d: str, startdate: datetime):
-
-    df = pd.DataFrame(data=d)
+def get_technical(indicator: str, period: int, duration: int, df: str, startdate: datetime):
 
     # Get Technical Indicator
     if indicator == 'open':
-        output = d['Open'][len(d['Open'])-duration-1:]
+        output = df['Open'][period-1:]
+        print(output)
 
     elif indicator == 'close':
-        output = d['Close'][len(d['Close']) - duration-1:]
+        output = df['Close'][period-1:]
 
     elif indicator == 'high':
-        output = d['High'][len(d['High']) - duration-1:]
+        output = df['High'][period-1:]
 
     elif indicator == 'low':
-        output = d['Low'][len(d['Low']) - duration-1:]
+        output = df['Low'][period-1:]
 
     elif indicator == 'volume':
-        output = d['Volume'][len(d['Volume']) - duration-1:]
+        output = df['Volume'][period-1:]
 
     elif indicator in ['low BB', 'BB low']:  # Lower Bollinger Band
         bb_low = ta.volatility.bollinger_lband(df["Close"], n=period, ndev=2, fillna=True)
@@ -119,6 +119,7 @@ def get_technical(indicator: str, period: int, duration: int, d: str, startdate:
     # Return in dictionary with mapping [date:value]
     data = {}
 
+    # TODO: Rewrite this to use the row as keys
     if isinstance(output, Series):
         output = Series.tolist(output)
     # <output> is a list
@@ -283,7 +284,7 @@ if __name__ == '__main__':
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    print(get_data(['AAPL', 'MSFT'], 'ATR', '06/10/2020', '09/10/2020', 3))
+    print(get_data(['AAPL', 'MSFT'], 'open', '07/10/2020', '09/10/2020', 5))
     print('end.')
     # for date in x:
         # print(date, x[date])
