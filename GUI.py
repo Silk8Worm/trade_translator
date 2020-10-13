@@ -9,7 +9,7 @@ https://github.com/kivy/kivy/issues/4991
 """
 
 from kivy.app import App
-from kivy.properties import StringProperty, BooleanProperty
+from kivy.properties import StringProperty, BooleanProperty, ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.uix.popup import Popup
 # Use this if you need to import TextInput
@@ -18,6 +18,7 @@ from kivy.config import Config # Better implementation of window size
 from kivy.clock import Clock
 from functools import partial
 from kivy.cache import Cache
+from datetime import datetime
 import Zippy
 
 
@@ -40,6 +41,9 @@ class Trade(Screen):
     word_list = "atr rsi obv macd".split(' ')
     trade = StringProperty()
     cover_trade = StringProperty()
+    trade_text = StringProperty()
+    cover_text = StringProperty()
+    universe_text = StringProperty()
 
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
@@ -119,12 +123,33 @@ class Trade(Screen):
     def set_cursor(self, instance, dt):
         instance.cursor = (len(instance.text), 50)
 
+    def error_text(self, module: str, errors: []):
+        if module == 'Signal':
+            self.trade_text = "Fuck"
+            print(errors)
+        elif module == 'Cover':
+            self.cover_text = "Fuck"
+            print(errors)
+        elif module == 'Universe':
+            self.universe_text = "Fuck"
+            print(errors)
+        else:
+            print("Module does not exist")
+
 
 class BackTestPopup(Popup):
 
     def backtest(self, first_date, second_date):
 
-        print(f'{self.signal},{self.buy},{self.trade},{self.cover_signal},{self.universe},{self.take_profit},{self.stop_loss},{self.cover_buy},{self.cover_trade},{first_date}, {second_date}')
+        try:
+            date1test = datetime.strptime(first_date, '%d/%m/%Y')
+            date2test = datetime.strptime(second_date, '%d/%m/%Y')
+            if date2test <= date1test:
+                print("Start date must be before end date.")
+                return
+        except:
+            print("Invalid Date Format")
+            return
 
         a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
                                  self.cover_signal,self.universe,
@@ -132,9 +157,13 @@ class BackTestPopup(Popup):
                                  self.cover_buy,self.cover_trade,
                                  first_date, second_date)
 
-        app = App.get_running_app()
-        app.manager.current = 'backtest'
-        app.manager.get_screen('backtest').chart(a, b, c, d)
+        if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered']:
+            app = App.get_running_app()
+            Trade.error_text(app.manager.get_screen('trade'), b, c)
+        else:
+            app = App.get_running_app()
+            app.manager.current = 'backtest'
+            app.manager.get_screen('backtest').chart(a, b, c, d)
 
 
 class CasePopup(Popup):
@@ -158,9 +187,13 @@ class CasePopup(Popup):
                                  self.cover_buy,self.cover_trade,
                                  self.case1start, self.case1end)
 
-        app = App.get_running_app()
-        app.manager.current = 'backtest'
-        app.manager.get_screen('backtest').chart(a, b, c, d)
+        if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered']:
+            app = App.get_running_app()
+            Trade.error_text(app.manager.get_screen('trade'), b, c)
+        else:
+            app = App.get_running_app()
+            app.manager.current = 'backtest'
+            app.manager.get_screen('backtest').chart(a, b, c, d)
 
     def case2(self):
         a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
@@ -169,21 +202,28 @@ class CasePopup(Popup):
                                  self.cover_buy,self.cover_trade,
                                  self.case2start, self.case2end)
 
-        app = App.get_running_app()
-        app.manager.current = 'backtest'
-        app.manager.get_screen('backtest').chart(a, b, c, d)
+        if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered']:
+            app = App.get_running_app()
+            Trade.error_text(app.manager.get_screen('trade'), b, c)
+        else:
+            app = App.get_running_app()
+            app.manager.current = 'backtest'
+            app.manager.get_screen('backtest').chart(a, b, c, d)
 
     def case3(self):
-
         a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
                                  self.cover_signal,self.universe,
                                  self.take_profit,self.stop_loss,
                                  self.cover_buy,self.cover_trade,
                                  self.case3start, self.case3end)
 
-        app = App.get_running_app()
-        app.manager.current = 'backtest'
-        app.manager.get_screen('backtest').chart(a, b, c, d)
+        if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered']:
+            app = App.get_running_app()
+            Trade.error_text(app.manager.get_screen('trade'), b, c)
+        else:
+            app = App.get_running_app()
+            app.manager.current = 'backtest'
+            app.manager.get_screen('backtest').chart(a, b, c, d)
 
 class BackTest(Screen):
 

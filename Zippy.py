@@ -12,6 +12,9 @@ NOT EXECUTE.
 def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
           t_profit: str, s_loss: str, cover_trade: str, cover_amt: str,
           first_date: str, second_date: str):
+
+    ticker_list = ['TSLA', 'MSFT', 'GOOG', 'AAPL']
+
     global start_date
     global end_date
     global start_date_pre
@@ -67,22 +70,28 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     end_date_pre = second_date
     end_date = datetime.strptime(end_date_pre, '%d/%m/%Y')
 
-    # FIXME: Validate input?? --> There is a max # of tickers you can input (11?)
+    if universe == '':
+        return 'No Tickers Entered', "Universe", [], None
     tickers_pre = universe.split(',')
     tickers = [x.strip() for x in tickers_pre]
-    state = ASTState(start_date_pre, end_date_pre, tickers)
+    invalid_tickers = []
+    for ticker in tickers:
+        if ticker not in ticker_list:
+            invalid_tickers.append(ticker)
+    if len(invalid_tickers) > 0:
+        return 'Invalid Ticker List', "Universe", invalid_tickers, None
 
-    # This is where the error is passed
+    state = ASTState(start_date_pre, end_date_pre, tickers)
     ast = build_ast(main_signal, state, debug=False)
     cover_ast = build_ast(other_signal, state, debug=False)
 
     # TODO: Add check for syntax errors (Will be done soon - Ryan)
     if not ast.valid():
-        print(ast.evaluate(), file=stderr)
-        exit(-1)
+        # print(ast.evaluate(), file=stderr)
+        return 'Invalid Input', "Signal", ast.evaluate(), None
     if not cover_ast.valid():
-        print(cover_ast.evaluate(), file=stderr)
-        exit(-1)
+        # print(cover_ast.evaluate(), file=stderr)
+        return 'Invalid Input', "Cover", ast.evaluate(), None
 
     # Iterate over the tickers, and then the dates (that list will be provided by zipline?)
     for ticker in tickers:

@@ -191,10 +191,9 @@ def pull_fundamental_data(ticker: str, indicator: str, start_date: str, end_date
     output = {}
 
     # Passing the appropriate dictionary of values
-    while temp_date != end_date + datetime.timedelta(days=1):
+    while temp_date <= end_date:
         output[temp_date.strftime("%d/%m/%Y")] = get_fundamental(temp_date, indicator, bs_dict, in_dict, cf_dict)
         temp_date += datetime.timedelta(days=1)
-        break
 
     return output
 
@@ -224,9 +223,9 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash):
             previous_cf = cash[list(cash.keys())[i+1]]
             break
 
-    print(correct_bs)
-    print(correct_is)
-    print(correct_cf)
+    # print(correct_bs)
+    # print(correct_is)
+    # print(correct_cf)
 
     #TODO: Need shares oustanding for calculations
     if indicator == "":
@@ -298,7 +297,6 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
     for ticker, data in data_dict.items():
         for date, value in data.items():
             output[date][ticker] = value
-    print(output)
     return output
 
 
@@ -307,7 +305,7 @@ if __name__ == '__main__':
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    pull_fundamental_data('AAPL', 'EPS', '09/09/2020', '25/09/2020')
+    print(get_data(['AAPL', 'MSFT'], 'EBITDA', '09/09/2020', '25/09/2020', 1))
     print('end.')
     # for date in x:
         # print(date, x[date])

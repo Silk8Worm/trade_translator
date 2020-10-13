@@ -1,6 +1,11 @@
 #:include trade.kv
 
 <TradeTranslator>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'Background_Images\signin_background.png'
     BoxLayout:
         orientation: 'vertical'
 
