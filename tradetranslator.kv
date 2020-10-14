@@ -5,92 +5,75 @@
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'Background_Images\signin_background.png'
-    BoxLayout:
-        orientation: 'vertical'
+            source: 'Background_Images\sign_in.png'
+
+    FloatLayout:
 
         Label:
-
-        BoxLayout:
-            orientation: 'horizontal'
-
-            Label:
-
-            BoxLayout:
-                pos_hint: {'center_y': 0.5}
-                orientation: 'vertical'
-                size_hint: None, None
-                width: 250
-                height: 370
-
-                BoxLayout:
-                    orientation: 'vertical'
-
-                    Label:
-                        font_name: 'Fonts\Times New Roman 400'
-                        text: 'Trade Translator'
-                        font_size: 45
-
-                    Label:
-                        text: 'Simplify your trading in minutes.'
-                        font_size: 15
-
-                BoxLayout:
-                    orientation: 'vertical'
-
-                    BoxLayout:
-                        padding: [-150,0,0,-10]
-                        Label:
-                            text: 'Email Address'
-                            font_size: 15
-                            halign: 'left'
-
-                    TextInput:
-                        id: signin
-                        hint_text: 'example@email.com'
-                        multiline:False
-                        font_size: 17
-
-                    BoxLayout:
-                        size_hint_y: None
-                        height: 15
-
-                BoxLayout:
-                    orientation: 'vertical'
-
-                    BoxLayout:
-                        padding: [-180,0,0,-10]
-                        Label:
-                            text: 'Password'
-                            halign: 'left'
-                            font_size: 15
-
-                    TextInput:
-                        id: password
-                        hint_text: 'Password'
-                        multiline:False
-                        password:True
-                        font_size: 17
-
-                    BoxLayout:
-                        size_hint_y: None
-                        height: 15
-
-                BoxLayout:
-                    size_hint_y: None
-                    height:10
-
-                BoxLayout:
-                    padding: [0,10,0,40]
-
-                    orientation: 'vertical'
-                    Button:
-                        text: 'Sign In'
-                        font_size: 15
-                        background_color: [.2, .3647, .917647, 1]
-
-                        on_release: root.do_signin(signin.text, password.text)
-
-            Label:
+            text: 'TRADE\nTRANSLATOR'
+            pos: self.width*1.2, self.height*2.6
+            size_hint: .38, .25
+            font_size: min(self.width/6, self.height/2.2258)
+            font_name: 'Fonts\DroidSans-Bold'
 
         Label:
+            text: 'Email Address'
+            font_name: 'Fonts\Dosis-Light'
+            size_hint: .15, .05
+            pos: self.width*3, self.height*11
+            font_size: min(self.width/5.675,self.height/1.0667)
+
+        TextInput:
+            id: signin
+            hint_text: 'example@email.com'
+            multiline:False
+            size_hint: .4, .078
+            pos: self.width*1.139, self.height*5.9
+            font_name: 'Fonts\Dosis-Light'
+            font_size: min(self.width/17.4615, self.height/1.92)
+            background_color: .12,.12,.12,1
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1
+                    rectangle: self.x, self.y, self.width, self.height
+
+        Label:
+            text: 'Password'
+            font_name: 'Fonts\Dosis-Light'
+            size_hint: .15, .05
+            pos: self.width*2.855, self.height*7.7
+            font_size: min(self.width/5.675,self.height/1.0667)
+
+        TextInput:
+            id: password
+            hint_text: 'password'
+            multiline:False
+            password:True
+            size_hint: .4, .078
+            pos: self.width*1.139, self.height*3.78
+            font_name: 'Fonts\Dosis-Light'
+            font_size: min(self.width/17.4615, self.height/1.92)
+            background_color: .12,.12,.12,1
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1
+                    rectangle: self.x, self.y, self.width, self.height
+
+        Button:
+            text: 'Sign In'
+            on_release: root.do_signin(signin.text, password.text)
+            size_hint: .17, .07
+            pos: self.width*4.032, self.height*2.4
+            font_name: 'Fonts\Dosis-Medium'
+            font_size: min(self.width/7, self.height/1.695)
+            background_color: .65, .65, .65, 1
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1
+                    rectangle: self.x, self.y, self.width, self.height

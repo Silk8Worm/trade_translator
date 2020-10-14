@@ -9,7 +9,7 @@ https://github.com/kivy/kivy/issues/4991
 """
 
 from kivy.app import App
-from kivy.properties import StringProperty, BooleanProperty, ObjectProperty
+from kivy.properties import StringProperty, BooleanProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.uix.popup import Popup
 # Use this if you need to import TextInput
@@ -260,10 +260,10 @@ class TradeTranslatorApp(App):
 
         # Better implementation of window size
         Config.set('graphics','resizable', True)
-        Config.set('graphics', 'width', 1100)
-        Config.set('graphics', 'height', 720)
-        Config.set('graphics', 'minimum_width', '1100')
-        Config.set('graphics', 'minimum_height', '720')
+        Config.set('graphics', 'width', 1135)
+        Config.set('graphics', 'height', 640)
+        Config.set('graphics', 'minimum_width', '1135')
+        Config.set('graphics', 'minimum_height', '640')
         Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
         self.manager = ScreenManager()
