@@ -225,6 +225,7 @@ class CasePopup(Popup):
             app.manager.current = 'backtest'
             app.manager.get_screen('backtest').chart(a, b, c, d)
 
+
 class BackTest(Screen):
 
     final_equity = StringProperty()
