@@ -1,284 +1,226 @@
 #:include backtest.kv
-#:include tradetranslator.kv
 #:include popup.kv
 #:include popup2.kv
 
 <Trade>:
-    BoxLayout:
-        orientation: 'vertical'
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'Background_Images/trade_screen.jpg'
 
-        BoxLayout:
-            orientation: 'horizontal'
-            size_hint_y: None
-            height: 140
+    FloatLayout:
+        size_hint: 1, .99
 
-            BoxLayout:
-                padding: [20,0,0,0]
-                orientation: 'horizontal'
-                Image:
-                    source: 'logo.png'
-                    size_hint_y: None
-                    height: 130
-                    allow_stretch: True
-                    keep_ratio: True
-                BoxLayout:
+        canvas.before:
+            Color:
+                rgba: 0,0,0,.8
+            Rectangle:
+                pos: self.width/28.5, self.height/26
+                size: self.width*.9295154185, self.height*.78
 
-            Label:
-                text: 'Trade Translator'
-                font_size: 60
-                halign: 'left'
+        Label:
+            text: 'TRADE TRANSLATOR'
+            font_name: 'Fonts\DroidSans-Bold'
+            size_hint: .55, .1
+            font_size: min(self.width/10.404167, self.height/1.066667)
+            pos: self.width/2.444444, self.height*8.6
 
-            BoxLayout:
-                orientation: 'vertical'
+        Label:
+            text: 'SIGNAL'
+            font_name: 'Fonts/Dosis-Light'
+            size_hint: .15, .042
+            font_size: min(self.width/7.09375, self.height/1.107692)
+            pos: self.width*.45, self.height*17.5
+            text_size: self.size
 
-                BoxLayout:
-                    size_hint_y: None
-                    height: 80
+        TextInput:
+            id: signal
+            multiline:True
+            font_size: min(self.width/21.410227, self.height/6.545455)
+            size_hint: .415, .225
+            hint_text: 'Enter signal'
+            pos: self.width/6.3, self.height*2.25
+            text: root.trade_text
+            on_text: root.on_text(self, self.text)
 
-                BoxLayout:
-                    orientation: 'horizontal'
-                    padding: [0,0,30,0]
+        Label:
+            text: 'COVER SIGNAL'
+            font_name: 'Fonts/Dosis-Light'
+            size_hint: .15, .042
+            font_size: min(self.width/7.09375, self.height/1.107692)
+            pos: self.width*.45, self.height*10.5
+            text_size: self.size
 
-                    Label:
+        TextInput:
+            id: cover_signal
+            multiline:True
+            font_size: min(self.width/21.410227, self.height/6.545455)
+            size_hint: .415, .225
+            hint_text: 'Enter cover signal'
+            pos: self.width/6.3, self.height*.942
+            text: root.cover_text
+            on_text: root.on_text(self, self.text)
 
-                BoxLayout:
+        Label:
+            text: 'UNIVERSE'
+            font_name: 'Fonts/Dosis-Light'
+            size_hint: .15, .042
+            font_size: min(self.width/7.09375, self.height/1.107692)
+            pos: self.width*3.475, self.height*10.5
+            text_size: self.size
 
-        GridLayout:
-            cols: 2
-            height: 550
-            padding: [0,-30,0,30]
+        TextInput:
+            id: universe
+            multiline:True
+            font_size: min(self.width/21.410227, self.height/6.545455)
+            size_hint: .415, .225
+            hint_text: 'Enter comma separated universe'
+            pos: self.width*1.250908, self.height*.942
+            text: root.universe_text
+            on_text: root.on_text(self, self.text)
 
-            BoxLayout:
-                orientation: 'vertical'
-                padding: [30, 0, 15, -30]
+        Label:
+            text: 'TRADE'
+            font_name: 'Fonts/Dosis-Light'
+            size_hint: .15, .042
+            font_size: min(self.width/7.09375, self.height/1.107692)
+            pos: self.width*3.475, self.height*17.5
+            text_size: self.size
 
-                BoxLayout:
-                    orientation: 'horizontal'
-                    padding: [15,0,0,15]
+        Button:
+            text: root.trade
+            background_color: (1,1,1,1)
+            font_name: 'Fonts\DroidSans-Bold'
+            size_hint: .13, .06
+            font_size: min(self.width/5.675, self.height/1.476923)
+            pos: self.width*4.01, self.height*11
+            on_release: root.change_trade()
+            background_color: .75, .75, .75, 1
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1.5
+                    rectangle: self.x, self.y, self.width, self.height
 
-                    Label:
-                        text_size: self.size
-                        text: 'Signal'
-                        font_size: .4 * self.height
+        TextInput:
+            id: trade
+            hint_text: 'Enter # of shares'
+            multiline: False
+            font_size: min(self.width/11.35, self.height/1.723077)
+            input_filter: 'int'
+            size_hint: .26, .07
+            pos: self.width*2.593, self.height*9.359
 
-                TextInput:
-                    id: signal
-                    multiline:True
-                    font_size: 28
-                    text: root.trade_text
-                    on_text: root.on_text(self, self.text)
+        Label:
+            text: 'COVER TRADE'
+            font_name: 'Fonts/Dosis-Light'
+            size_hint: .15, .042
+            font_size: min(self.width/7.09375, self.height/1.107692)
+            pos: self.width*3.475, self.height*14.2
+            text_size: self.size
 
+        Button:
+            text: root.cover_trade
+            background_color: (1,1,1,1)
+            font_name: 'Fonts\DroidSans-Bold'
+            size_hint: .13, .06
+            font_size: min(self.width/5.675, self.height/1.476923)
+            pos: self.width*4.01, self.height*8.7
+            on_release: root.change_cover_trade()
+            background_color: .75, .75, .75, 1
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1.5
+                    rectangle: self.x, self.y, self.width, self.height
 
-            BoxLayout:
-                orientation: 'vertical'
-                padding: [30, 0, 30, -30]
+        TextInput:
+            id: cover_trade
+            hint_text: 'Enter # of shares'
+            multiline: False
+            font_size: min(self.width/11.35, self.height/1.723077)
+            input_filter: 'int'
+            size_hint: .26, .07
+            pos: self.width*2.593, self.height*7.385
 
-                BoxLayout:
-                    orientation: 'horizontal'
-                    padding: [15,0,0,15]
+        Label:
+            text: 'TAKE PROFIT'
+            font_name: 'Fonts/Dosis-Light'
+            size_hint: .15, .042
+            font_size: min(self.width/7.09375, self.height/1.107692)
+            pos: self.width*.45, self.height*3.5
+            text_size: self.size
 
-                    Label:
-                        text_size: self.size
-                        text: 'Trade'
-                        font_size: 24
-                        size_hint_y: None
-                        height: 40
-                BoxLayout:
-                    orientation: 'horizontal'
-                    BoxLayout:
-                        padding: [40,20,40,20]
+        TextInput:
+            id: take_profit
+            hint_text: 'Enter percent        '
+            multiline: False
+            font_size: min(self.width/8.254545, self.height/1.629)
+            input_filter: 'float'
+            size_hint: .16, .06
+            pos: self.width/2.445, self.height*1.4
+            halign: 'right'
 
-                        Button:
-                            background_color: (1,1,1,1)
-                            font_size: 30
-                            text: root.trade
-                            on_release: root.change_trade()
+        Label:
+            text: '%'
+            size_hint: .02, .06
+            font_size: min(self.width/1.031818, self.height/1.745455)
+            pos: self.width*11.5, self.height*1.4
 
-                    TextInput:
-                        id: trade
-                        multiline:True
-                        font_size: 28
-                        input_filter: 'int'
-                        on_text: root.on_text(self, self.text)
+        Label:
+            text: 'STOP LOSS'
+            font_name: 'Fonts/Dosis-Light'
+            size_hint: .15, .042
+            font_size: min(self.width/7.09375, self.height/1.107692)
+            pos: self.width*1.845, self.height*3.5
+            text_size: self.size
 
-            BoxLayout:
-                orientation: 'vertical'
-                padding: [30, 0, 15, -30]
+        TextInput:
+            id: stop_loss
+            hint_text: 'Enter percent        '
+            multiline: False
+            font_size: min(self.width/8.254545, self.height/1.629)
+            input_filter: 'float'
+            size_hint: .16, .06
+            pos: self.width*1.715, self.height*1.4
+            halign: 'right'
 
-                BoxLayout:
-                    orientation: 'horizontal'
-                    padding: [15,0,0,15]
+        Label:
+            text: '%'
+            size_hint: .02, .06
+            font_size: min(self.width/1.031818, self.height/1.745455)
+            pos: self.width*21.94, self.height*1.4
 
-                    Label:
-                        text_size: self.size
-                        text: 'Cover Signal'
-                        font_size: 24
-                        size_hint_y: None
-                        height: 40
+        Button:
+            text: 'BACKTEST CASE'
+            on_release: root.backtest_case(signal.text, trade.text, cover_signal.text, universe.text, take_profit.text, stop_loss.text, cover_trade.text)
+            size_hint: .185, .08
+            pos: self.width*2.815, self.height*1.05
+            font_name: 'Fonts/Dosis-Medium'
+            font_size: min(self.width/8.075961, self.height/1.969231)
+            background_color: .65, .65, .65, 1
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1.2
+                    rectangle: self.x, self.y, self.width, self.height
 
-                TextInput:
-                    id: cover_signal
-                    multiline:True
-                    font_size: 28
-                    text: root.cover_text
-                    on_text: root.on_text(self, self.text)
+        Button:
+            text: 'BACKTEST'
+            on_release: root.backtest(signal.text, trade.text, cover_signal.text, universe.text, take_profit.text, stop_loss.text, cover_trade.text)
+            size_hint: .185, .08
+            pos: self.width*4.043, self.height*1.05
+            font_name: 'Fonts/Dosis-Medium'
+            font_size: min(self.width/8.075961, self.height/1.969231)
+            background_color: .65, .65, .65, 1
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1.2
+                    rectangle: self.x, self.y, self.width, self.height
 
-            BoxLayout:
-                orientation: 'vertical'
-                padding: [30, 0, 30, -30]
-
-                BoxLayout:
-                    orientation: 'horizontal'
-                    padding: [15,0,0,15]
-
-                    Label:
-                        text_size: self.size
-                        text: 'Cover Trade'
-                        font_size: 24
-                        size_hint_y: None
-                        height: 40
-                BoxLayout:
-                    orientation: 'horizontal'
-
-                    BoxLayout:
-                        padding: [40,20,40,20]
-
-                        Button:
-                            background_color: (1,1,1,1)
-                            font_size: 30
-                            text: root.cover_trade
-                            on_release: root.change_cover_trade()
-
-                    TextInput:
-                        id: cover_trade
-                        multiline:True
-                        font_size: 28
-                        input_filter: 'int'
-                        on_text: root.on_text(self, self.text)
-
-
-            BoxLayout:
-                orientation: 'horizontal'
-
-                BoxLayout:
-                    orientation: 'vertical'
-                    padding: [30,0,15,-30]
-
-                    BoxLayout:
-                        orientation: 'horizontal'
-                        padding: [15,0,0,15]
-
-                        Label:
-                            text_size: self.size
-                            text: 'Take Profit'
-                            font_size: 24
-                            size_hint_y: None
-                            height: 40
-
-                    BoxLayout:
-                        orientation: 'horizontal'
-                        padding: [0,35,0,30]
-
-                        TextInput:
-                            size_hint_y: None
-                            height: 50
-                            id: take_profit
-                            multiline:False
-                            font_size: 30
-                            input_filter: 'float'
-                            on_text: root.on_text(self, self.text)
-
-                        Label:
-                            size_hint_y: None
-                            height: 50
-                            size_hint_x: None
-                            width: 60
-                            text: '%'
-                            font_size: 46
-
-                BoxLayout:
-                    orientation: 'vertical'
-                    padding: [30,0,15,-30]
-
-                    BoxLayout:
-                        orientation: 'horizontal'
-                        padding: [15,0,0,15]
-
-                        Label:
-                            text_size: self.size
-                            text: 'Stop Loss'
-                            font_size: 24
-                            size_hint_y: None
-                            height: 40
-
-                    BoxLayout:
-                        orientation: 'horizontal'
-                        padding: [0,35,0,30]
-
-                        TextInput:
-                            size_hint_y: None
-                            height: 50
-                            id: stop_loss
-                            multiline:False
-                            font_size: 30
-                            input_filter: 'float'
-                            on_text: root.on_text(self, self.text)
-
-                        Label:
-                            size_hint_y: None
-                            height: 50
-                            size_hint_x: None
-                            width: 60
-                            text: '%'
-                            font_size: 46
-
-
-            BoxLayout:
-                orientation: 'vertical'
-                padding: [30, 0, 30, -30]
-
-                BoxLayout:
-                    orientation: 'horizontal'
-                    padding: [15,0,0,15]
-
-                    Label:
-                        text_size: self.size
-                        text: 'Universe'
-                        font_size: 24
-                        size_hint_y: None
-                        height: 40
-
-                TextInput:
-                    id: universe
-                    multiline:True
-                    font_size: 28
-                    text: root.universe_text
-                    on_text: root.on_text(self, self.text)
-
-        BoxLayout:
-            orientation: 'horizontal'
-            size_hint_y: None
-            height: 100
-
-            Label:
-                font_size: 18
-            Label:
-                font_size: 18
-
-            BoxLayout:
-                padding: [30,20,30,20]
-                Button:
-                    text: 'Backtest Case'
-                    font_size: 18
-                    background_color: [.2, .3647, .917647, 1]
-
-                    on_release: root.backtest_case(signal.text, trade.text, cover_signal.text, universe.text, take_profit.text, stop_loss.text, cover_trade.text)
-
-            BoxLayout:
-                padding: [30,20,30,20]
-                Button:
-                    text: 'Backtest'
-                    font_size: 18
-                    background_color: [.2, .3647, .917647, 1]
-
-                    on_release: root.backtest(signal.text, trade.text, cover_signal.text, universe.text, take_profit.text, stop_loss.text, cover_trade.text)

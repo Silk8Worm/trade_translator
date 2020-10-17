@@ -5,7 +5,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'Background_Images\sign_in.png'
+            source: 'Background_Images/sign_in.png'
 
     FloatLayout:
 
@@ -14,22 +14,15 @@
             pos: self.width*1.2, self.height*2.6
             size_hint: .38, .25
             font_size: min(self.width/6, self.height/2.2258)
-            font_name: 'Fonts\DroidSans-Bold'
+            font_name: 'Fonts/DroidSans-Bold'
 
         Label:
             text: 'Email Address'
-            font_name: 'Fonts\Dosis-Light'
+            font_name: 'Fonts/Dosis-Light'
             size_hint: .15, .05
+            pos: self.width*3.05, self.height*11
+            font_size: min(self.width/5.675,self.height/1.0667)
             text_size: self.size
-            pos: self.width*3, self.height*11
-            font_size: min(self.width/5.675,self.height/1.066667)
-            canvas.before:
-                Color:
-                    rgba: 1, 1, 1, 1
-                Line:
-                    width: 1
-                    rectangle: self.x, self.y, self.width, self.height
-
 
         TextInput:
             id: signin
@@ -37,7 +30,7 @@
             multiline:False
             size_hint: .4, .078
             pos: self.width*1.139, self.height*5.9
-            font_name: 'Fonts\Dosis-Light'
+            font_name: 'Fonts/Dosis-Light'
             font_size: min(self.width/17.4615, self.height/1.92)
             background_color: .12,.12,.12,1
             canvas.before:
@@ -49,11 +42,11 @@
 
         Label:
             text: 'Password'
-            font_name: 'Fonts\Dosis-Light'
+            font_name: 'Fonts/Dosis-Light'
             size_hint: .15, .05
+            pos: self.width*3.05, self.height*7.7
+            font_size: min(self.width/5.675,self.height/1.0667)
             text_size: self.size
-            pos: self.width*3, self.height*7.7
-            font_size: min(self.width/5.675,self.height/1.066667)
 
         TextInput:
             id: password
@@ -62,7 +55,7 @@
             password:True
             size_hint: .4, .078
             pos: self.width*1.139, self.height*3.78
-            font_name: 'Fonts\Dosis-Light'
+            font_name: 'Fonts/Dosis-Light'
             font_size: min(self.width/17.4615, self.height/1.92)
             background_color: .12,.12,.12,1
             canvas.before:
@@ -77,7 +70,7 @@
             on_release: root.do_signin(signin.text, password.text)
             size_hint: .17, .07
             pos: self.width*4.032, self.height*2.4
-            font_name: 'Fonts\Dosis-Medium'
+            font_name: 'Fonts/Dosis-Medium'
             font_size: min(self.width/7, self.height/1.695)
             background_color: .65, .65, .65, 1
             canvas.before:

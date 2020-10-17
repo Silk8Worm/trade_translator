@@ -19,6 +19,7 @@ from kivy.clock import Clock
 from functools import partial
 from kivy.cache import Cache
 from datetime import datetime
+from datetime import timedelta
 import Zippy
 
 
@@ -147,6 +148,10 @@ class BackTestPopup(Popup):
             date2test = datetime.strptime(second_date, '%d/%m/%Y')
             if date2test <= date1test:
                 print("Start date must be before end date.")
+                return
+            date1test += timedelta(days=7)
+            if date2test <= (date1test + timedelta(days=7)):
+                print("Date range not large enough (min 1 week)")
                 return
         except:
             print("Invalid Date Format")
