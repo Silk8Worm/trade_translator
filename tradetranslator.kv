@@ -20,8 +20,16 @@
             text: 'Email Address'
             font_name: 'Fonts\Dosis-Light'
             size_hint: .15, .05
+            text_size: self.size
             pos: self.width*3, self.height*11
-            font_size: min(self.width/5.675,self.height/1.0667)
+            font_size: min(self.width/5.675,self.height/1.066667)
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1
+                    rectangle: self.x, self.y, self.width, self.height
+
 
         TextInput:
             id: signin
@@ -43,8 +51,9 @@
             text: 'Password'
             font_name: 'Fonts\Dosis-Light'
             size_hint: .15, .05
-            pos: self.width*2.855, self.height*7.7
-            font_size: min(self.width/5.675,self.height/1.0667)
+            text_size: self.size
+            pos: self.width*3, self.height*7.7
+            font_size: min(self.width/5.675,self.height/1.066667)
 
         TextInput:
             id: password

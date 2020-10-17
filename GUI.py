@@ -38,7 +38,8 @@ class TradeTranslator(Screen):
 
 class Trade(Screen):
 
-    word_list = "atr rsi obv macd".split(' ')
+    suggestion_words = "atr rsi obv macd".split(' ')
+    word_list = suggestion_words.copy()
     trade = StringProperty()
     cover_trade = StringProperty()
     trade_text = StringProperty()
@@ -107,7 +108,7 @@ class Trade(Screen):
             return
         instance.suggestion_text = ' '
         word_list = list(set(
-            self.word_list + value[:value.find(' ')].split(' ')))
+            self.word_list))
         val = value[value.rfind(' ') + 1:]
         if not val:
             return
@@ -224,7 +225,6 @@ class CasePopup(Popup):
             app = App.get_running_app()
             app.manager.current = 'backtest'
             app.manager.get_screen('backtest').chart(a, b, c, d)
-
 
 class BackTest(Screen):
 
