@@ -56,7 +56,6 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
     # Get Technical Indicator
     if indicator == 'open':
         output = df['Open'][period-1:]
-        print(output)
 
     elif indicator == 'close':
         output = df['Close'][period-1:]
@@ -72,27 +71,28 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
 
     elif indicator in ['low BB', 'BB low']:  # Lower Bollinger Band
         bb_low = ta.volatility.bollinger_lband(df["Close"], n=period, ndev=2, fillna=True)
-        output = bb_low[len(bb_low)-duration-1:]
+        output = bb_low[period-1:]
 
     elif indicator in ['high BB', 'BB high']:  # Higher Bollinger Band
         bb_high = ta.volatility.bollinger_hband(df["Close"], n=period, ndev=2, fillna=True)
-        output = bb_high[len(bb_high) - duration-1:]
+        output = bb_high[period-1:]
 
     elif indicator == 'ATR':  # Average True Range
+        # TODO: Replace with scratch_2
         atr = ta.volatility.average_true_range(df["High"], df["Low"], df["Close"], n=period, fillna=True)
-        output = atr[len(atr)-duration-1:]
+        output = atr[period-1:]
 
     elif indicator == 'RSI':  # Relative Strength Index  # TODO: verify
         rsi = ta.momentum.rsi(df["Close"], n=period, fillna=True)
-        output = rsi[len(rsi)-duration-1:]
+        output = rsi[period-1:]
 
     elif indicator == 'OBV':  # On-Balance Volume
         obv = ta.volume.on_balance_volume(df["Close"][4:], df["Volume"][4:], fillna=True)  # Splice Redundant Data
-        output = obv[len(obv)-duration-1:]
+        output = obv[period-1:]
 
     elif indicator == 'EMA':  # Exponential Moving Average  # TODO: verify
         ema = ta.trend.ema_indicator(df["Close"], n=period, fillna=True)
-        output = ema[len(ema)-duration-1:]
+        output = ema[period-1:]
 
     elif indicator == 'MACD':  # Moving Average Convergence Divergence  # TODO: verify
         ema1 = ta.trend.ema_indicator(df["Close"], n=period/2, fillna=True)
@@ -102,7 +102,7 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         output = []
         for i in range(len(ema1)):
             output.append(ema1[i]-ema2[i])
-        output = output[len(output) - duration-1:]
+        output = output[period-1:]
 
     elif indicator in ['proper MACD', 'MACD proper']:
         macd_proper = ta.trend.macd(df["Close"], n_fast=period, n_slow=period, fillna=True)
@@ -126,7 +126,8 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
     key = startdate  # <key> is a datetime object
     friday = False
     for i in range(0, len(output)):
-        left = np.busday_offset(key, 1, roll='backward')  # TODO: I think this is suppose to be 'forward'
+        left = np.busday_offset(key.isoformat()[:10], 1, roll='backward')  # TODO: I think this is suppose to be 'forward'
+        left = datetime.datetime.strptime(str(left), '%Y-%m-%d')
         right = key + datetime.timedelta(days=1)
         if not (left == right):
             # <key is a friday>
@@ -284,8 +285,13 @@ if __name__ == '__main__':
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    print(get_data(['AAPL', 'MSFT'], 'open', '07/10/2020', '09/10/2020', 5))
-    print('end.')
-    # for date in x:
-        # print(date, x[date])
+    x = get_data(['AAPL', 'MSFT'], 'ATR', '07/10/2020', '09/10/2020', 5)
+    # print(x)
+
+    print('Data from <x>')
+    for date in x:
+        print(date)
+        for stock in x[date]:
+            print(stock, x[date][stock])
+        print('-----')
 
