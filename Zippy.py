@@ -1,9 +1,8 @@
-from AST import *
-from signalparse import build_ast
+from LexerParser.src.AST import *
+from LexerParser.src.signalparse import build_ast
 from datetime import datetime
 import backtrader as bt
 from PIL import Image
-from sys import stderr
 """
 IF A TRADE WOULD GIVE THE USER A NEGATIVE CASH BALANCE, THE TRADE DOES
 NOT EXECUTE.
