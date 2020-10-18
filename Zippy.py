@@ -108,7 +108,7 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
 
     saveplots(cerebro, file_path='chart.png', start=start_date, end=end_date)
     img = Image.open("chart.png")
-    area = (0,0,691,244)
+    area = (0,0,675,244)
     cropped_img = img.crop(area)
     cropped_img.save('chart.png')
 
