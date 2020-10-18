@@ -22,7 +22,12 @@ tokens = [
 # Reserved Keywords
 keywords = ['if', 'greater', 'less', 'than', 'equal', 'to', 'above', 'below',
             'crosses', 'and', 'or']
-combinational_indicators = ['bbands', 'high', 'low']
+combinational_indicators = ['bbands', 'high', 'low', 'ebitda', 'growth', 'leverage', 'ratio', 'operating',
+                            'margin', 'revenue', 'growth', 'yesterday', 'open', 'close']
+
+#FIXME NETDEBT/
+
+# 'EBITDA', 'EBITDA growth', 'leverage ratio', 'net debt/EBITDA', 'operating margin', 'revenue growth']
 # Makes a dict mapping keywords to token types and adds the tokens to the list
 reserved = {k: k.upper() for k in keywords + combinational_indicators}
 tokens += list(reserved.values())
@@ -30,7 +35,7 @@ tokens += list(reserved.values())
 
 # Defining regular expressions for tokens
 def t_FLOAT(t):
-    r'\d+\.\d+'
+    r'\d*\.\d+'
     t.value = float(t.value)
     return t
 
@@ -59,7 +64,7 @@ def t_EQUALSYM(t):
 def t_STRING(t):
     r'[^\s\\]+'
     # Check for reserved words
-    if t.value in ['open', 'close', 'volume', 'obv', 'atr', 'rsi', 'macd',
+    if t.value in ['volume', 'obv', 'atr', 'rsi', 'macd',
                    'ema', 'sma']:
         t.type = 'INDICATOR'
     elif t.value in ['days', 'months', "years", "day", "month", "year"]:

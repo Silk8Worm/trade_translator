@@ -96,11 +96,19 @@ def p_lookup_time(p):
     p[0] = Lookup(state, p[2], p[1])
 
 
+def p_lookup_fundamental(p):
+    '''lookup : fundamental'''
+    p[0] = Lookup(state, p[1], (1, 'day'))
+
+def p_lookup_openclose(p):
+    '''lookup : indicatory'''
+    p[0] = Lookup(state, p[1], (1, 'day'))
+
+
 # A grammar rule defining lookup based on just an Indicator
 def p_lookup(p):
     '''lookup : indicator'''
     p[0] = Lookup(state, p[1])
-
 
 # A grammar rule defining a length of time (Ex. 5 days)
 def p_time(p):
@@ -148,9 +156,26 @@ def p_indicator_combined_bb(p):
 def p_indicator_single(p):
     '''indicator : INDICATOR
                  | LOW
-                 | HIGH'''
+                 | HIGH
+                 | OPEN
+                 | CLOSE'''
     p[0] = p[1]
 
+def p_indicator_yesterady(p):
+    '''indicatory : OPEN YESTERDAY
+                  | CLOSE YESTERDAY'''
+    p[0] = p[1]
+
+
+# Defines the fundamentals
+#FIXME:  'net debt/EBITDA'
+def p_fundamental(p):
+    '''fundamental : EBITDA
+                   | EBITDA GROWTH
+                   | LEVERAGE RATIO
+                   | OPERATING MARGIN
+                   | REVENUE GROWTH'''
+    p[0] = " ".join([str(x) for x in p[1:]])
 
 # Error rule for syntax errors
 def p_error(p):
@@ -219,7 +244,7 @@ if __name__ == '__main__':
     # s = "i ras greaf tha 3"
     # s = "If RSI MACD crosses above"
     # s = "if exponential moving average crosses below"
-    s = "if rsi = 100"
+    s = "if open yesterday greater than 50.5"
     # s = "if rsi greater than 30 or 5 day macd crosses below 50 and moving average equal to 43"
     ast = build_ast(s, ASTState("", "", ""), debug=True)
     print(ast)
@@ -228,6 +253,4 @@ if __name__ == '__main__':
 '''
 Add Open yesterday
 Add close yesterday
-add fundamentals
-Remove word 'to'
 '''
