@@ -79,7 +79,6 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         output = bb_high[period-1:]
 
     elif indicator == 'ATR':  # Average True Range
-        # TODO: Replace with scratch_2
         high = df['High'][1:]
         low = df['Low'][1:]
         close = df['Close'][1:]
@@ -98,7 +97,7 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
 
         output = atr.tolist()[period-1:]
 
-    elif indicator == 'RSI':  # Relative Strength Index  # TODO: verify
+    elif indicator == 'RSI':  # Relative Strength Index  # TODO: Do this manually
         rsi = ta.momentum.rsi(df["Close"], n=period, fillna=True)
         output = rsi[period-1:]
 
@@ -120,7 +119,7 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
 
         output = obv.tolist()
 
-    elif indicator == 'EMA':  # Exponential Moving Average  # TODO: verify
+    elif indicator == 'EMA':  # Exponential Moving Average
         close = df['Close']
 
         ema = np.zeros(len(close))
@@ -134,9 +133,9 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         for i in range(period + 1, len(ema)):
             ema[i] = close[i] * multiplier + ema[i - 1] * (1 - multiplier)
 
-        output = ema[period:]
+        output = ema.tolist()[period:]
 
-    elif indicator == 'MACD':  # Moving Average Convergence Divergence  # TODO: verify
+    elif indicator == 'MACD':  # Moving Average Convergence Divergence  # TODO: Do this manually
         ema1 = ta.trend.ema_indicator(df["Close"], n=period/2, fillna=True)
         ema2 = ta.trend.ema_indicator(df["Close"], n=period, fillna=True)
         ema1 = Series.tolist(ema1)
@@ -145,18 +144,6 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         for i in range(len(ema1)):
             output.append(ema1[i]-ema2[i])
         output = output[period-1:]
-
-    elif indicator in ['proper MACD', 'MACD proper']:
-        macd_proper = ta.trend.macd(df["Close"], n_fast=period, n_slow=period, fillna=True)
-        output = macd_proper[len(macd_proper) - duration-1:]
-
-    elif indicator in ['signal MACD', 'MACD signal']:
-        macd_signal = ta.trend.macd_diff(df["Close"], n_fast=period, n_slow=period, fillna=True)
-        output = macd_signal[len(macd_signal) - duration-1:]
-
-    elif indicator in ['divergent MACD', 'MACD divergent']:
-        macd_divergence = ta.trend.macd_signal(df["Close"], n_fast=period, n_slow=period, fillna=True)
-        output = macd_divergence[len(macd_divergence) - duration-1:]
 
     # Return in dictionary with mapping [date:value]
     data = {}
