@@ -1,103 +1,113 @@
 <BackTest>:
-    BoxLayout:
-        orientation: 'vertical'
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'Background_Images/backtest.png'
 
-        BoxLayout:
-            orientation: 'horizontal'
-            size_hint_y: None
-            height: 140
+    FloatLayout:
 
-            BoxLayout:
-                padding: [20,0,0,0]
-                orientation: 'horizontal'
-                Image:
-                    source: 'logo.png'
-                    size_hint_y: None
-                    height: 130
-                    allow_stretch: True
-                    keep_ratio: True
-                BoxLayout:
+        canvas.before:
+            Color:
+                rgba: 0,0,0,.8
+            Rectangle:
+                pos: self.width/28.5, self.height/26
+                size: self.width*.9295154185, self.height*.78
 
-            Label:
-                text: 'Trade Translator'
-                font_size: 60
-                halign: 'left'
+        Label:
+            text: 'TRADE TRANSLATOR'
+            font_name: 'Fonts\DroidSans-Bold'
+            size_hint: .55, .1
+            font_size: min(self.width/10.404167, self.height/1.066667)
+            pos: self.width/2.444444, self.height*8.6
 
-            BoxLayout:
-                orientation: 'vertical'
+        Label:
+            text: 'FINAL EQUITY'
+            font_name: 'Fonts\DroidSans-Bold'
+            font_size: min(self.width/10.574878, self.height/2.497561)
+            size_hint: .191, .08
+            text_size: self.size
+            pos: self.width*.332, self.height*9.4
 
-                BoxLayout:
-                    size_hint_y: None
-                    height: 80
+        Label:
+            text: root.final_equity
+            font_size: min(self.width/7.226167, self.height/1.706667)
+            color: 0, 0, 0, 1
+            size_hint: .191, .08
+            pos: self.width*.328, self.height*8.3
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.width, self.height
 
-                BoxLayout:
-                    orientation: 'horizontal'
-                    padding: [0,0,30,0]
+        Label:
+            text: 'CUMULATIVE RETURN'
+            font_name: 'Fonts\DroidSans-Bold'
+            font_size: min(self.width/10.574878, self.height/2.497561)
+            size_hint: .191, .08
+            text_size: self.size
+            pos: self.width*1.522, self.height*9.4
 
-                    Label:
+        Label:
+            text: root.cumulative_return
+            font_size: min(self.width/7.226167, self.height/1.706667)
+            color: 0, 0, 0, 1
+            size_hint: .191, .08
+            pos: self.width*1.518, self.height*8.3
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.width, self.height
 
-                    Button:
-                        text: 'Back'
-                        font_size: 15
-                        background_color: 0,.3,.8,1
-                        halign: 'right'
-                        size_hint_y: None
-                        height: 70
-                        background_color: [.2, .3647, .917647, 1]
+        Label:
+            text: 'SHARPE RATIO'
+            font_name: 'Fonts\DroidSans-Bold'
+            font_size: min(self.width/10.574878, self.height/2.497561)
+            size_hint: .191, .08
+            text_size: self.size
+            pos: self.width*2.713, self.height*9.4
 
-                        on_release: root.back()
+        Label:
+            text: root.sharpe_ratio
+            font_size: min(self.width/7.226167, self.height/1.706667)
+            color: 0, 0, 0, 1
+            size_hint: .191, .08
+            pos: self.width*2.709, self.height*8.3
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.width, self.height
 
-                BoxLayout:
+        Label:
+            text: 'SORTINO RATIO'
+            font_name: 'Fonts\DroidSans-Bold'
+            font_size: min(self.width/10.574878, self.height/2.497561)
+            size_hint: .191, .08
+            text_size: self.size
+            pos: self.width*3.903, self.height*9.4
 
-        BoxLayout:
-            orientation: 'horizontal'
-            size_hint: (1, .1)
-            padding: [0,80,0,0]
+        Label:
+            text: root.sortino_ratio
+            font_size: min(self.width/7.226167, self.height/1.706667)
+            color: 0, 0, 0, 1
+            size_hint: .191, .08
+            pos: self.width*3.899, self.height*8.3
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.width, self.height
 
-            Label:
-                text: 'Final Equity'
-                font_size: 20
-
-            Label:
-                text: 'Cumulative Return'
-                font_size: 20
-
-            Label:
-                text: 'Sharpe Ratio'
-                font_size: 20
-
-            Label:
-                text: 'Sortino Ratio'
-                font_size: 20
-
-        BoxLayout:
-            orientation: 'horizontal'
-            size_hint: (1, .2)
-            padding: [0,0,0,0]
-
-            Label:
-                text: root.final_equity
-                font_size: 20
-                color: 0.8274,0.8274,0.8274,1
-
-            Label:
-                text: root.cumulative_return
-                font_size: 20
-                color: 0.8274,0.8274,0.8274,1
-
-            Label:
-                text: root.sharpe_ratio
-                font_size: 20
-                color: 0.8274,0.8274,0.8274,1
-
-            Label:
-                text: root.sortino_ratio
-                font_size: 20
-                color: 0.8274,0.8274,0.8274,1
-
-        BoxLayout:
-            padding: [100,50,100,50]
-            orientation: 'horizontal'
-            Image:
-                source: root.image
-                allow_stretch: True
+        Image:
+            source: root.image
+            allow_stretch: True
+            keep_ratio: False
+            size_hint: .8733, .53
+            pos: self.width*.0715, self.height*.15

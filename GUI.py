@@ -19,6 +19,7 @@ from kivy.clock import Clock
 from functools import partial
 from kivy.cache import Cache
 from datetime import datetime
+from datetime import timedelta
 import Zippy
 
 
@@ -148,6 +149,10 @@ class BackTestPopup(Popup):
             if date2test <= date1test:
                 print("Start date must be before end date.")
                 return
+            date1test += timedelta(days=7)
+            if date2test <= (date1test + timedelta(days=7)):
+                print("Date range not large enough (min 1 week)")
+                return
         except:
             print("Invalid Date Format")
             return
@@ -174,12 +179,12 @@ class CasePopup(Popup):
     case2enabled = BooleanProperty(True)
     case3enabled = BooleanProperty(False)
 
-    case1start = "01/01/2020"
-    case1end = "10/03/2020"
-    case2start = "01/01/2020"
-    case2end = "12/01/2020"
-    case3start = "01/01/2020"
-    case3end = "14/01/2020"
+    case1start = "28/02/2020"
+    case1end = "02/04/2020"
+    case2start = "30/11/2019"
+    case2end = "25/01/2020"
+    case3start = "30/07/2019"
+    case3end = "02/09/2019"
 
     def case1(self):
         a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
