@@ -114,6 +114,8 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
                 obv[i] = obv[i - 1] + volume[i]
             elif close[i] < close[i - 1]:
                 obv[i] = obv[i - 1] - volume[i]
+            else:
+                obv[i] = obv[i - 1]
 
         output = obv.tolist()
 
