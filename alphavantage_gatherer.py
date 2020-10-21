@@ -34,7 +34,8 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
     duration = np.busday_count(startdate.isoformat()[:10], enddate.isoformat()[:10]) + 1
 
     # <firstdate> obtains extra days of data; some indicators calculate from preexisting values
-    firstdate = np.busday_offset(startdate.isoformat()[:10], -(indicator_range_specification-1), roll='forward')
+    # obtains exactly <period> many extra days
+    firstdate = np.busday_offset(startdate.isoformat()[:10], -(indicator_range_specification), roll='forward')
     firstdate = datetime.datetime.strptime(str(firstdate), '%Y-%m-%d')
 
     # Fetch with pandas data reader
@@ -55,19 +56,19 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
 
     # Get Technical Indicator
     if indicator == 'open':
-        output = df['Open'][period-1:]
+        output = df['Open'][period:]
 
     elif indicator == 'close':
-        output = df['Close'][period-1:]
+        output = df['Close'][period:]
 
     elif indicator == 'high':
-        output = df['High'][period-1:]
+        output = df['High'][period:]
 
     elif indicator == 'low':
-        output = df['Low'][period-1:]
+        output = df['Low'][period:]
 
     elif indicator == 'volume':
-        output = df['Volume'][period-1:]
+        output = df['Volume'][period:]
 
     elif indicator in ['low BB', 'BB low']:  # Lower Bollinger Band
         bb_low = ta.volatility.bollinger_lband(df["Close"], n=period, ndev=2, fillna=True)
@@ -79,9 +80,9 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
 
     elif indicator == 'ATR':  # Average True Range
         # TODO: Replace with scratch_2
-        high = df['High']
-        low = df['Low']
-        close = df['Close']
+        high = df['High'][1:]
+        low = df['Low'][1:]
+        close = df['Close'][1:]
         tr = np.zeros(len(close))
         atr = np.zeros(len(close))
 
@@ -102,8 +103,8 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         output = rsi[period-1:]
 
     elif indicator == 'OBV':  # On-Balance Volume
-        close = df['Close'][period-1:]
-        volume = df['Volume'][period-1:]
+        close = df['Close'][period:]
+        volume = df['Volume'][period:]
 
         obv = np.zeros(len(close))
 
@@ -120,8 +121,20 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         output = obv.tolist()
 
     elif indicator == 'EMA':  # Exponential Moving Average  # TODO: verify
-        ema = ta.trend.ema_indicator(df["Close"], n=period, fillna=True)
-        output = ema[period-1:]
+        close = df['Close']
+
+        ema = np.zeros(len(close))
+        multiplier = 2 / (period + 1)
+        multiplier = multiplier / (1 + period)
+
+        # Prime the first EMA values as the previous SMA
+        ema[period] = close[:period].mean()
+
+        # Compute the rest of the EMA values
+        for i in range(period + 1, len(ema)):
+            ema[i] = close[i] * multiplier + ema[i - 1] * (1 - multiplier)
+
+        output = ema[period:]
 
     elif indicator == 'MACD':  # Moving Average Convergence Divergence  # TODO: verify
         ema1 = ta.trend.ema_indicator(df["Close"], n=period/2, fillna=True)
@@ -314,7 +327,7 @@ if __name__ == '__main__':
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    x = get_data(['NFLX'], 'OBV', '01/10/2020', '20/10/2020', 5)
+    x = get_data(['NFLX'], 'EMA', '01/10/2020', '20/10/2020', 5)
     # print(x)
 
     print('Data from <x>')
