@@ -102,8 +102,20 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         output = rsi[period-1:]
 
     elif indicator == 'OBV':  # On-Balance Volume
-        obv = ta.volume.on_balance_volume(df["Close"][period-1:], df["Volume"][period-1:], fillna=True)  # Splice Redundant Data
-        output = obv
+        close = df['Close'][period-1:]
+        volume = df['Volume'][period-1:]
+
+        obv = np.zeros(len(close))
+
+        # Prime the first OBV value
+        obv[0] = 0
+        for i in range(1, len(obv)):
+            if close[i] > close[i - 1]:
+                obv[i] = obv[i - 1] + volume[i]
+            elif close[i] < close[i - 1]:
+                obv[i] = obv[i - 1] - volume[i]
+
+        output = obv.tolist()
 
     elif indicator == 'EMA':  # Exponential Moving Average  # TODO: verify
         ema = ta.trend.ema_indicator(df["Close"], n=period, fillna=True)
@@ -300,7 +312,7 @@ if __name__ == '__main__':
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    x = get_data(['NFLX'], 'ATR', '07/10/2020', '20/10/2020', 5)
+    x = get_data(['NFLX'], 'OBV', '01/10/2020', '20/10/2020', 5)
     # print(x)
 
     print('Data from <x>')
