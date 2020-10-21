@@ -25,6 +25,9 @@ TECHNICAL_DATABASE = {}  # dictionaries allow you to assume a key already exists
 #  TODO: Make Database behave well with holidays
 #  Alpaca does not not behave well with stock splits!!
 
+# BDD = np.busdaycalendar(holidays=['2020-09-07'])
+HOLIDAYS_LIST = ['2020-09-07']
+
 
 def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: str, indicator_range_specification: int):
 
@@ -35,7 +38,14 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
 
     # <firstdate> obtains extra days of data; some indicators calculate from preexisting values
     # obtains exactly <period> many extra days
-    firstdate = np.busday_offset(startdate.isoformat()[:10], -(indicator_range_specification), roll='forward')
+    firstdate = np.busday_offset(startdate.isoformat()[:10], -(indicator_range_specification), roll='forward', holidays=HOLIDAYS_LIST)
+    # Special case for MACD
+    if indicator == 'MACD':
+        if indicator_range_specification < 26:
+            firstdate = np.busday_offset(startdate.isoformat()[:10], -(26), roll='forward', holidays=HOLIDAYS_LIST)
+        elif indicator_range_specification == 26:
+            print('26 is invalid input')
+            return
     firstdate = datetime.datetime.strptime(str(firstdate), '%Y-%m-%d')
 
     # Fetch with pandas data reader
@@ -53,7 +63,7 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
 
 
 def get_technical(indicator: str, period: int, duration: int, df: str, startdate: datetime):
-
+    # TODO: Is <duration> redundant here?
     # Get Technical Indicator
     if indicator == 'open':
         output = df['Open'][period:]
@@ -136,14 +146,21 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         output = ema.tolist()[period:]
 
     elif indicator == 'MACD':  # Moving Average Convergence Divergence  # TODO: Do this manually
-        ema1 = ta.trend.ema_indicator(df["Close"], n=period/2, fillna=True)
-        ema2 = ta.trend.ema_indicator(df["Close"], n=period, fillna=True)
-        ema1 = Series.tolist(ema1)
-        ema2 = Series.tolist(ema2)
-        output = []
-        for i in range(len(ema1)):
-            output.append(ema1[i]-ema2[i])
-        output = output[period-1:]
+        ema26 = get_technical('EMA', 26, duration, df, startdate)
+        other_startdate = np.busday_offset(startdate.isoformat()[:10], -(26-period), roll='forward', holidays=HOLIDAYS_LIST)
+        other_startdate = datetime.datetime.strptime(str(other_startdate), '%Y-%m-%d')
+        other_ema = get_technical('EMA', period, duration, df, other_startdate)
+
+        if period < 26:
+            macd = {}
+            for key in ema26:
+                macd[key] = other_ema[key] - ema26[key]
+        else:
+            macd = np.zeros(len(other_ema))
+            for key in other_ema:
+                macd[key] = ema26[key] - other_ema[key]
+
+        return macd
 
     # Return in dictionary with mapping [date:value]
     data = {}
@@ -155,7 +172,7 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
     key = startdate  # <key> is a datetime object
     friday = False
     for i in range(0, len(output)):
-        left = np.busday_offset(key.isoformat()[:10], 1, roll='backward')  # TODO: I think this is suppose to be 'forward'
+        left = np.busday_offset(key.isoformat()[:10], 1, roll='backward', holidays=HOLIDAYS_LIST)  # TODO: I think this is suppose to be 'forward'
         left = datetime.datetime.strptime(str(left), '%Y-%m-%d')
         right = key + datetime.timedelta(days=1)
         if not (left == right):
@@ -166,8 +183,8 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         key = key + datetime.timedelta(days=1)
         if friday:
             # Set key to next business day
-            # key = np.busday_offset(key, 1, roll='backward')
-            key = key + datetime.timedelta(days=2)  # TODO: Use <busday>, this is bad with holidays and 3-day weekends
+            key = left
+            # key = key + datetime.timedelta(days=2)  # TODO: Use <busday>, this is bad with holidays and 3-day weekends
             friday = False
 
     return data
@@ -314,7 +331,8 @@ if __name__ == '__main__':
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    x = get_data(['NFLX'], 'EMA', '01/10/2020', '20/10/2020', 5)
+    x = get_data(['NFLX'], 'MACD', '25/09/2020', '20/10/2020', 12)
+    # x = get_data(['NFLX'], 'EMA', '25/09/2020', '20/10/2020', 26)
     # print(x)
 
     print('Data from <x>')
