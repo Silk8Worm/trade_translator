@@ -79,16 +79,31 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
 
     elif indicator == 'ATR':  # Average True Range
         # TODO: Replace with scratch_2
-        atr = ta.volatility.average_true_range(df["High"], df["Low"], df["Close"], n=period, fillna=True)
-        output = atr[period-1:]
+        high = df['High']
+        low = df['Low']
+        close = df['Close']
+        tr = np.zeros(len(close))
+        atr = np.zeros(len(close))
+
+        # Prime the first true range values
+        tr[0] = high[0] - low[0]
+        # Obtain values for the rest of the true range
+        for i in range(1, len(tr)):
+            tr[i] = max(high[i] - low[i], abs(high[i] - close[i - 1]), abs(low[i] - close[i - 1]))
+
+        # Obtain values for average true range
+        for i in range(period - 1, len(atr)):
+            atr[i] = tr[i - period + 1:i + 1].mean()
+
+        output = atr.tolist()[period-1:]
 
     elif indicator == 'RSI':  # Relative Strength Index  # TODO: verify
         rsi = ta.momentum.rsi(df["Close"], n=period, fillna=True)
         output = rsi[period-1:]
 
     elif indicator == 'OBV':  # On-Balance Volume
-        obv = ta.volume.on_balance_volume(df["Close"][4:], df["Volume"][4:], fillna=True)  # Splice Redundant Data
-        output = obv[period-1:]
+        obv = ta.volume.on_balance_volume(df["Close"][period-1:], df["Volume"][period-1:], fillna=True)  # Splice Redundant Data
+        output = obv
 
     elif indicator == 'EMA':  # Exponential Moving Average  # TODO: verify
         ema = ta.trend.ema_indicator(df["Close"], n=period, fillna=True)
@@ -119,7 +134,7 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
     # Return in dictionary with mapping [date:value]
     data = {}
 
-    # TODO: Rewrite this to use the row as keys
+    # TODO: Rewrite this to use the dataframe
     if isinstance(output, Series):
         output = Series.tolist(output)
     # <output> is a list
@@ -285,7 +300,7 @@ if __name__ == '__main__':
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    x = get_data(['AAPL', 'MSFT'], 'ATR', '07/10/2020', '09/10/2020', 5)
+    x = get_data(['NFLX'], 'ATR', '07/10/2020', '20/10/2020', 5)
     # print(x)
 
     print('Data from <x>')
