@@ -146,17 +146,21 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         output = ema.tolist()[period:]
 
     elif indicator == 'MACD':  # Moving Average Convergence Divergence  # TODO: Do this manually
-        ema26 = get_technical('EMA', 26, duration, df, startdate)
-        other_startdate = np.busday_offset(startdate.isoformat()[:10], -(26-period), roll='forward', holidays=HOLIDAYS_LIST)
+        other_startdate = np.busday_offset(startdate.isoformat()[:10], -(abs(26-period)), roll='forward', holidays=HOLIDAYS_LIST)
         other_startdate = datetime.datetime.strptime(str(other_startdate), '%Y-%m-%d')
-        other_ema = get_technical('EMA', period, duration, df, other_startdate)
+
+        macd = {}
 
         if period < 26:
-            macd = {}
+            ema26 = get_technical('EMA', 26, duration, df, startdate)
+            other_ema = get_technical('EMA', period, duration, df, other_startdate)
+
             for key in ema26:
                 macd[key] = other_ema[key] - ema26[key]
         else:
-            macd = np.zeros(len(other_ema))
+            ema26 = get_technical('EMA', 26, duration, df, other_startdate)
+            other_ema = get_technical('EMA', period, duration, df, startdate)
+
             for key in other_ema:
                 macd[key] = ema26[key] - other_ema[key]
 
@@ -331,7 +335,7 @@ if __name__ == '__main__':
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    x = get_data(['NFLX'], 'MACD', '25/09/2020', '20/10/2020', 12)
+    x = get_data(['NFLX'], 'MACD', '25/09/2020', '20/10/2020', 30)
     # x = get_data(['NFLX'], 'EMA', '25/09/2020', '20/10/2020', 26)
     # print(x)
 
