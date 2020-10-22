@@ -25,6 +25,9 @@ TECHNICAL_DATABASE = {}  # dictionaries allow you to assume a key already exists
 #  TODO: Make Database behave well with holidays
 #  Alpaca does not not behave well with stock splits!!
 
+# BDD = np.busdaycalendar(holidays=['2020-09-07'])
+HOLIDAYS_LIST = ['2020-09-07']
+
 
 def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: str, indicator_range_specification: int):
 
@@ -34,7 +37,15 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
     duration = np.busday_count(startdate.isoformat()[:10], enddate.isoformat()[:10]) + 1
 
     # <firstdate> obtains extra days of data; some indicators calculate from preexisting values
-    firstdate = np.busday_offset(startdate.isoformat()[:10], -(indicator_range_specification-1), roll='forward')
+    # obtains exactly <period> many extra days
+    firstdate = np.busday_offset(startdate.isoformat()[:10], -(indicator_range_specification), roll='forward', holidays=HOLIDAYS_LIST)
+    # Special case for MACD
+    if indicator == 'MACD':
+        if indicator_range_specification < 26:
+            firstdate = np.busday_offset(startdate.isoformat()[:10], -(26), roll='forward', holidays=HOLIDAYS_LIST)
+        elif indicator_range_specification == 26:
+            print('26 is invalid input')
+            return
     firstdate = datetime.datetime.strptime(str(firstdate), '%Y-%m-%d')
 
     # Fetch with pandas data reader
@@ -52,22 +63,22 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
 
 
 def get_technical(indicator: str, period: int, duration: int, df: str, startdate: datetime):
-
+    # TODO: Is <duration> redundant here?
     # Get Technical Indicator
     if indicator == 'open':
-        output = df['Open'][period-1:]
+        output = df['Open'][period:]
 
     elif indicator == 'close':
-        output = df['Close'][period-1:]
+        output = df['Close'][period:]
 
     elif indicator == 'high':
-        output = df['High'][period-1:]
+        output = df['High'][period:]
 
     elif indicator == 'low':
-        output = df['Low'][period-1:]
+        output = df['Low'][period:]
 
     elif indicator == 'volume':
-        output = df['Volume'][period-1:]
+        output = df['Volume'][period:]
 
     elif indicator in ['low BB', 'BB low']:  # Lower Bollinger Band
         bb_low = ta.volatility.bollinger_lband(df["Close"], n=period, ndev=2, fillna=True)
@@ -78,55 +89,94 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         output = bb_high[period-1:]
 
     elif indicator == 'ATR':  # Average True Range
-        # TODO: Replace with scratch_2
-        atr = ta.volatility.average_true_range(df["High"], df["Low"], df["Close"], n=period, fillna=True)
-        output = atr[period-1:]
+        high = df['High'][1:]
+        low = df['Low'][1:]
+        close = df['Close'][1:]
+        tr = np.zeros(len(close))
+        atr = np.zeros(len(close))
 
-    elif indicator == 'RSI':  # Relative Strength Index  # TODO: verify
+        # Prime the first true range values
+        tr[0] = high[0] - low[0]
+        # Obtain values for the rest of the true range
+        for i in range(1, len(tr)):
+            tr[i] = max(high[i] - low[i], abs(high[i] - close[i - 1]), abs(low[i] - close[i - 1]))
+
+        # Obtain values for average true range
+        for i in range(period - 1, len(atr)):
+            atr[i] = tr[i - period + 1:i + 1].mean()
+
+        output = atr.tolist()[period-1:]
+
+    elif indicator == 'RSI':  # Relative Strength Index  # TODO: Do this manually
         rsi = ta.momentum.rsi(df["Close"], n=period, fillna=True)
         output = rsi[period-1:]
 
     elif indicator == 'OBV':  # On-Balance Volume
-        obv = ta.volume.on_balance_volume(df["Close"][4:], df["Volume"][4:], fillna=True)  # Splice Redundant Data
-        output = obv[period-1:]
+        close = df['Close'][period:]
+        volume = df['Volume'][period:]
 
-    elif indicator == 'EMA':  # Exponential Moving Average  # TODO: verify
-        ema = ta.trend.ema_indicator(df["Close"], n=period, fillna=True)
-        output = ema[period-1:]
+        obv = np.zeros(len(close))
 
-    elif indicator == 'MACD':  # Moving Average Convergence Divergence  # TODO: verify
-        ema1 = ta.trend.ema_indicator(df["Close"], n=period/2, fillna=True)
-        ema2 = ta.trend.ema_indicator(df["Close"], n=period, fillna=True)
-        ema1 = Series.tolist(ema1)
-        ema2 = Series.tolist(ema2)
-        output = []
-        for i in range(len(ema1)):
-            output.append(ema1[i]-ema2[i])
-        output = output[period-1:]
+        # Prime the first OBV value
+        obv[0] = 0
+        for i in range(1, len(obv)):
+            if close[i] > close[i - 1]:
+                obv[i] = obv[i - 1] + volume[i]
+            elif close[i] < close[i - 1]:
+                obv[i] = obv[i - 1] - volume[i]
+            else:
+                obv[i] = obv[i - 1]
 
-    elif indicator in ['proper MACD', 'MACD proper']:
-        macd_proper = ta.trend.macd(df["Close"], n_fast=period, n_slow=period, fillna=True)
-        output = macd_proper[len(macd_proper) - duration-1:]
+        output = obv.tolist()
 
-    elif indicator in ['signal MACD', 'MACD signal']:
-        macd_signal = ta.trend.macd_diff(df["Close"], n_fast=period, n_slow=period, fillna=True)
-        output = macd_signal[len(macd_signal) - duration-1:]
+    elif indicator == 'EMA':  # Exponential Moving Average
+        close = df['Close']
 
-    elif indicator in ['divergent MACD', 'MACD divergent']:
-        macd_divergence = ta.trend.macd_signal(df["Close"], n_fast=period, n_slow=period, fillna=True)
-        output = macd_divergence[len(macd_divergence) - duration-1:]
+        ema = np.zeros(len(close))
+        multiplier = 2 / (period + 1)
+        multiplier = multiplier / (1 + period)
+
+        # Prime the first EMA values as the previous SMA
+        ema[period] = close[:period].mean()
+
+        # Compute the rest of the EMA values
+        for i in range(period + 1, len(ema)):
+            ema[i] = close[i] * multiplier + ema[i - 1] * (1 - multiplier)
+
+        output = ema.tolist()[period:]
+
+    elif indicator == 'MACD':  # Moving Average Convergence Divergence  # TODO: Do this manually
+        other_startdate = np.busday_offset(startdate.isoformat()[:10], -(abs(26-period)), roll='forward', holidays=HOLIDAYS_LIST)
+        other_startdate = datetime.datetime.strptime(str(other_startdate), '%Y-%m-%d')
+
+        macd = {}
+
+        if period < 26:
+            ema26 = get_technical('EMA', 26, duration, df, startdate)
+            other_ema = get_technical('EMA', period, duration, df, other_startdate)
+
+            for key in ema26:
+                macd[key] = other_ema[key] - ema26[key]
+        else:
+            ema26 = get_technical('EMA', 26, duration, df, other_startdate)
+            other_ema = get_technical('EMA', period, duration, df, startdate)
+
+            for key in other_ema:
+                macd[key] = ema26[key] - other_ema[key]
+
+        return macd
 
     # Return in dictionary with mapping [date:value]
     data = {}
 
-    # TODO: Rewrite this to use the row as keys
+    # TODO: Rewrite this to use the dataframe
     if isinstance(output, Series):
         output = Series.tolist(output)
     # <output> is a list
     key = startdate  # <key> is a datetime object
     friday = False
     for i in range(0, len(output)):
-        left = np.busday_offset(key.isoformat()[:10], 1, roll='backward')  # TODO: I think this is suppose to be 'forward'
+        left = np.busday_offset(key.isoformat()[:10], 1, roll='backward', holidays=HOLIDAYS_LIST)  # TODO: I think this is suppose to be 'forward'
         left = datetime.datetime.strptime(str(left), '%Y-%m-%d')
         right = key + datetime.timedelta(days=1)
         if not (left == right):
@@ -137,8 +187,8 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         key = key + datetime.timedelta(days=1)
         if friday:
             # Set key to next business day
-            # key = np.busday_offset(key, 1, roll='backward')
-            key = key + datetime.timedelta(days=2)  # TODO: Use <busday>, this is bad with holidays and 3-day weekends
+            key = left
+            # key = key + datetime.timedelta(days=2)  # TODO: Use <busday>, this is bad with holidays and 3-day weekends
             friday = False
 
     return data
@@ -285,7 +335,8 @@ if __name__ == '__main__':
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    x = get_data(['AAPL', 'MSFT'], 'ATR', '07/10/2020', '09/10/2020', 5)
+    x = get_data(['NFLX'], 'MACD', '25/09/2020', '20/10/2020', 30)
+    # x = get_data(['NFLX'], 'EMA', '25/09/2020', '20/10/2020', 26)
     # print(x)
 
     print('Data from <x>')
