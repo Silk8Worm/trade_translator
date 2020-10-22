@@ -105,9 +105,11 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
         cerebro.addstrategy(TreeSignalStrategy)
     cerebro.run()
 
+
     saveplots(cerebro, file_path='chart.png', start=start_date, end=end_date)
     img = Image.open("chart.png")
-    area = (0,0,675,244)
+    width, height = img.size
+    area = (0,0,width,244)
     cropped_img = img.crop(area)
     cropped_img.save('chart.png')
 
@@ -123,7 +125,6 @@ class TreeSignalStrategy(bt.Strategy):
         date_data = self.datetime.date(ago=0)
         state.current_day = date_data.strftime('%d/%m/%Y')
 
-        print(date_data)
         close = self.data.close[0]
 
         if amount > 0 and ast.evaluate():
