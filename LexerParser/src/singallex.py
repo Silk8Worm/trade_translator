@@ -27,7 +27,6 @@ keywords = ['if', 'greater', 'less', 'than', 'equal', 'to', 'above', 'below',
 combinational_indicators = ['bbands', 'high', 'low', 'ebitda', 'growth', 'leverage', 'ratio', 'operating',
                             'margin', 'revenue', 'growth', 'yesterday', 'open', 'close', 'net', 'debt']
 
-
 # Makes a dict mapping keywords to token types and adds the tokens to the list
 reserved = {k: k.upper() for k in keywords + combinational_indicators}
 tokens += list(reserved.values())
@@ -60,13 +59,16 @@ def t_EQUALSYM(t):
     r'='
     return t
 
+
 def t_SLASH(t):
     r'/'
     return t
 
+
 def t_DEBTEBITDA(t):
     r'debt/ebitda'
     return t
+
 
 def t_STRING(t):
     r'[^\s\\]+'

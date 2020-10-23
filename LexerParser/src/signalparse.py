@@ -289,9 +289,3 @@ if __name__ == '__main__':
         print(f'{i:2}) {values[i]}')
         print(ast)
         print("_"*20)
-
-# TODO
-'''
-Add Open yesterday
-Add close yesterday
-'''
