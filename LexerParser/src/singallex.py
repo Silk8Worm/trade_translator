@@ -18,12 +18,12 @@ tokens = [
     'LESSSYM',
     'EQUALSYM',
     'DEBTEBITDA',
-    'SLASH'
+    'SLASH',
 ]
 
 # Reserved Keywords
 keywords = ['if', 'greater', 'less', 'than', 'equal', 'to', 'above', 'below',
-            'crosses', 'and', 'or']
+            'crosses', 'and', 'or', 'is']
 combinational_indicators = ['bbands', 'high', 'low', 'ebitda', 'growth', 'leverage', 'ratio', 'operating',
                             'margin', 'revenue', 'growth', 'yesterday', 'open', 'close', 'net', 'debt']
 

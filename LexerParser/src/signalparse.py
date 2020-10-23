@@ -121,19 +121,22 @@ def p_time(p):
 # Merges multi word tokens
 def p_gt(p):
     '''gt : GREATER THAN
-          | GREATERSYM '''
+          | GREATERSYM
+          | IS GREATER THAN'''
     p[0] = "gt"
 
 
 def p_lt(p):
     '''lt : LESS THAN
-          | LESSSYM '''
+          | LESSSYM
+          | IS LESS THAN'''
     p[0] = "lt"
 
 
 def p_eq(p):
     '''eq : EQUAL TO
-          | EQUALSYM '''
+          | EQUALSYM
+          | IS EQUAL TO'''
     p[0] = "eq"
 
 
@@ -180,10 +183,12 @@ def p_fundamental(p):
                    | REVENUE GROWTH'''
     p[0] = " ".join([str(x) for x in p[1:]])
 
+
 def p_fundamental_net_debt(p):
     '''fundamental : NET DEBTEBITDA
                    | NET DEBT SLASH EBITDA'''
     p[0] = "net debt/ebitda"
+
 
 # Error rule for syntax errors
 def p_error(p):
@@ -244,19 +249,46 @@ def build_ast(str_input: str, _state: ASTState, debug=False):
 
 
 if __name__ == '__main__':
-    # s = ""
-    # s = "if rsa greater than 4"
-    # s = "if ras gpraper than 4"
-    # s = "fi rsi greater than 4.9"
-    # s = "rsi if less than 3"
-    # s = "i ras greaf tha 3"
-    # s = "If RSI MACD crosses above"
-    # s = "if exponential moving average crosses below"
-    # s = "if open yesterday greater than 50.5"
-    # s = "if rsi greater than 30 or 5 day macd crosses below 50 and moving average equal to 43"
-    s = "if net debt/ebitda less than 4"
-    ast = build_ast(s, ASTState("", "", ""), debug=True)
-    print(ast)
+    # values = [""
+    # , "if rsa greater than 4"
+    # , "if ras gpraper than 4"
+    # , "fi rsi greater than 4.9"
+    # , "rsi if less than 3"
+    # , "i ras greaf tha 3"
+    # , "If RSI MACD crosses above"
+    # , "if exponential moving average crosses below"
+    # , "if open yesterday greater than 50.5"
+    # , "if rsi greater than 30 or 5 day macd crosses below 50 and moving average equal to 43"
+    # , "if net debt/ebitda less than 4"]
+    values = [
+        "rsi is greater than 50",
+        "5 day macd crosses above 20 day macd",
+        "if 1 day open greater than close",
+        "if 3 day ema less than 20 day sma",
+        "if rsi less than macd",
+        "macd greater than 10",
+        "if bbands high less than 50",
+        "if bbands low greater than bbands high",
+        "if bbands high greater than bbands low",
+        "if rsi is greater than 70",
+        "if rsi less than 40 and 5 day macd greater than 0",
+        "rsi is greater than 30 or 20 day atr greater than .5",
+        "if rsi greater than 10 and atr less than 50 or rsi is greater than 70",
+        "if atr less than 30 and 5 day macd greater than 20 day macd",
+        "if 20 day ema greater than 5 day ema",
+        "if 20 day sma greater than 5 day ema",
+        "if 20 day ema greater than 5 day ema or 20 day sma greater than 5 day ema and rsi greater than 0",
+        "if 20 day ema crosses above 5 day sma",
+        "if 20 day sma crosses below 5 day ema",
+        "if 20 day ema crosses above 5 day sma or 20 day sma crosses below 5 day ema",
+        "30 day rsi less than 10 day rsi",
+        "macd crosses above rsi"]
+        #FIXME: Second if and is, close and macd and rsi don't have # days printed out
+    for i in range(len(values)):
+        ast = build_ast(values[i], ASTState("", "", ""), debug=True)
+        print(f'{i:2}) {values[i]}')
+        print(ast)
+        print("_"*20)
 
 # TODO
 '''
