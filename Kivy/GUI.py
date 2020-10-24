@@ -279,7 +279,7 @@ class TradeTranslatorApp(App):
 
         self.manager = ScreenManager()
         print("1")
-        # self.manager.add_widget(TradeTranslator(name='signin'))
+        self.manager.add_widget(TradeTranslator(name='signin'))
         # print("2")
         self.manager.add_widget(Trade(name='trade'))
         self.manager.add_widget(BackTest(name='backtest'))
