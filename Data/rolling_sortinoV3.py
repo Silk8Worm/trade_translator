@@ -38,7 +38,9 @@ def rolling_Sortino(port_vals, startingValue):
     excessReturn = avgDailyReturn - RFR
     downsideDev = (sum(negativeExcessReturnsSqrd)/len(negativeExcessReturnsSqrd))**0.5
 
-    if downsideDev == 0:
+    if downsideDev == 0 and avgDailyReturn == 0:
+        return 0
+    elif downsideDev == 0:
         return 100000
 
     sortino = avgDailyReturn/downsideDev

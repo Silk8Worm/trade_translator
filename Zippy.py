@@ -32,6 +32,8 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
         cover_amount = 0
     else:
         cover_amount = int(cover_amt)
+    if cover_signal == "":
+        cover_signal = "if rsi greater than 1000000"
     global starting_cash
     starting_cash = 1000000.0
     global port_vals
@@ -74,7 +76,7 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     end_date = datetime.strptime(end_date_pre, '%d/%m/%Y')
 
     if universe == '':
-        return 'No Tickers Entered', "Universe", [], None
+        return 'No Tickers Entered', "Universe", [], ""
     tickers_pre = universe.split(',')
     tickers = [x.strip() for x in tickers_pre]
     invalid_tickers = []
@@ -82,7 +84,7 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
         if ticker not in ticker_list:
             invalid_tickers.append(ticker)
     if len(invalid_tickers) > 0:
-        return 'Invalid Ticker List', "Universe", invalid_tickers, None
+        return 'Invalid Ticker List', "Universe", invalid_tickers, universe
 
     state = ASTState(start_date_pre, end_date_pre, tickers)
     ast = build_ast(main_signal, state, debug=False)
@@ -91,10 +93,10 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     # TODO: Add check for syntax errors (Will be done soon - Ryan)
     if not ast.valid():
         # print(ast.evaluate(), file=stderr)
-        return 'Invalid Input', "Signal", ast.evaluate(), None
+        return 'Invalid Input', "Signal", ast.evaluate(), signal
     if not cover_ast.valid():
         # print(cover_ast.evaluate(), file=stderr)
-        return 'Invalid Input', "Cover", ast.evaluate(), None
+        return 'Invalid Input', "Cover Signal", cover_ast.evaluate(), cover_signal
 
     # Iterate over the tickers, and then the dates (that list will be provided by zipline?)
     for ticker in tickers:

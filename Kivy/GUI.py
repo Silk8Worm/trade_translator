@@ -134,24 +134,50 @@ class Trade(Screen):
     def set_cursor(self, instance, dt):
         instance.cursor = (len(instance.text), 50)
 
-    def error_text(self, module: str, errors: []):
-        popup = ErrorPopup()
+    def error_text(self, text: str, module: str, errors: []):
+        popup = ErrorPopup(module, text, errors)
+        popup.error_module = module
+        popup.error_text = text
+        popup.errors_lst = errors
         popup.open()
-        if module == 'Signal':
-            self.trade_text = "Fuck"
-            print(errors)
-        elif module == 'Cover':
-            self.cover_text = "Fuck"
-            print(errors)
-        elif module == 'Universe':
-            self.universe_text = "Fuck"
-            print(errors)
-        else:
-            print("Module does not exist")
 
 
 class ErrorPopup(Popup):
-    pass
+    error_module = StringProperty()
+    error_text = StringProperty()
+    errors = StringProperty()
+
+    def __init__(self, module, text, errors, **kwargs):
+        super(Popup, self).__init__(**kwargs)
+        self.error_module = module
+        self.error_text = text
+        self.errors_lst = errors
+        if self.error_module == 'Signal' or self.error_module == 'Cover Signal':
+            print(self.errors_lst)
+            if self.errors_lst[0][1] == -1:
+                self.errors = 'Input too short. Missing words.'
+            else:
+                self.errors = 'Invalid words: '
+                for i in range(len(self.errors_lst)):
+                    self.errors += self.errors_lst[i][0]
+                    if i < len(self.errors_lst) - 1:
+                        self.errors += ', '
+        elif self.error_module == 'Universe':
+            if self.errors_lst == []:
+                self.errors = "No universe entered."
+            else:
+                self.errors = "Invalid tickers: "
+                for i in range(len(self.errors_lst)):
+                    self.errors += self.errors_lst[i]
+                    if i < len(self.errors_lst) - 1:
+                        self.errors += ', '
+        elif self.error_module == 'Backtest Dates':
+            if text == ' - ':
+                self.errors = 'No date provided.'
+            else:
+                self.errors = self.errors_lst[0]
+        else:
+            print("Module does not exist")
 
 
 class BackTestPopup(Popup):
@@ -163,15 +189,16 @@ class BackTestPopup(Popup):
             date2test = datetime.strptime(second_date, '%d/%m/%Y')
             if date2test <= date1test:
                 app = App.get_running_app()
-                Trade.error_text(app.manager.get_screen('trade'), 'Backtest Dates', ['Start date must be before end date.'])
+                Trade.error_text(app.manager.get_screen('trade'), first_date+' - '+second_date, 'Backtest Dates', ['Start date must be before end date and at least 1 week before.'])
                 return
             date1test += timedelta(days=7)
             if date2test < date1test:
                 app = App.get_running_app()
-                Trade.error_text(app.manager.get_screen('trade'), 'Backtest Dates', ['Date range not large enough (min 1 week).'])
+                Trade.error_text(app.manager.get_screen('trade'), first_date+' - '+second_date, 'Backtest Dates', ['Date range not large enough (min 1 week).'])
                 return
         except:
-            print("Invalid Date Format")
+            app = App.get_running_app()
+            Trade.error_text(app.manager.get_screen('trade'), first_date+' - '+second_date, 'Backtest Dates', ['Invalid date format.'])
             return
 
         a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
@@ -182,9 +209,10 @@ class BackTestPopup(Popup):
 
         if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered']:
             app = App.get_running_app()
-            Trade.error_text(app.manager.get_screen('trade'), b, c)
+            Trade.error_text(app.manager.get_screen('trade'), d, b, c)
         else:
             app = App.get_running_app()
+            app.manager.transition = NoTransition()
             app.manager.current = 'backtest'
             app.manager.get_screen('backtest').chart(a, b, c, d)
             app.manager.get_screen('backtest').submit_enabled = False
@@ -217,9 +245,10 @@ class CasePopup(Popup):
 
         if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered']:
             app = App.get_running_app()
-            Trade.error_text(app.manager.get_screen('trade'), b, c)
+            Trade.error_text(app.manager.get_screen('trade'), d, b, c)
         else:
             app = App.get_running_app()
+            app.manager.transition = NoTransition()
             app.manager.get_screen('backtest').chart(a, b, c, d)
             app.manager.get_screen('backtest').submit_enabled = True
             app.manager.get_screen('backtest').casename = self.case_name
@@ -296,9 +325,9 @@ class TradeTranslatorApp(App):
 
         self.manager = ScreenManager()
 
+        self.manager.add_widget(TradeTranslator(name='signin'))
         self.manager.add_widget(Trade(name='trade'))
         self.manager.add_widget(BackTest(name='backtest'))
-        self.manager.add_widget(TradeTranslator(name='signin'))
 
         # Use this if you need to import TextInput
         # Window.size = (1100, 720)

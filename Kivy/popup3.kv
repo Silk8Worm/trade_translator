@@ -1,4 +1,42 @@
 <ErrorPopup>:
-    background: 'Kivy/Background_Images/sign_in.png'
+    background: 'Kivy/Background_Images/donk.png'
     title: 'Error With Inputs'
-    size_hint: .5, .5
+    size_hint: .7, .6
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        Label:
+            text: root.error_module
+            font_name: 'Kivy/Fonts/Dosis-Light'
+            font_size: min(self.width/6.111538, self.height*.68)
+            size_hint: (1, .2)
+
+        BoxLayout:
+            size_hint: (1, 1)
+            padding: [20, 5, 20, 20]
+            TextInput:
+                multiline:True
+                text: root.error_text
+                background_color: 1,1,1,1
+                color: 0,0,0,1
+                font_size: min(self.width/30, self.height/6.7)
+                readonly: True
+
+        BoxLayout:
+            size_hint: (1, .7)
+            padding: [20, 0, 20, 10]
+            TextInput:
+                multiline: True
+                text: root.errors
+                background_color: 0, 0, 0, 1
+                readonly: True
+                font_size: min(self.width/40, self.height/6)
+                canvas.before:
+                    Color:
+                        rgba: 1, 1, 1, 1
+                    Line:
+                        width: 1.2
+                        rectangle: self.x, self.y, self.width, self.height
+
+
