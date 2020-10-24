@@ -10,6 +10,8 @@
 
             Label:
                 text: 'Pick First Date'
+                font_name: 'Kivy/Fonts/Dosis-Light'
+                font_size: 22
 
             BoxLayout:
                 padding: [40,20,40,20]
@@ -24,6 +26,8 @@
 
             Label:
                 text: 'Pick Second Date'
+                font_name: 'Kivy/Fonts/Dosis-Light'
+                font_size: 22
 
             BoxLayout:
                 padding: [40,20,40,20]
@@ -34,10 +38,17 @@
                     multiline: False
 
         BoxLayout:
-            padding: [150,20,150,10]
+            padding: [140,20,140,10]
             Button:
                 text: 'Run Backtest'
+                font_name: 'Kivy/Fonts/DroidSans-Bold'
+                font_size: 26
                 on_release: root.backtest(first_date.text, second_date.text)
                 on_release: root.dismiss()
-
-
+                background_color: .65, .65, .65, 1
+                canvas.before:
+                    Color:
+                        rgba: 1, 1, 1, 1
+                    Line:
+                        width: 2
+                        rectangle: self.x, self.y, self.width, self.height

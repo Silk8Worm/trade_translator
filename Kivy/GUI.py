@@ -21,17 +21,26 @@ from functools import partial
 from kivy.cache import Cache
 from datetime import datetime
 from datetime import timedelta
+import requests
+import time
 import Zippy
 
 class TradeTranslator(Screen):
+
+    login_error = BooleanProperty(False)
+
     def do_signin(self, signinText, passwordText):
         app = App.get_running_app()
 
         app.username = signinText
         app.password = passwordText
 
-        self.manager.transition = NoTransition()
-        self.manager.current = 'trade'
+        r = requests.post('https://tranquil-beyond-74281.herokuapp.com/info/validate/', data={'username':app.username, 'password':app.password})
+        if r.text == 'true':
+            self.manager.transition = NoTransition()
+            self.manager.current = 'trade'
+        else:
+            self.login_error = True
 
     def resetForm(self):
         self.ids['signin'].text = ""
@@ -126,6 +135,8 @@ class Trade(Screen):
         instance.cursor = (len(instance.text), 50)
 
     def error_text(self, module: str, errors: []):
+        popup = ErrorPopup()
+        popup.open()
         if module == 'Signal':
             self.trade_text = "Fuck"
             print(errors)
@@ -139,6 +150,10 @@ class Trade(Screen):
             print("Module does not exist")
 
 
+class ErrorPopup(Popup):
+    pass
+
+
 class BackTestPopup(Popup):
 
     def backtest(self, first_date, second_date):
@@ -147,11 +162,13 @@ class BackTestPopup(Popup):
             date1test = datetime.strptime(first_date, '%d/%m/%Y')
             date2test = datetime.strptime(second_date, '%d/%m/%Y')
             if date2test <= date1test:
-                print("Start date must be before end date.")
+                app = App.get_running_app()
+                Trade.error_text(app.manager.get_screen('trade'), 'Backtest Dates', ['Start date must be before end date.'])
                 return
             date1test += timedelta(days=7)
-            if date2test <= (date1test + timedelta(days=7)):
-                print("Date range not large enough (min 1 week)")
+            if date2test < date1test:
+                app = App.get_running_app()
+                Trade.error_text(app.manager.get_screen('trade'), 'Backtest Dates', ['Date range not large enough (min 1 week).'])
                 return
         except:
             print("Invalid Date Format")
@@ -170,66 +187,44 @@ class BackTestPopup(Popup):
             app = App.get_running_app()
             app.manager.current = 'backtest'
             app.manager.get_screen('backtest').chart(a, b, c, d)
+            app.manager.get_screen('backtest').submit_enabled = False
 
 
 class CasePopup(Popup):
 
     # Set True to False to disable cases
-    case1enabled = BooleanProperty(True)
-    case2enabled = BooleanProperty(True)
-    case3enabled = BooleanProperty(False)
+    case_enabled = BooleanProperty(True)
+    case_name = StringProperty()
+    casestart = ""
+    caseend = ""
 
-    case1start = "28/02/2020"
-    case1end = "02/04/2020"
-    case2start = "30/11/2019"
-    case2end = "25/01/2020"
-    case3start = "30/07/2019"
-    case3end = "02/09/2019"
+    def __init__(self, **kwargs):
+        super(Popup, self).__init__(**kwargs)
+        r = requests.get('https://tranquil-beyond-74281.herokuapp.com/info/cases/get/')
+        if len(r.json()['cases']) == 0:
+            self.case_enabled = False
+        else:
+            self.case_name = r.json()['cases'][0]['name']
+            self.casestart = r.json()['cases'][0]['startDate']
+            self.caseend = r.json()['cases'][0]['endDate']
 
-    def case1(self):
+    def case(self):
         a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
                                  self.cover_signal,self.universe,
                                  self.take_profit,self.stop_loss,
                                  self.cover_buy,self.cover_trade,
-                                 self.case1start, self.case1end)
+                                 self.casestart, self.caseend)
 
         if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered']:
             app = App.get_running_app()
             Trade.error_text(app.manager.get_screen('trade'), b, c)
         else:
             app = App.get_running_app()
-            app.manager.current = 'backtest'
             app.manager.get_screen('backtest').chart(a, b, c, d)
-
-    def case2(self):
-        a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
-                                 self.cover_signal,self.universe,
-                                 self.take_profit,self.stop_loss,
-                                 self.cover_buy,self.cover_trade,
-                                 self.case2start, self.case2end)
-
-        if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered']:
-            app = App.get_running_app()
-            Trade.error_text(app.manager.get_screen('trade'), b, c)
-        else:
-            app = App.get_running_app()
+            app.manager.get_screen('backtest').submit_enabled = True
+            app.manager.get_screen('backtest').casename = self.case_name
             app.manager.current = 'backtest'
-            app.manager.get_screen('backtest').chart(a, b, c, d)
 
-    def case3(self):
-        a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
-                                 self.cover_signal,self.universe,
-                                 self.take_profit,self.stop_loss,
-                                 self.cover_buy,self.cover_trade,
-                                 self.case3start, self.case3end)
-
-        if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered']:
-            app = App.get_running_app()
-            Trade.error_text(app.manager.get_screen('trade'), b, c)
-        else:
-            app = App.get_running_app()
-            app.manager.current = 'backtest'
-            app.manager.get_screen('backtest').chart(a, b, c, d)
 
 class BackTest(Screen):
 
@@ -238,8 +233,16 @@ class BackTest(Screen):
     sharpe_ratio = StringProperty()
     sortino_ratio = StringProperty()
     image = StringProperty()
+    submit_enabled = BooleanProperty(True)
+    submit_text = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(Screen, self).__init__(**kwargs)
+        self.infinite_sortino = False
+        self.submit_text = 'SUBMIT'
 
     def back(self):
+        self.manager.transition = NoTransition()
         self.manager.current = 'trade'
         self.image = 'logo.png'
 
@@ -248,21 +251,35 @@ class BackTest(Screen):
         self.final_equity = f'${final:.2f}'
         self.cumulative_return = f'${cumulative:.2f}'
         self.sharpe_ratio = f'{sharpe:.3f}'
-        self.sortino_ratio = f'{sortino:.3f}'
+        if sortino == 100000:
+            self.sortino_ratio = 'Infinity'
+            self.infinite_sortino = True
+        else:
+            self.sortino_ratio = f'{sortino:.3f}'
         Cache._categories['kv.image']['limit'] = 0
         Cache._categories['kv.image']['timeout'] = 1
         Cache._categories['kv.texture']['limit'] = 0
         Cache._categories['kv.texture']['timeout'] = 1
         self.image = 'chart.png'
 
+    def submit(self):
+        app = App.get_running_app()
+        if self.sortino_ratio == 'Infinity':
+            sortino_submit = 0
+        else:
+            sortino_submit = float(self.sortino_ratio)
+        r = requests.post('https://tranquil-beyond-74281.herokuapp.com/info/cases/submit/',
+                          data={"username": app.username, "case": self.casename,
+                                "equity": float(self.final_equity.strip('$')),
+                                "return": float(self.cumulative_return.strip('$')),
+                                "sortino": sortino_submit,
+                                "sharpe": float(self.sharpe_ratio),
+                                'infinite_sortino': self.infinite_sortino})
+        if r.text == 'false':
+            self.submit_text = 'ERROR'
+
 
 class TradeTranslatorApp(App):
-    def __init__(self):
-       import os
-       self.kv_directory = "Kivy"
-       App.__init__(self)
-
-
     username = StringProperty(None)
     password = StringProperty(None)
 
@@ -278,11 +295,10 @@ class TradeTranslatorApp(App):
         Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
         self.manager = ScreenManager()
-        print("1")
-        self.manager.add_widget(TradeTranslator(name='signin'))
-        # print("2")
+
         self.manager.add_widget(Trade(name='trade'))
         self.manager.add_widget(BackTest(name='backtest'))
+        self.manager.add_widget(TradeTranslator(name='signin'))
 
         # Use this if you need to import TextInput
         # Window.size = (1100, 720)

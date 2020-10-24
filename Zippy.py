@@ -3,6 +3,8 @@ from LexerParser.src.signalparse import build_ast
 from datetime import datetime
 import backtrader as bt
 from PIL import Image
+from Data.rolling_sortinoV3 import rolling_Sortino
+from Data.Rolling_Sharpe import rolling_sharpe
 """
 IF A TRADE WOULD GIVE THE USER A NEGATIVE CASH BALANCE, THE TRADE DOES
 NOT EXECUTE.
@@ -31,7 +33,9 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     else:
         cover_amount = int(cover_amt)
     global starting_cash
-    starting_cash = 500000.0
+    starting_cash = 1000000.0
+    global port_vals
+    port_vals = []
     global state
     global ast
     global cover_ast
@@ -113,7 +117,17 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     cropped_img = img.crop(area)
     cropped_img.save('chart.png')
 
-    return cerebro.broker.getvalue(), cerebro.broker.getvalue()-starting_cash, 3.0, 2.0
+    port_vals_daily = []
+    for i in range(len(tickers), len(port_vals), len(tickers)):
+        port_vals_daily.append(port_vals[i])
+    sharpe = rolling_sharpe(port_vals_daily, starting_cash)
+    sortino = rolling_Sortino(port_vals_daily, starting_cash)
+    if not sharpe:
+        sharpe = 0
+    if not sortino:
+        sortino = 0
+
+    return cerebro.broker.getvalue(), cerebro.broker.getvalue()-starting_cash, sharpe, sortino
 
 
 class TreeSignalStrategy(bt.Strategy):
@@ -122,6 +136,7 @@ class TreeSignalStrategy(bt.Strategy):
         self._addobserver(True, bt.observers.BuySell)
 
     def next(self):
+        port_vals.append(self.broker.getvalue())
         date_data = self.datetime.date(ago=0)
         state.current_day = date_data.strftime('%d/%m/%Y')
 
@@ -185,6 +200,6 @@ if __name__ == '__main__':
     # universe = "AAPL, TSLA, GOOG, TTM, XOM, F, T, MSFT, AMZN, COTY, GE, GM, NIO, ALL, NVDA, REAL, NFLX, BAC, BABA"
     universe = "AAPL,TSLA,GOOG"
 
-    zippy('if rsi greater than 100', 'Buy', '1000', 'if rsi less than 0',
-          universe, '100', '5',
-          'Sell', '1000', '18/03/2020', '18/10/2020')
+    zippy('if rsi greater than 0', 'Buy', '1000', 'if rsi less than 40',
+          universe, '50', '50',
+          'Sell', '0', '18/03/2020', '25/03/2020')

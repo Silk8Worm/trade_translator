@@ -14,7 +14,6 @@ def rolling_Sortino(port_vals, startingValue):
 
 
     if len(port_vals) <= 10:
-        print("not enough portfolio values")
         return None
 
 
@@ -39,8 +38,9 @@ def rolling_Sortino(port_vals, startingValue):
     excessReturn = avgDailyReturn - RFR
     downsideDev = (sum(negativeExcessReturnsSqrd)/len(negativeExcessReturnsSqrd))**0.5
 
+    if downsideDev == 0:
+        return 100000
+
     sortino = avgDailyReturn/downsideDev
 
     return sortino
-
-print(rolling_Sortino([100.4, 100.2, 100.21, 99.21, 100, 50, 99.79, 100.79, 100.45, 100.84, 100.4, 100.89], 100))

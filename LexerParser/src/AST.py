@@ -50,7 +50,6 @@ class Lookup(Expr):
 
             self.data = data_gatherer.get_data(self.state.universe,
                                                self.args[0].upper(), self.state.start, self.state.end, num_days)
-            print(self.data)
 
 
 

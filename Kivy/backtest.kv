@@ -6,6 +6,7 @@
             source: 'Kivy/Background_Images/backtest.png'
 
     FloatLayout:
+        size_hint: 1, .99
 
         canvas.before:
             Color:
@@ -104,6 +105,38 @@
                 Rectangle:
                     pos: self.pos
                     size: self.width, self.height
+
+        Button:
+            text: 'BACK'
+            on_release: root.back()
+            size_hint: .12, .08
+            pos: self.width*6.8, self.height*10.85
+            font_name: 'Kivy/Fonts/DroidSans-Bold'
+            font_size: min(self.width/7.09375, self.height/2.133333)
+            background_color: .65, .65, .65, 1
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1.2
+                    rectangle: self.x, self.y, self.width, self.height
+
+        Button:
+            text: root.submit_text
+            visible: root.submit_enabled
+            opacity: 1 if root.submit_enabled else 0
+            on_release: root.submit()
+            size_hint: .12, .08
+            pos: self.width*.55, self.height*10.85
+            font_name: 'Kivy/Fonts/DroidSans-Bold'
+            font_size: min(self.width/7.09375, self.height/2.133333)
+            background_color: .65, .65, .65, 1
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1.2
+                    rectangle: self.x, self.y, self.width, self.height
 
         Image:
             source: root.image
