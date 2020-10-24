@@ -9,6 +9,7 @@ https://github.com/kivy/kivy/issues/4991
 """
 
 from kivy.app import App
+from kivy.lang import Builder
 from kivy.properties import StringProperty, BooleanProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.uix.popup import Popup
@@ -21,7 +22,6 @@ from kivy.cache import Cache
 from datetime import datetime
 from datetime import timedelta
 import Zippy
-
 
 class TradeTranslator(Screen):
     def do_signin(self, signinText, passwordText):
@@ -257,11 +257,16 @@ class BackTest(Screen):
 
 
 class TradeTranslatorApp(App):
+    def __init__(self):
+       import os
+       self.kv_directory = "Kivy"
+       App.__init__(self)
+
+
     username = StringProperty(None)
     password = StringProperty(None)
 
     def build(self):
-
         self.title = "Rotman Commerce FinTech Association"
 
         # Better implementation of window size
@@ -273,8 +278,9 @@ class TradeTranslatorApp(App):
         Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
         self.manager = ScreenManager()
-
-        self.manager.add_widget(TradeTranslator(name='signin'))
+        print("1")
+        # self.manager.add_widget(TradeTranslator(name='signin'))
+        # print("2")
         self.manager.add_widget(Trade(name='trade'))
         self.manager.add_widget(BackTest(name='backtest'))
 
@@ -285,7 +291,3 @@ class TradeTranslatorApp(App):
         # Window.top = Window.top-60
 
         return self.manager
-
-
-if __name__ == '__main__':
-    TradeTranslatorApp().run()

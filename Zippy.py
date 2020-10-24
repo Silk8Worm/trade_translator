@@ -106,8 +106,8 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     cerebro.run()
 
 
-    saveplots(cerebro, file_path='chart.png', start=start_date, end=end_date)
-    img = Image.open("chart.png")
+    saveplots(cerebro, file_path='Kivy/chart.png', start=start_date, end=end_date)
+    img = Image.open("Kivy/chart.png")
     width, height = img.size
     area = (0,0,width,244)
     cropped_img = img.crop(area)

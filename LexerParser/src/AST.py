@@ -6,7 +6,7 @@
 """
 
 from typing import Union, Any
-import alphavantage_gatherer
+from Data import data_gatherer
 
 
 # The current state held by the abstract syntax tree
@@ -48,8 +48,8 @@ class Lookup(Expr):
                 # FIXME: Weeks and Months???
                 num_days = self.args[1][0]
 
-            self.data = alphavantage_gatherer.get_data(self.state.universe,
-            self.args[0].upper(), self.state.start, self.state.end, num_days)
+            self.data = data_gatherer.get_data(self.state.universe,
+                                               self.args[0].upper(), self.state.start, self.state.end, num_days)
             print(self.data)
 
 

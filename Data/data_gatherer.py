@@ -1,16 +1,11 @@
-import requests
 import datetime
 import numpy as np
-import pandas as pd
 import pandas_datareader as pdr
 from pandas import Series
 import ta
 from ta.volatility import BollingerBands
 from ta.momentum import RSIIndicator
-from ta.volume import OnBalanceVolumeIndicator
-from ta.trend import MACD
-from ta.trend import EMAIndicator
-import Financial_Statement_Calling as call
+from Data import Financial_Statement_Calling as call
 
 # ta documentation
 # https://technical-analysis-library-in-python.readthedocs.io/en/latest/ta.html#volatility-indicators
