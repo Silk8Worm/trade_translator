@@ -117,7 +117,7 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     width, height = img.size
     area = (0,0,width,244)
     cropped_img = img.crop(area)
-    cropped_img.save('chart.png')
+    cropped_img.save('Kivy/chart.png')
 
     port_vals_daily = []
     for i in range(len(tickers), len(port_vals), len(tickers)):

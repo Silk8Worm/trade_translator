@@ -289,7 +289,7 @@ class BackTest(Screen):
         Cache._categories['kv.image']['timeout'] = 1
         Cache._categories['kv.texture']['limit'] = 0
         Cache._categories['kv.texture']['timeout'] = 1
-        self.image = 'chart.png'
+        self.image = 'Kivy/chart.png'
 
     def submit(self):
         app = App.get_running_app()
