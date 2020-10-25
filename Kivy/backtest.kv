@@ -125,6 +125,7 @@
             text: root.submit_text
             visible: root.submit_enabled
             opacity: 1 if root.submit_enabled else 0
+            disabled: not self.visible
             on_release: root.submit()
             size_hint: .12, .08
             pos: self.width*6.8, self.height*10.85

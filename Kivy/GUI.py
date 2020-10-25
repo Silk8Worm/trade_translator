@@ -48,7 +48,9 @@ class TradeTranslator(Screen):
 
 class Trade(Screen):
 
-    suggestion_words = "atr rsi obv macd".split(' ')
+    lower_words = 'atr above and bbands below close crosses debt debt/ebitda day days ema ebitda equal greater growth high if is low leverage less macd margin month months net obv open operating or rsi revenue ratio sma than to volume yesterday years year'
+    upper_words = lower_words.upper()
+    suggestion_words = (lower_words+' '+upper_words).split()
     word_list = suggestion_words.copy()
     trade = StringProperty()
     cover_trade = StringProperty()
@@ -72,11 +74,6 @@ class Trade(Screen):
             self.cover_trade = "Sell"
         else:
             self.cover_trade = "Buy"
-
-    def disconnect(self):
-        self.manager.transition = NoTransition()
-        self.manager.current = 'signin'
-        self.manager.get_screen('signin').resetForm()
 
     def backtest(self, signal, trade, cover_signal, universe, take_profit, stop_loss, cover_trade):
         popup = BackTestPopup()
@@ -117,8 +114,7 @@ class Trade(Screen):
             instance.text = value.replace('	', '')
             return
         instance.suggestion_text = ' '
-        word_list = list(set(
-            self.word_list))
+        word_list = self.word_list
         val = value[value.rfind(' ') + 1:]
         if not val:
             return
@@ -153,11 +149,10 @@ class ErrorPopup(Popup):
         self.error_text = text
         self.errors_lst = errors
         if self.error_module == 'Signal' or self.error_module == 'Cover Signal':
-            print(self.errors_lst)
             if self.errors_lst[0][1] == -1:
                 self.errors = 'Input too short. Missing words.'
             else:
-                self.errors = 'Invalid words: '
+                self.errors = 'Invalid word(s): '
                 for i in range(len(self.errors_lst)):
                     self.errors += self.errors_lst[i][0]
                     if i < len(self.errors_lst) - 1:
@@ -166,7 +161,7 @@ class ErrorPopup(Popup):
             if self.errors_lst == []:
                 self.errors = "No universe entered."
             else:
-                self.errors = "Invalid tickers: "
+                self.errors = "Invalid ticker(s): "
                 for i in range(len(self.errors_lst)):
                     self.errors += self.errors_lst[i]
                     if i < len(self.errors_lst) - 1:
@@ -195,6 +190,11 @@ class BackTestPopup(Popup):
             if date2test < date1test:
                 app = App.get_running_app()
                 Trade.error_text(app.manager.get_screen('trade'), first_date+' - '+second_date, 'Backtest Dates', ['Date range not large enough (min 1 week).'])
+                return
+            earliest_date = datetime(2018, 11, 1)
+            if earliest_date > date1test:
+                app = App.get_running_app()
+                Trade.error_text(app.manager.get_screen('trade'), first_date+' - '+second_date, 'Backtest Dates', ['Currently, we only support backtesting starting from Nov. 1st, 2018.'])
                 return
         except:
             app = App.get_running_app()

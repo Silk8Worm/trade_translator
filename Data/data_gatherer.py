@@ -5,7 +5,8 @@ from pandas import Series
 import ta
 from ta.volatility import BollingerBands
 from ta.momentum import RSIIndicator
-from Data import Financial_Statement_Calling as call
+import requests
+import json
 
 # ta documentation
 # https://technical-analysis-library-in-python.readthedocs.io/en/latest/ta.html#volatility-indicators
@@ -35,7 +36,7 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
     # obtains exactly <period> many extra days
     firstdate = np.busday_offset(startdate.isoformat()[:10], -(indicator_range_specification), roll='forward', holidays=HOLIDAYS_LIST)
     # Special case for MACD
-    if indicator == 'MACD':
+    if indicator == 'macd':
         if indicator_range_specification < 26:
             firstdate = np.busday_offset(startdate.isoformat()[:10], -(26), roll='forward', holidays=HOLIDAYS_LIST)
         elif indicator_range_specification == 26:
@@ -75,15 +76,15 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
     elif indicator == 'volume':
         output = df['Volume'][period:]
 
-    elif indicator in ['low BB', 'BB low']:  # Lower Bollinger Band
+    elif indicator in ['low BB', 'BB low', 'bbands low']:  # Lower Bollinger Band
         bb_low = ta.volatility.bollinger_lband(df["Close"], n=period, ndev=2, fillna=True)
         output = bb_low[period-1:]
 
-    elif indicator in ['high BB', 'BB high']:  # Higher Bollinger Band
+    elif indicator in ['high BB', 'BB high', 'bbands high']:  # Higher Bollinger Band
         bb_high = ta.volatility.bollinger_hband(df["Close"], n=period, ndev=2, fillna=True)
         output = bb_high[period-1:]
 
-    elif indicator == 'ATR':  # Average True Range
+    elif indicator == 'atr':  # Average True Range
         high = df['High'][1:]
         low = df['Low'][1:]
         close = df['Close'][1:]
@@ -102,11 +103,11 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
 
         output = atr.tolist()[period-1:]
 
-    elif indicator == 'RSI':  # Relative Strength Index  # TODO: Do this manually
+    elif indicator == 'rsi':  # Relative Strength Index  # TODO: Do this manually
         rsi = ta.momentum.rsi(df["Close"], n=period, fillna=True)
         output = rsi[period-1:]
 
-    elif indicator == 'OBV':  # On-Balance Volume
+    elif indicator == 'obv':  # On-Balance Volume
         close = df['Close'][period:]
         volume = df['Volume'][period:]
 
@@ -124,7 +125,7 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
 
         output = obv.tolist()
 
-    elif indicator == 'EMA':  # Exponential Moving Average
+    elif indicator == 'ema':  # Exponential Moving Average
         close = df['Close']
 
         ema = np.zeros(len(close))
@@ -140,21 +141,21 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
 
         output = ema.tolist()[period:]
 
-    elif indicator == 'MACD':  # Moving Average Convergence Divergence  # TODO: Do this manually
+    elif indicator == 'macd':  # Moving Average Convergence Divergence  # TODO: Do this manually
         other_startdate = np.busday_offset(startdate.isoformat()[:10], -(abs(26-period)), roll='forward', holidays=HOLIDAYS_LIST)
         other_startdate = datetime.datetime.strptime(str(other_startdate), '%Y-%m-%d')
 
         macd = {}
 
         if period < 26:
-            ema26 = get_technical('EMA', 26, duration, df, startdate)
-            other_ema = get_technical('EMA', period, duration, df, other_startdate)
+            ema26 = get_technical('ema', 26, duration, df, startdate)
+            other_ema = get_technical('ema', period, duration, df, other_startdate)
 
             for key in ema26:
                 macd[key] = other_ema[key] - ema26[key]
         else:
-            ema26 = get_technical('EMA', 26, duration, df, other_startdate)
-            other_ema = get_technical('EMA', period, duration, df, startdate)
+            ema26 = get_technical('ema', 26, duration, df, other_startdate)
+            other_ema = get_technical('ema', period, duration, df, startdate)
 
             for key in other_ema:
                 macd[key] = ema26[key] - other_ema[key]
@@ -190,15 +191,13 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
 
 
 def pull_fundamental_data(ticker: str, indicator: str, start_date: str, end_date: str):
-    api_key = "Tpk_6ef4a75d2a6f4d95be047b5629cf964f"
-
     start_date = datetime.datetime.strptime(start_date, '%d/%m/%Y')
     end_date = datetime.datetime.strptime(end_date, '%d/%m/%Y')
 
     # TODO: Delete this, just temporary
-    balance_sheet = call.balance_sheet(api_key, ticker, num_periods=12)
-    income_statement = call.income_statement(api_key, ticker, num_periods=12)
-    cash_flow_statement = call.cash_flow_statement(api_key, ticker, num_periods=12)
+    balance_sheet = json.loads(requests.get('https://tranquil-beyond-74281.herokuapp.com/info/tt/statements/'+ticker+'/balance/').text)
+    income_statement = json.loads(requests.get('https://tranquil-beyond-74281.herokuapp.com/info/tt/statements/'+ticker+'/income/').text)
+    cash_flow_statement = json.loads(requests.get('https://tranquil-beyond-74281.herokuapp.com/info/tt/statements/'+ticker+'/cash/').text)
 
     bs_dict = {}
     in_dict = {}
@@ -257,23 +256,23 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash):
     if indicator == "":
         return 'temporary'
     #
-    # if indicator == 'EPS':
+    # if indicator == 'eps':
     #    return (correct_is['netIncome'] + correct_cf['dividendsPaid'])/ num_shares
     # elif indicator == 'book value/share':
     #    return (correct_bs['shareholderEquity'] - pref_equity)/ num_shares
     # elif indicator == 'dividend yield':
     #    return dividendsPaid / stock_price
-    elif indicator == 'EBITDA':
+    elif indicator == 'ebitda':
         return correct_is['operatingIncome'] + correct_cf['depreciation']
-    elif indicator == 'EBITDA growth':
+    elif indicator == 'ebitda growth':
         this_year = correct_is['operatingIncome'] + correct_cf['depreciation']
         last_year = previous_is['operatingIncome'] + previous_cf['depreciation']
         return (this_year-last_year)/last_year
-    # elif indicator == 'EPS growth':
+    # elif indicator == 'eps growth':
     #
     elif indicator == 'leverage ratio':
         return correct_bs['totalLiabilities']/correct_bs['shareholderEquity']
-    elif indicator == 'net debt/EBITDA':
+    elif indicator == 'net debt/ebitda':
         return (correct_bs['totalLiabilities'] - correct_bs['currentCash']) / (correct_is['operatingIncome'] + correct_cf['depreciation'])
     elif indicator == 'operating margin':
         return correct_is['operatingIncome'] / correct_is['totalRevenue']
@@ -293,16 +292,18 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash):
 
 def get_data(tickers: list, indicator: str, start_date: str, end_date: str, period: int):
 
+    indicator = indicator.lower()
+
     data_dict = {}
-    technical_indicators = ['open', 'close', 'high', 'low', 'volume', 'low BB',
-                            'BB low', 'high BB', 'BB high', 'ATR', 'RSI', 'OBV',
-                            'EMA', 'MACD', 'proper MACD', 'MACD proper',
-                            'signal MACD', 'MACD signal', 'divergent MACD',
-                            'MACD divergent']
-    fundamental_indicators = ['EPS', 'book value/share',
-                              'dividend yield', 'EBITDA growth', 'EPS growth',
-                              'leverage ratio', 'EBITDA',
-                              'net debt/EBITDA', 'operating margin',
+    technical_indicators = ['open', 'close', 'high', 'low', 'volume', 'low bb',
+                            'bb low', 'high bb', 'bb high', 'atr', 'rsi', 'obv',
+                            'ema', 'macd', 'proper macd', 'macd proper',
+                            'signal macd', 'macd signal', 'divergent macd',
+                            'macd divergent']
+    fundamental_indicators = ['eps', 'book value/share',
+                              'dividend yield', 'ebitda growth', 'eps growth',
+                              'leverage ratio', 'ebitda',
+                              'net debt/ebitda', 'operating margin',
                               'price/book value', 'price/earnings','price/revenue',
                               'revenue growth', 'short interest']
 
