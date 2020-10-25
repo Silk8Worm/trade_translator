@@ -152,7 +152,7 @@ class ErrorPopup(Popup):
             if self.errors_lst[0][1] == -1:
                 self.errors = 'Input too short. Missing words.'
             else:
-                self.errors = 'Invalid word(s): '
+                self.errors = self.errors_lst[0][2] + '(s): '
                 for i in range(len(self.errors_lst)):
                     self.errors += self.errors_lst[i][0]
                     if i < len(self.errors_lst) - 1:
