@@ -22,7 +22,8 @@ TECHNICAL_DATABASE = {}  # dictionaries allow you to assume a key already exists
 #  Alpaca does not not behave well with stock splits!!
 
 # BDD = np.busdaycalendar(holidays=['2020-09-07'])
-HOLIDAYS_LIST = ['2020-09-07']
+HOLIDAYS_LIST = ['2020-01-01', '2020-01-20', '2020-02-17', '2020-04-10', '2020-05-25',
+                 '2020-06-03', '2020-09-07', '2020-11-26', '2020-12-25']
 
 
 def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: str, indicator_range_specification: int):
@@ -76,12 +77,12 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
     elif indicator == 'volume':
         output = df['Volume'][period:]
 
-    elif indicator in ['low BB', 'BB low', 'bbands low']:  # Lower Bollinger Band
-        bb_low = ta.volatility.bollinger_lband(df["Close"], n=period, ndev=2, fillna=True)
+    elif indicator in ['low bb', 'bb low', 'bbands low']:  # Lower Bollinger Band
+        bb_low = ta.volatility.bollinger_lband(df["Close"][1:], n=period, ndev=2, fillna=True)
         output = bb_low[period-1:]
 
-    elif indicator in ['high BB', 'BB high', 'bbands high']:  # Higher Bollinger Band
-        bb_high = ta.volatility.bollinger_hband(df["Close"], n=period, ndev=2, fillna=True)
+    elif indicator in ['high bb', 'bb high', 'bbands high']:  # Higher Bollinger Band
+        bb_high = ta.volatility.bollinger_hband(df["Close"][1:], n=period, ndev=2, fillna=True)
         output = bb_high[period-1:]
 
     elif indicator == 'atr':  # Average True Range
@@ -103,9 +104,53 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
 
         output = atr.tolist()[period-1:]
 
-    elif indicator == 'rsi':  # Relative Strength Index  # TODO: Do this manually
-        rsi = ta.momentum.rsi(df["Close"], n=period, fillna=True)
-        output = rsi[period-1:]
+    elif indicator == 'rsi':  # Relative Strength Index
+        close = df['Close']
+
+        today_gain = np.zeros(len(close))
+        today_loss = np.zeros(len(close))
+        avg_gain = np.zeros(len(close))
+        avg_loss = np.zeros(len(close))
+        rs = np.zeros(len(close))
+        rsi = np.zeros(len(close))
+
+        # Compute Gain and Loss of Each Day
+        for i in range(1, len(close)):
+            diff = close[i] - close[i - 1]
+            if diff > 0:
+                today_gain[i] = diff
+            else:
+                today_loss[i] = abs(diff)
+
+        # Compute Average Gain/Loss
+        for i in range(period, len(close)):
+            x = today_gain[i - (period - 1):i + 1]
+            y = today_loss[i - (period - 1):i + 1]
+
+            count = 0
+            for value in x:
+                if value != 0:
+                    avg_gain[i] += value
+                    count += 1
+            avg_gain[i] /= count
+
+            count = 0
+            for value in y:
+                if value != 0:
+                    avg_loss[i] += value
+                    count += 1
+
+            if avg_loss[i] == 0:
+                # Edge Case, avoid division by zero
+                rsi[i] = 100
+            else:
+                # Standard Case
+                avg_loss[i] /= count
+
+                rs[i] = avg_gain[i] / avg_loss[i]
+                rsi[i] = 100 - 100 / (1 + rs[i])
+
+        output = rsi.tolist()[period:]
 
     elif indicator == 'obv':  # On-Balance Volume
         close = df['Close'][period:]
@@ -141,7 +186,7 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
 
         output = ema.tolist()[period:]
 
-    elif indicator == 'macd':  # Moving Average Convergence Divergence  # TODO: Do this manually
+    elif indicator == 'macd':  # Moving Average Convergence Divergence
         other_startdate = np.busday_offset(startdate.isoformat()[:10], -(abs(26-period)), roll='forward', holidays=HOLIDAYS_LIST)
         other_startdate = datetime.datetime.strptime(str(other_startdate), '%Y-%m-%d')
 
@@ -331,7 +376,7 @@ if __name__ == '__main__':
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    x = get_data(['NFLX'], 'MACD', '25/09/2020', '20/10/2020', 30)
+    x = get_data(['NFLX'], 'close', '09/10/2020', '20/10/2020', 14)
     # x = get_data(['NFLX'], 'EMA', '25/09/2020', '20/10/2020', 26)
     # print(x)
 
