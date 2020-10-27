@@ -154,7 +154,7 @@ class ErrorPopup(Popup):
             else:
                 self.errors = self.errors_lst[0][2] + '(s): '
                 for i in range(len(self.errors_lst)):
-                    self.errors += self.errors_lst[i][0]
+                    self.errors += str(self.errors_lst[i][0])
                     if i < len(self.errors_lst) - 1:
                         self.errors += ', '
         elif self.error_module == 'Universe':
