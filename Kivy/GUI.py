@@ -52,39 +52,71 @@ class Trade(Screen):
     upper_words = lower_words.upper()
     suggestion_words = (lower_words+' '+upper_words).split()
     word_list = suggestion_words.copy()
+    # Number Text
     trade = StringProperty()
     cover_trade = StringProperty()
+    trade_hint = StringProperty()
+    cover_trade_hint = StringProperty()
+    # Signal Text
     trade_text = StringProperty()
     cover_text = StringProperty()
     universe_text = StringProperty()
 
     def __init__(self, **kwargs):
         super(Screen, self).__init__(**kwargs)
-        self.trade = "Buy"
-        self.cover_trade = "Sell"
+        self.trade = "Buy #"
+        self.cover_trade = "Sell #"
+        self.trade_hint = "Enter # of shares"
+        self.cover_trade_hint = "Enter # of shares"
 
     def change_trade(self):
-        if self.trade == "Buy":
-            self.trade = "Sell"
+        if self.trade == "Buy #":
+            self.trade = "Buy %"
+            self.trade_hint = "Enter % of portfolio"
+        elif self.trade == "Buy %":
+            self.trade = "Sell #"
+            self.trade_hint = "Enter # of shares"
+        elif self.trade == "Sell #":
+            self.trade = "Sell %"
+            self.trade_hint = "Enter % of portfolio"
+        elif self.trade == "Sell %":
+            self.trade = "Buy #"
+            self.trade_hint = "Enter # of shares"
         else:
-            self.trade = "Buy"
+            print("Error with button.")
 
     def change_cover_trade(self):
-        if self.cover_trade == "Buy":
-            self.cover_trade = "Sell"
+        if self.cover_trade == "Buy #":
+            self.cover_trade = "Buy %"
+            self.cover_trade_hint = "Enter % of portfolio"
+        elif self.cover_trade == "Buy %":
+            self.cover_trade = "Sell #"
+            self.cover_trade_hint = "Enter # of shares"
+        elif self.cover_trade == "Sell #":
+            self.cover_trade = "Sell %"
+            self.cover_trade_hint = "Enter % of portfolio"
+        elif self.cover_trade == "Sell %":
+            self.cover_trade = "Buy #"
+            self.cover_trade_hint = "Enter # of shares"
         else:
-            self.cover_trade = "Buy"
+            print("Error with button.")
 
     def backtest(self, signal, trade, cover_signal, universe, take_profit, stop_loss, cover_trade):
         popup = BackTestPopup()
         popup.open()
         popup.signal = signal
-        popup.trade = trade
+        if self.trade in ['Buy %', 'Sell %']:
+            popup.trade = trade + '%'
+        else:
+            popup.trade = trade
         popup.cover_signal = cover_signal
         popup.universe = universe
         popup.take_profit = take_profit
         popup.stop_loss = stop_loss
-        popup.cover_trade = cover_trade
+        if self.trade in ['Buy %', 'Sell %']:
+            popup.cover_trade = cover_trade + '%'
+        else:
+            popup.cover_trade = cover_trade
         popup.buy = self.trade
         popup.cover_buy = self.cover_trade
 
@@ -92,12 +124,18 @@ class Trade(Screen):
         popup = CasePopup()
         popup.open()
         popup.signal = signal
-        popup.trade = trade
+        if self.trade in ['Buy %', 'Sell %']:
+            popup.trade = trade + '%'
+        else:
+            popup.trade = trade
         popup.cover_signal = cover_signal
         popup.universe = universe
         popup.take_profit = take_profit
         popup.stop_loss = stop_loss
-        popup.cover_trade = cover_trade
+        if self.trade in ['Buy %', 'Sell %']:
+            popup.cover_trade = cover_trade + '%'
+        else:
+            popup.cover_trade = cover_trade
         popup.buy = self.trade
         popup.cover_buy = self.cover_trade
 
@@ -171,6 +209,8 @@ class ErrorPopup(Popup):
                 self.errors = 'No date provided.'
             else:
                 self.errors = self.errors_lst[0]
+        elif self.error_module in ['Take Profit', 'Stop Loss', 'Trade', 'Cover Trade']:
+            self.errors = "You cannot enter a negative number."
         else:
             print("Module does not exist")
 
@@ -207,7 +247,7 @@ class BackTestPopup(Popup):
                                  self.cover_buy,self.cover_trade,
                                  first_date, second_date)
 
-        if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered']:
+        if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered', 'Negative Values Not Accepted']:
             app = App.get_running_app()
             Trade.error_text(app.manager.get_screen('trade'), d, b, c)
         else:
@@ -243,7 +283,7 @@ class CasePopup(Popup):
                                  self.cover_buy,self.cover_trade,
                                  self.casestart, self.caseend)
 
-        if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered']:
+        if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered', 'Negative Values Not Accepted']:
             app = App.get_running_app()
             Trade.error_text(app.manager.get_screen('trade'), d, b, c)
         else:

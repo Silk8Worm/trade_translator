@@ -22,16 +22,32 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     global end_date_pre
     global buy_bool
     global cover_buy_bool
+    global percentage_trade
     global amount
-    if amt == "":
+    if amt == "" or amt == "%":
         amount = 0
     else:
+        if amt[-1] == '%':
+            amt = amt.strip('%')
+            percentage_trade = True
+        else:
+            percentage_trade = False
         amount = int(amt)
+        if amount < 0:
+            return 'Negative Values Not Accepted', "Trade", "", amt
     global cover_amount
-    if cover_amt == "":
+    global percentage_cover_trade
+    if cover_amt == "" or cover_amt == "%":
         cover_amount = 0
     else:
+        if cover_amt[-1] == '%':
+            cover_amt = cover_amt.strip('%')
+            percentage_cover_trade = True
+        else:
+            percentage_cover_trade = False
         cover_amount = int(cover_amt)
+        if cover_amount < 0:
+            return 'Negative Values Not Accepted', "Cover Trade", "", cover_amt
     if cover_signal == "":
         cover_signal = "if rsi greater than 1000000"
     global starting_cash
@@ -47,25 +63,30 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     other_signal = cover_signal
     global take_profit
     if t_profit == "":
-        take_profit=1000
+        take_profit=10
     else:
         take_profit = float(t_profit)/100
+        if take_profit < 0:
+            return 'Negative Values Not Accepted', "Take Profit", "", t_profit
     global stop_loss
     if s_loss == "":
-        stop_loss=1000
+        stop_loss=10
     else:
         stop_loss = float(s_loss)/100
-    if trade == 'Sell':
+        if stop_loss < 0:
+            return 'Negative Values Not Accepted', "Stop Loss", "", s_loss
+    print(trade)
+    if trade == 'Sell #' or trade == 'Sell %':
         buy_bool = False
     else:
         buy_bool = True
 
-    if cover_trade == 'Sell':
+    if cover_trade == 'Sell #' or cover_trade == 'Sell %':
         cover_buy_bool = False
     else:
         cover_buy_bool = True
 
-    cerebro = bt.Cerebro()
+    cerebro = bt.Cerebro(cheat_on_open=True)
     cerebro.broker.setcash(starting_cash)
     cerebro.broker.setcommission(0)
 
@@ -98,6 +119,7 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
         # print(cover_ast.evaluate(), file=stderr)
         return 'Invalid Input', "Cover Signal", cover_ast.evaluate(), cover_signal
 
+    cerebro.broker.set_checksubmit(checksubmit=False)
     # Iterate over the tickers, and then the dates (that list will be provided by zipline?)
     for ticker in tickers:
         state.ticker = ticker
@@ -137,35 +159,71 @@ class TreeSignalStrategy(bt.Strategy):
     def __init__(self):
         self._addobserver(True, bt.observers.BuySell)
 
-    def next(self):
+    def next_open(self):
         port_vals.append(self.broker.getvalue())
         date_data = self.datetime.date(ago=0)
         state.current_day = date_data.strftime('%d/%m/%Y')
 
-        close = self.data.close[0]
+        open = self.data.open[0]
         if amount > 0 and ast.evaluate():
-            if buy_bool:
-                self.buy_bracket(size=amount,
-                                 exectype=bt.Order.Market,
-                                 limitprice=close*(1+take_profit),
-                                 stopprice=close*(1-stop_loss))
+            if percentage_trade:
+                size = round((self.broker.get_cash() / open * amount / 100), 0)
+                if size == 0:
+                    pass
+                elif buy_bool:
+                    if not self.position:
+                        self.buy_bracket(size=size,
+                                         exectype=bt.Order.Market,
+                                         limitprice=open*(1+take_profit),
+                                         stopprice=open*(1-stop_loss))
+                else:
+                    if not self.position:
+                        self.sell_bracket(size=size,
+                                          exectype=bt.Order.Market,
+                                          limitprice=open*(1-take_profit),
+                                          stopprice=open*(1+stop_loss))
             else:
-                self.sell_bracket(size=amount,
-                                  exectype=bt.Order.Market,
-                                  limitprice=close*(1-take_profit),
-                                  stopprice=close*(1+stop_loss))
+                if buy_bool:
+                    self.buy_bracket(size=amount,
+                                     exectype=bt.Order.Market,
+                                     limitprice=open*(1+take_profit),
+                                     stopprice=open*(1-stop_loss))
+                else:
+                    if self.broker.get_cash() + amount * open < starting_cash*2:
+                        self.sell_bracket(size=amount,
+                                          exectype=bt.Order.Market,
+                                          limitprice=open*(1-take_profit),
+                                          stopprice=open*(1+stop_loss))
 
         if cover_amount > 0 and cover_ast.evaluate():
-            if cover_buy_bool:
-                self.buy_bracket(size=cover_amount,
-                                 exectype=bt.Order.Market,
-                                 limitprice=close*(1+take_profit),
-                                 stopprice=close*(1-stop_loss))
+            if percentage_cover_trade:
+                size = round((self.broker.get_cash() / open) * cover_amount/100, 0)
+                if size == 0:
+                    pass
+                elif cover_buy_bool:
+                    if not self.position:
+                        self.buy_bracket(size=size,
+                                         exectype=bt.Order.Market,
+                                         limitprice=open*(1+take_profit),
+                                         stopprice=open*(1-stop_loss))
+                else:
+                    if not self.position:
+                        self.sell_bracket(size=size,
+                                          exectype=bt.Order.Market,
+                                          limitprice=open*(1-take_profit),
+                                          stopprice=open*(1+stop_loss))
             else:
-                self.sell_bracket(size=cover_amount,
-                                  exectype=bt.Order.Market,
-                                  limitprice=close*(1-take_profit),
-                                  stopprice=close*(1+stop_loss))
+                if cover_buy_bool:
+                    self.buy_bracket(size=cover_amount,
+                                     exectype=bt.Order.Market,
+                                     limitprice=open*(1+take_profit),
+                                     stopprice=open*(1-stop_loss))
+                else:
+                    if self.broker.get_cash() + cover_amount * open < starting_cash*2:
+                        self.sell_bracket(size=cover_amount,
+                                          exectype=bt.Order.Market,
+                                          limitprice=open*(1-take_profit),
+                                          stopprice=open*(1+stop_loss))
 
 
 def saveplots(cerebro, numfigs=1, iplot=True, start=None, end=None,

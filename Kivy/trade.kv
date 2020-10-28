@@ -106,7 +106,7 @@
 
         TextInput:
             id: trade
-            hint_text: 'Enter # of shares'
+            hint_text: root.trade_hint
             multiline: False
             font_size: min(self.width/11.35, self.height/1.723077)
             input_filter: 'int'
@@ -139,7 +139,7 @@
 
         TextInput:
             id: cover_trade
-            hint_text: 'Enter # of shares'
+            hint_text: root.cover_trade_hint
             multiline: False
             font_size: min(self.width/11.35, self.height/1.723077)
             input_filter: 'int'
