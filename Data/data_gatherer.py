@@ -207,6 +207,17 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
 
         return macd
 
+    elif indicator == 'sma':  # Simply Moving Average
+        close = df['Close'][1:]
+
+        sma = np.zeros(len(close))
+
+        # Compute the SMA
+        for i in range(period-1, len(sma)):
+            sma[i] = close[i - period + 1:i+1].mean()
+
+        output = sma.tolist()[period-1:]
+
     # Return in dictionary with mapping [date:value]
     data = {}
 
@@ -376,7 +387,7 @@ if __name__ == '__main__':
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    x = get_data(['NFLX'], 'close', '09/10/2020', '20/10/2020', 14)
+    x = get_data(['NFLX'], 'sma', '25/09/2020', '20/10/2020', 5)
     # x = get_data(['NFLX'], 'EMA', '25/09/2020', '20/10/2020', 26)
     # print(x)
 
