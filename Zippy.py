@@ -75,7 +75,6 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
         stop_loss = float(s_loss)/100
         if stop_loss < 0:
             return 'Negative Values Not Accepted', "Stop Loss", "", s_loss
-    print(trade)
     if trade == 'Sell #' or trade == 'Sell %':
         buy_bool = False
     else:
