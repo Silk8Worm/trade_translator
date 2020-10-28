@@ -2,3 +2,8 @@
 /LexerParser/src/parser.out
 /LexerParser/src/parsetab.py
 /LexerParser/Notes.txt
+Data/__pycache__/
+Kivy/__pycache__/
+Kivy/chart.png
+LexerParser/src/__pycache__/
+__pycache__/Zippy.cpython-38.pyc
