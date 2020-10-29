@@ -311,37 +311,20 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash):
     #TODO: Need shares oustanding for calculations
     if indicator == "":
         return 'temporary'
-    #
-    # if indicator == 'eps':
-    #    return (correct_is['netIncome'] + correct_cf['dividendsPaid'])/ num_shares
-    # elif indicator == 'book value/share':
-    #    return (correct_bs['shareholderEquity'] - pref_equity)/ num_shares
-    # elif indicator == 'dividend yield':
-    #    return dividendsPaid / stock_price
     elif indicator == 'ebitda':
         return correct_is['operatingIncome'] + correct_cf['depreciation']
     elif indicator == 'ebitda growth':
         this_year = correct_is['operatingIncome'] + correct_cf['depreciation']
         last_year = previous_is['operatingIncome'] + previous_cf['depreciation']
         return (this_year-last_year)/last_year
-    # elif indicator == 'eps growth':
-    #
     elif indicator == 'leverage ratio':
         return correct_bs['totalLiabilities']/correct_bs['shareholderEquity']
     elif indicator == 'net debt/ebitda':
         return (correct_bs['totalLiabilities'] - correct_bs['currentCash']) / (correct_is['operatingIncome'] + correct_cf['depreciation'])
     elif indicator == 'operating margin':
         return correct_is['operatingIncome'] / correct_is['totalRevenue']
-    # elif indicator == 'price/book value':
-    #    return stock_price / (correct_bs['shareholderEquity'] - pref_equity)
-    # elif indicator == 'price/earnings':
-    #    return stock_price / ((correct_is['netIncome'] + correct_cf['dividendsPaid'])/ num_shares)
-    # elif indicator == 'price/revenue':
-    #    return stock_price / correct_is['totalRevenue']
     elif indicator == 'revenue growth':
         return (correct_is['totalRevenue'] - previous_is['totalRevenue']) / previous_is['totalRevenue']
-    # elif indicator == 'short interest':
-    #   return num_shorted_shares / num_shares
     else:
         return None
 

@@ -157,6 +157,7 @@ class TreeSignalStrategy(bt.Strategy):
 
     def __init__(self):
         self._addobserver(True, bt.observers.BuySell)
+        self.cover = False
 
     def next_open(self):
         port_vals.append(self.broker.getvalue())
@@ -171,54 +172,62 @@ class TreeSignalStrategy(bt.Strategy):
                     pass
                 elif buy_bool:
                     if not self.position:
+                        self.cover = True
                         self.buy_bracket(size=size,
                                          exectype=bt.Order.Market,
                                          limitprice=open*(1+take_profit),
                                          stopprice=open*(1-stop_loss))
                 else:
                     if not self.position:
+                        self.cover = True
                         self.sell_bracket(size=size,
                                           exectype=bt.Order.Market,
                                           limitprice=open*(1-take_profit),
                                           stopprice=open*(1+stop_loss))
             else:
                 if buy_bool:
+                    self.cover = True
                     self.buy_bracket(size=amount,
                                      exectype=bt.Order.Market,
                                      limitprice=open*(1+take_profit),
                                      stopprice=open*(1-stop_loss))
                 else:
+                    self.cover = True
                     if self.broker.get_cash() + amount * open < starting_cash*2:
                         self.sell_bracket(size=amount,
                                           exectype=bt.Order.Market,
                                           limitprice=open*(1-take_profit),
                                           stopprice=open*(1+stop_loss))
 
-        if cover_amount > 0 and cover_ast.evaluate():
+        if cover_amount > 0 and cover_ast.evaluate() and self.cover == True:
             if percentage_cover_trade:
                 size = round((self.broker.get_cash() / open) * cover_amount/100, 0)
                 if size == 0:
                     pass
                 elif cover_buy_bool:
                     if not self.position:
+                        self.cover = False
                         self.buy_bracket(size=size,
                                          exectype=bt.Order.Market,
                                          limitprice=open*(1+take_profit),
                                          stopprice=open*(1-stop_loss))
                 else:
                     if not self.position:
+                        self.cover = False
                         self.sell_bracket(size=size,
                                           exectype=bt.Order.Market,
                                           limitprice=open*(1-take_profit),
                                           stopprice=open*(1+stop_loss))
             else:
                 if cover_buy_bool:
+                    self.cover = False
                     self.buy_bracket(size=cover_amount,
                                      exectype=bt.Order.Market,
                                      limitprice=open*(1+take_profit),
                                      stopprice=open*(1-stop_loss))
                 else:
                     if self.broker.get_cash() + cover_amount * open < starting_cash*2:
+                        self.cover = False
                         self.sell_bracket(size=cover_amount,
                                           exectype=bt.Order.Market,
                                           limitprice=open*(1-take_profit),
