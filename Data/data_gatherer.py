@@ -246,9 +246,9 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
     return data
 
 
-def pull_fundamental_data(ticker: str, indicator: str, start_date: str, end_date: str):
-    start_date = datetime.datetime.strptime(start_date, '%d/%m/%Y')
-    end_date = datetime.datetime.strptime(end_date, '%d/%m/%Y')
+def pull_fundamental_data(ticker: str, indicator: str, start_date_pre: str, end_date_pre: str):
+    start_date = datetime.datetime.strptime(start_date_pre, '%d/%m/%Y')
+    end_date = datetime.datetime.strptime(end_date_pre, '%d/%m/%Y')
 
     # TODO: Delete this, just temporary
     balance_sheet = json.loads(requests.get('https://tranquil-beyond-74281.herokuapp.com/info/tt/statements/'+ticker+'/balance/').text)
@@ -267,19 +267,25 @@ def pull_fundamental_data(ticker: str, indicator: str, start_date: str, end_date
     for item in cash_flow_statement['cashflow']:
         cf_dict[item['reportDate']] = item
 
+    r = requests.post('https://tranquil-beyond-74281.herokuapp.com/info/tt/price/', data={"tickers":ticker, "start":start_date_pre, "end":end_date_pre})
+    prices_j = r.json()
+    prices = {}
+    for key, value in prices_j.items():
+        prices[datetime.datetime.strptime(key, '%d/%m/%Y')] = value
+
     temp_date = start_date
 
     output = {}
 
     # Passing the appropriate dictionary of values
     while temp_date <= end_date:
-        output[temp_date.strftime("%d/%m/%Y")] = get_fundamental(temp_date, indicator, bs_dict, in_dict, cf_dict)
+        output[temp_date.strftime("%d/%m/%Y")] = get_fundamental(temp_date, indicator, bs_dict, in_dict, cf_dict, prices)
         temp_date += datetime.timedelta(days=1)
 
     return output
 
 
-def get_fundamental(date: datetime, indicator: str, bal, inc, cash):
+def get_fundamental(date: datetime, indicator: str, bal, inc, cash, prices):
 
     correct_bs, previous_bs, correct_is, previous_is, correct_cf, previous_cf = \
         {}, {}, {}, {}, {}, {}
@@ -303,30 +309,76 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash):
             correct_cf = cash[date_check]
             previous_cf = cash[list(cash.keys())[i+1]]
             break
-
     # print(correct_bs)
     # print(correct_is)
     # print(correct_cf)
+    for key, value in correct_bs.items():
+        if value is None:
+            correct_bs[key] = 0
+    for key, value in correct_is.items():
+        if value is None:
+            correct_is[key] = 0
+    for key, value in correct_cf.items():
+        if value is None:
+            correct_cf[key] = 0
 
-    #TODO: Need shares oustanding for calculations
-    if indicator == "":
-        return 'temporary'
-    elif indicator == 'ebitda':
-        return correct_is['operatingIncome'] + correct_cf['depreciation']
-    elif indicator == 'ebitda growth':
-        this_year = correct_is['operatingIncome'] + correct_cf['depreciation']
-        last_year = previous_is['operatingIncome'] + previous_cf['depreciation']
-        return (this_year-last_year)/last_year
-    elif indicator == 'leverage ratio':
-        return correct_bs['totalLiabilities']/correct_bs['shareholderEquity']
-    elif indicator == 'net debt/ebitda':
-        return (correct_bs['totalLiabilities'] - correct_bs['currentCash']) / (correct_is['operatingIncome'] + correct_cf['depreciation'])
-    elif indicator == 'operating margin':
-        return correct_is['operatingIncome'] / correct_is['totalRevenue']
-    elif indicator == 'revenue growth':
-        return (correct_is['totalRevenue'] - previous_is['totalRevenue']) / previous_is['totalRevenue']
-    else:
-        return None
+    try:
+        if indicator == "":
+            return 'temporary'
+        elif indicator == 'ebitda':
+            return correct_is['operatingIncome'] + correct_cf['depreciation']
+        elif indicator == 'ebitda growth':
+            this_year = correct_is['operatingIncome'] + correct_cf['depreciation']
+            last_year = previous_is['operatingIncome'] + previous_cf['depreciation']
+            return (this_year-last_year)/last_year
+        elif indicator == 'leverage ratio':
+            return ((previous_bs['totalAssets']+correct_bs['totalAssets'])/2)/((previous_bs['shareholderEquity']+correct_bs['shareholderEquity'])/2)
+        elif indicator == 'net debt/ebitda':
+            return (correct_bs['totalLiabilities'] - correct_bs['currentCash']) / (correct_is['operatingIncome'] + correct_cf['depreciation'])
+        elif indicator == 'operating margin':
+            return correct_is['operatingIncome'] / correct_is['totalRevenue']
+        elif indicator == 'revenue growth':
+            return (correct_is['totalRevenue'] - previous_is['totalRevenue']) / previous_is['totalRevenue']
+
+        #TODO: Ryan plz add
+        elif indicator == 'debt to equity':
+            return (correct_bs['currentLongTermDebt'] + correct_bs['longTermDebt']) / correct_bs['shareholderEquity']
+        elif indicator == 'debt to assets':
+            return (correct_bs['currentLongTermDebt'] + correct_bs['longTermDebt']) / correct_bs['totalAssets']
+        elif indicator == 'cash debt coverage ratio':
+            return correct_cf['cashFlow'] / ((correct_bs['totalLiabilities'] + previous_bs['totalLiabilities'])/2)
+        elif indicator == 'eps':
+            return correct_is['netIncomeBasic'] / correct_bs['commonStock']
+        elif indicator == 'gross margin':
+            return correct_is['grossProfit'] / correct_is['totalRevenue']
+        elif indicator == 'profit margin':
+            return correct_is['netIncome'] / correct_is['totalRevenue']
+        elif indicator == 'roe':
+            return correct_is['netIncome'] / ((correct_bs['shareholderEquity'] + previous_bs['shareholderEquity'])/2)
+        elif indicator == 'roa':
+            return correct_is['netIncome'] / ((correct_bs['totalAssets'] + previous_bs['totalAssets'])/2)
+        elif indicator == 'current ratio':
+            return correct_bs['currentAssets'] / correct_bs['totalCurrentLiabilities']
+        elif indicator == 'quick ratio':
+            return (correct_bs['currentCash'] + correct_bs['shortTermInvestments'] + correct_bs['receivables']) / correct_bs['totalCurrentLiabilities']
+        elif indicator == 'payout ratio':
+            return correct_cf['dividendsPaid'] / correct_is['netIncome']
+        elif indicator == 'revenue per share':
+            return correct_is['totalRevenue'] / correct_bs['commonStock']
+        elif indicator == 'price to sales':
+            try:
+                return prices[date] / (correct_is['totalRevenue'] / correct_bs['commonStock'])
+            except KeyError:
+                return 0
+        elif indicator == 'price to earnings':
+            try:
+                return prices[date] / (correct_is['netIncomeBasic'] / correct_bs['commonStock'])
+            except KeyError:
+                return 0
+        else:
+            return 0
+    except ZeroDivisionError:
+        return 0
 
 
 def get_data(tickers: list, indicator: str, start_date: str, end_date: str, period: int):
@@ -344,7 +396,12 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
                               'leverage ratio', 'ebitda',
                               'net debt/ebitda', 'operating margin',
                               'price/book value', 'price/earnings','price/revenue',
-                              'revenue growth', 'short interest']
+                              'revenue growth', 'short interest',
+                              #TODO: To be added
+                              'debt to equity', 'debt to assets', 'cash debt coverage ratio',
+                              'eps', 'gross margin', 'profit margin', 'roe', 'roa',
+                              'current ratio', 'quick ratio', 'payout ratio',
+                              'revenue per share', 'price to sales', 'price to earnings']
 
     if indicator in fundamental_indicators:
         for ticker in tickers:
@@ -370,7 +427,7 @@ if __name__ == '__main__':
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    x = get_data(['NFLX'], 'sma', '25/09/2020', '20/10/2020', 5)
+    x = get_data(['NFLX'], 'gross margin', '25/09/2020', '20/10/2020', 5)
     # x = get_data(['NFLX'], 'EMA', '25/09/2020', '20/10/2020', 26)
     # print(x)
 
