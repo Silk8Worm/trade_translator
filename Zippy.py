@@ -192,7 +192,8 @@ class TreeSignalStrategy(bt.Strategy):
                             self.buy_bracket(size=size,
                                              exectype=bt.Order.Market,
                                              limitprice=open*(1+take_profit),
-                                             stopprice=open*(1-stop_loss))
+                                             stopprice=open*(1-stop_loss),
+                                             data=self.data)
                     else:
                         if not self.position and self.temp_cash + size*open < min(self.broker.get_cash()*2, starting_cash*2):
                             self.temp_cash += size*open
@@ -203,7 +204,8 @@ class TreeSignalStrategy(bt.Strategy):
                             self.sell_bracket(size=size,
                                               exectype=bt.Order.Market,
                                               limitprice=open*(1-take_profit),
-                                              stopprice=open*(1+stop_loss))
+                                              stopprice=open*(1+stop_loss),
+                                              data=self.data)
                 else:
                     if buy_bool:
                         if not self.position:
@@ -214,7 +216,8 @@ class TreeSignalStrategy(bt.Strategy):
                             self.buy_bracket(size=amount,
                                              exectype=bt.Order.Market,
                                              limitprice=open*(1+take_profit),
-                                             stopprice=open*(1-stop_loss))
+                                             stopprice=open*(1-stop_loss),
+                                             data=self.data)
                     else:
                         if not self.position and self.temp_cash + amount * open < min(self.broker.get_cash()*2, starting_cash*2):
                             transaction_history.append(f'{state.ticker} SHORT_SELL {amount} {date_data.strftime("%d/%m/%Y")} {open}')
@@ -225,7 +228,8 @@ class TreeSignalStrategy(bt.Strategy):
                             self.sell_bracket(size=amount,
                                               exectype=bt.Order.Market,
                                               limitprice=open*(1-take_profit),
-                                              stopprice=open*(1+stop_loss))
+                                              stopprice=open*(1+stop_loss),
+                                              data=self.data)
 
             if cover_amount > 0 and cover_ast.evaluate() and self.cover > 0 and self.position:
                 if percentage_cover_trade:
@@ -238,7 +242,8 @@ class TreeSignalStrategy(bt.Strategy):
                         self.buy_bracket(size=size,
                                          exectype=bt.Order.Market,
                                          limitprice=max(self.take_price[0], self.stop_price[0]),
-                                         stopprice=min(self.stop_price[0], self.take_price[0]))
+                                         stopprice=min(self.stop_price[0], self.take_price[0]),
+                                         data=self.data)
                         self.take_price.pop(0)
                         self.stop_price.pop(0)
                     else:
@@ -249,7 +254,8 @@ class TreeSignalStrategy(bt.Strategy):
                             self.sell_bracket(size=size,
                                               exectype=bt.Order.Market,
                                               limitprice=min(self.stop_price[0], self.take_price[0]),
-                                              stopprice=max(self.take_price[0], self.stop_price[0]))
+                                              stopprice=max(self.take_price[0], self.stop_price[0]),
+                                              data=self.data)
                             self.take_price.pop(0)
                             self.stop_price.pop(0)
                 else:
@@ -259,7 +265,8 @@ class TreeSignalStrategy(bt.Strategy):
                         self.buy_bracket(size=cover_amount,
                                          exectype=bt.Order.Market,
                                          limitprice=max(self.take_price[0], self.stop_price[0]),
-                                         stopprice=min(self.stop_price[0], self.take_price[0]))
+                                         stopprice=min(self.stop_price[0], self.take_price[0]),
+                                         data=self.data)
                         self.take_price.pop(0)
                         self.stop_price.pop(0)
                     else:
@@ -270,7 +277,8 @@ class TreeSignalStrategy(bt.Strategy):
                             self.sell_bracket(size=cover_amount,
                                               exectype=bt.Order.Market,
                                               limitprice=min(self.stop_price[0], self.take_price[0]),
-                                              stopprice=max(self.take_price[0], self.stop_price[0]))
+                                              stopprice=max(self.take_price[0], self.stop_price[0]),
+                                              data=self.data)
                             self.take_price.pop(0)
                             self.stop_price.pop(0)
 
