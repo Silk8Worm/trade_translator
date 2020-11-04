@@ -309,9 +309,9 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash, prices):
             correct_cf = cash[date_check]
             previous_cf = cash[list(cash.keys())[i+1]]
             break
-    print(correct_bs)
-    print(correct_is)
-    print(correct_cf)
+    if correct_bs == {} or correct_is == {} or correct_cf == {}:
+        return 0
+
     for key, value in correct_bs.items():
         if value is None:
             correct_bs[key] = 0
@@ -378,8 +378,6 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash, prices):
         else:
             return 0
     except ZeroDivisionError:
-        return 0
-    except KeyError:
         return 0
 
 
