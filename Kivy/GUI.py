@@ -241,7 +241,7 @@ class BackTestPopup(Popup):
             Trade.error_text(app.manager.get_screen('trade'), first_date+' - '+second_date, 'Backtest Dates', ['Invalid date format.'])
             return
 
-        a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
+        a, b, c, d, e = Zippy.zippy(self.signal,self.buy,self.trade,
                                  self.cover_signal,self.universe,
                                  self.take_profit,self.stop_loss,
                                  self.cover_buy,self.cover_trade,
@@ -277,7 +277,7 @@ class CasePopup(Popup):
             self.caseend = r.json()['cases'][0]['endDate']
 
     def case(self):
-        a, b, c, d = Zippy.zippy(self.signal,self.buy,self.trade,
+        a, b, c, d, e = Zippy.zippy(self.signal,self.buy,self.trade,
                                  self.cover_signal,self.universe,
                                  self.take_profit,self.stop_loss,
                                  self.cover_buy,self.cover_trade,
@@ -292,6 +292,16 @@ class CasePopup(Popup):
             app.manager.get_screen('backtest').chart(a, b, c, d)
             app.manager.get_screen('backtest').submit_enabled = True
             app.manager.get_screen('backtest').casename = self.case_name
+            app.manager.get_screen('backtest').universe = self.universe
+            app.manager.get_screen('backtest').signal = self.signal
+            app.manager.get_screen('backtest').cover_signal = self.cover_signal
+            app.manager.get_screen('backtest').enter_instruction = self.buy
+            app.manager.get_screen('backtest').exit_instruction = self.cover_buy
+            app.manager.get_screen('backtest').take_profit = self.take_profit
+            app.manager.get_screen('backtest').stop_loss = self.stop_loss
+            app.manager.get_screen('backtest').signal_amount = self.trade
+            app.manager.get_screen('backtest').cover_signal_amount = self.cover_trade
+            app.manager.get_screen('backtest').transaction_history = e
             app.manager.current = 'backtest'
 
 
@@ -343,7 +353,34 @@ class BackTest(Screen):
                                 "return": float(self.cumulative_return.strip('$')),
                                 "sortino": sortino_submit,
                                 "sharpe": float(self.sharpe_ratio),
-                                'infinite_sortino': self.infinite_sortino})
+                                "universe": self.universe,
+                                "signal": self.signal,
+                                "cover_signal": self.cover_signal,
+                                "enter_instruction": self.enter_instruction,
+                                "exit_instruction": self.exit_instruction,
+                                "take_profit": int(self.take_profit),
+                                "stop_loss": int(self.stop_loss),
+                                "signal_amount": int(self.signal_amount),
+                                "cover_signal_amount": int(self.cover_signal_amount),
+                                "transaction_history": self.transaction_history,
+                                "infinite_sortino": self.infinite_sortino})
+        dict = {"username": app.username, "case": self.casename,
+                "equity": float(self.final_equity.strip('$')),
+                "return": float(self.cumulative_return.strip('$')),
+                "sortino": sortino_submit,
+                "sharpe": float(self.sharpe_ratio),
+                "universe": self.universe,
+                "signal": self.signal,
+                "cover_signal": self.cover_signal,
+                "enter_instruction": self.enter_instruction,
+                "exit_instruction": self.exit_instruction,
+                "take_profit": int(self.take_profit),
+                "stop_loss": int(self.stop_loss),
+                "signal_amount": int(self.signal_amount),
+                "cover_signal_amount": int(self.cover_signal_amount),
+                "transaction_history": self.transaction_history,
+                "infinite_sortino": self.infinite_sortino}
+        print(r.json())
         if r.text == 'false':
             self.submit_text = 'ERROR'
 

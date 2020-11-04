@@ -23,6 +23,7 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     global buy_bool
     global cover_buy_bool
     global percentage_trade
+    global tickers
     global amount
     if amt == "" or amt == "%":
         amount = 0
@@ -34,7 +35,7 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
             percentage_trade = False
         amount = int(amt)
         if amount < 0:
-            return 'Negative Values Not Accepted', "Trade", "", amt
+            return 'Negative Values Not Accepted', "Trade", "", amt, None
     global cover_amount
     global percentage_cover_trade
     if cover_amt == "" or cover_amt == "%":
@@ -47,7 +48,7 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
             percentage_cover_trade = False
         cover_amount = int(cover_amt)
         if cover_amount < 0:
-            return 'Negative Values Not Accepted', "Cover Trade", "", cover_amt
+            return 'Negative Values Not Accepted', "Cover Trade", "", cover_amt, None
     if cover_signal == "":
         cover_signal = "if rsi greater than 1000000"
     global starting_cash
@@ -67,14 +68,14 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     else:
         take_profit = float(t_profit)/100
         if take_profit < 0:
-            return 'Negative Values Not Accepted', "Take Profit", "", t_profit
+            return 'Negative Values Not Accepted', "Take Profit", "", t_profit, None
     global stop_loss
     if s_loss == "":
         stop_loss=10
     else:
         stop_loss = float(s_loss)/100
         if stop_loss < 0:
-            return 'Negative Values Not Accepted', "Stop Loss", "", s_loss
+            return 'Negative Values Not Accepted', "Stop Loss", "", s_loss, None
     if trade == 'Sell #' or trade == 'Sell %':
         buy_bool = False
     else:
@@ -84,6 +85,8 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
         cover_buy_bool = False
     else:
         cover_buy_bool = True
+    global transaction_history
+    transaction_history = []
 
     cerebro = bt.Cerebro(cheat_on_open=True)
     cerebro.broker.setcash(starting_cash)
@@ -96,7 +99,7 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     end_date = datetime.strptime(end_date_pre, '%d/%m/%Y')
 
     if universe == '':
-        return 'No Tickers Entered', "Universe", [], ""
+        return 'No Tickers Entered', "Universe", [], "", None
     tickers_pre = universe.split(',')
     tickers = [x.strip() for x in tickers_pre]
     invalid_tickers = []
@@ -104,7 +107,7 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
         if ticker not in ticker_list:
             invalid_tickers.append(ticker)
     if len(invalid_tickers) > 0:
-        return 'Invalid Ticker List', "Universe", invalid_tickers, universe
+        return 'Invalid Ticker List', "Universe", invalid_tickers, universe, None
 
     state = ASTState(start_date_pre, end_date_pre, tickers)
     ast = build_ast(main_signal, state, debug=False)
@@ -113,13 +116,15 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     # TODO: Add check for syntax errors (Will be done soon - Ryan)
     if not ast.valid():
         # print(ast.evaluate(), file=stderr)
-        return 'Invalid Input', "Signal", ast.evaluate(), signal
+        return 'Invalid Input', "Signal", ast.evaluate(), signal, None
     if not cover_ast.valid():
         # print(cover_ast.evaluate(), file=stderr)
-        return 'Invalid Input', "Cover Signal", cover_ast.evaluate(), cover_signal
+        return 'Invalid Input', "Cover Signal", cover_ast.evaluate(), cover_signal, None
 
     cerebro.broker.set_checksubmit(checksubmit=False)
     # Iterate over the tickers, and then the dates (that list will be provided by zipline?)
+    data_num = 0
+    cerebro.addstrategy(TreeSignalStrategy)
     for ticker in tickers:
         state.ticker = ticker
         # Updates the ticker being processed
@@ -127,9 +132,8 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
                                          fromdate=start_date,
                                          todate=end_date,
                                          plot=False)
-
-        cerebro.adddata(data)
-        cerebro.addstrategy(TreeSignalStrategy)
+        cerebro.adddata(data, name=ticker)
+        data_num += 1
     cerebro.run()
 
 
@@ -150,7 +154,7 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     if not sortino:
         sortino = 0
 
-    return cerebro.broker.getvalue(), cerebro.broker.getvalue()-starting_cash, sharpe, sortino
+    return cerebro.broker.getvalue(), cerebro.broker.getvalue()-starting_cash, sharpe, sortino, transaction_history
 
 
 class TreeSignalStrategy(bt.Strategy):
@@ -165,57 +169,65 @@ class TreeSignalStrategy(bt.Strategy):
         port_vals.append(self.broker.getvalue())
         date_data = self.datetime.date(ago=0)
         state.current_day = date_data.strftime('%d/%m/%Y')
-
-        open = self.data.open[0]
-        if amount > 0 and ast.evaluate():
-            if percentage_trade:
-                size = round((self.broker.get_cash() / open * amount / 100), 0)
-                if size == 0:
-                    pass
-                elif buy_bool:
-                    if not self.position:
-                        self.cover += 1
-                        self.take_price.append(open*(1+take_profit))
-                        self.stop_price.append(open*(1-stop_loss))
-                        self.buy_bracket(size=size,
-                                         exectype=bt.Order.Market,
-                                         limitprice=open*(1+take_profit),
-                                         stopprice=open*(1-stop_loss))
+        for i in range(len(tickers)):
+            self.data = self.datas[i]
+            state.ticker = self.data._name
+            open = self.data.open[0]
+            if amount > 0 and ast.evaluate():
+                if percentage_trade:
+                    size = round((self.broker.get_cash() / open * amount / 100), 0)
+                    if size == 0:
+                        pass
+                    elif buy_bool:
+                        if not self.position:
+                            transaction_history.append(f'{state.ticker} LONG_BUY {size} {date_data.strftime("%d/%m/%Y")} {open}')
+                            self.cover += 1
+                            self.take_price.append(open*(1+take_profit))
+                            self.stop_price.append(open*(1-stop_loss))
+                            self.buy_bracket(size=size,
+                                             exectype=bt.Order.Market,
+                                             limitprice=open*(1+take_profit),
+                                             stopprice=open*(1-stop_loss))
+                    else:
+                        if not self.position:
+                            transaction_history.append(f'{state.ticker} SHORT_SELL {size} {date_data.strftime("%d/%m/%Y")} {open}')
+                            self.cover += 1
+                            self.take_price.append(open*(1-take_profit))
+                            self.stop_price.append(open*(1+stop_loss))
+                            self.sell_bracket(size=size,
+                                              exectype=bt.Order.Market,
+                                              limitprice=open*(1-take_profit),
+                                              stopprice=open*(1+stop_loss))
                 else:
-                    if not self.position:
-                        self.cover += 1
-                        self.take_price.append(open*(1+take_profit))
-                        self.stop_price.append(open*(1-stop_loss))
-                        self.sell_bracket(size=size,
-                                          exectype=bt.Order.Market,
-                                          limitprice=open*(1-take_profit),
-                                          stopprice=open*(1+stop_loss))
-            else:
-                if buy_bool:
-                    self.cover += 1
-                    self.take_price.append(open*(1+take_profit))
-                    self.stop_price.append(open*(1-stop_loss))
-                    self.buy_bracket(size=amount,
-                                     exectype=bt.Order.Market,
-                                     limitprice=open*(1+take_profit),
-                                     stopprice=open*(1-stop_loss))
-                else:
-                    self.cover += 1
-                    self.take_price.append(open*(1+take_profit))
-                    self.stop_price.append(open*(1-stop_loss))
-                    if self.broker.get_cash() + amount * open < starting_cash*2:
-                        self.sell_bracket(size=amount,
-                                          exectype=bt.Order.Market,
-                                          limitprice=open*(1-take_profit),
-                                          stopprice=open*(1+stop_loss))
+                    if buy_bool:
+                        if not self.position:
+                            transaction_history.append(f'{state.ticker} LONG_BUY {amount} {date_data.strftime("%d/%m/%Y")} {open}')
+                            self.cover += 1
+                            self.take_price.append(open*(1+take_profit))
+                            self.stop_price.append(open*(1-stop_loss))
+                            self.buy_bracket(size=amount,
+                                             exectype=bt.Order.Market,
+                                             limitprice=open*(1+take_profit),
+                                             stopprice=open*(1-stop_loss))
+                    else:
+                        if not self.position:
+                            transaction_history.append(f'{state.ticker} SHORT_SELL {amount} {date_data.strftime("%d/%m/%Y")} {open}')
+                            self.cover += 1
+                            self.take_price.append(open*(1-take_profit))
+                            self.stop_price.append(open*(1+stop_loss))
+                            if self.broker.get_cash() + amount * open < starting_cash*2:
+                                self.sell_bracket(size=amount,
+                                                  exectype=bt.Order.Market,
+                                                  limitprice=open*(1-take_profit),
+                                                  stopprice=open*(1+stop_loss))
 
-        if cover_amount > 0 and cover_ast.evaluate() and self.cover > 0:
-            if percentage_cover_trade:
-                size = round((self.broker.get_cash() / open) * cover_amount/100, 0)
-                if size == 0:
-                    pass
-                elif cover_buy_bool:
-                    if not self.position:
+            if cover_amount > 0 and cover_ast.evaluate() and self.cover > 0 and self.position:
+                if percentage_cover_trade:
+                    size = round((self.broker.get_cash() / open) * cover_amount/100, 0)
+                    if size == 0:
+                        pass
+                    elif cover_buy_bool:
+                        transaction_history.append(f'{state.ticker} BUY {size} {date_data.strftime("%d/%m/%Y")} {open}')
                         self.cover -= 1
                         self.buy_bracket(size=size,
                                          exectype=bt.Order.Market,
@@ -223,8 +235,8 @@ class TreeSignalStrategy(bt.Strategy):
                                          stopprice=self.stop_price[0])
                         self.take_price.pop(0)
                         self.stop_price.pop(0)
-                else:
-                    if not self.position:
+                    else:
+                        transaction_history.append(f'{state.ticker} SELL {size} {date_data.strftime("%d/%m/%Y")} {open}')
                         self.cover -= 1
                         self.sell_bracket(size=size,
                                           exectype=bt.Order.Market,
@@ -232,24 +244,26 @@ class TreeSignalStrategy(bt.Strategy):
                                           stopprice=self.stop_price[0])
                         self.take_price.pop(0)
                         self.stop_price.pop(0)
-            else:
-                if cover_buy_bool:
-                    self.cover -= 1
-                    self.buy_bracket(size=cover_amount,
-                                     exectype=bt.Order.Market,
-                                     limitprice=self.take_price[0],
-                                     stopprice=self.stop_price[0])
-                    self.take_price.pop(0)
-                    self.stop_price.pop(0)
                 else:
-                    if self.broker.get_cash() + cover_amount * open < starting_cash*2:
+                    if cover_buy_bool:
+                        transaction_history.append(f'{state.ticker} BUY {cover_amount} {date_data.strftime("%d/%m/%Y")} {open}')
                         self.cover -= 1
-                        self.sell_bracket(size=cover_amount,
-                                          exectype=bt.Order.Market,
-                                          limitprice=self.take_price[0],
-                                          stopprice=self.stop_price[0])
+                        self.buy_bracket(size=cover_amount,
+                                         exectype=bt.Order.Market,
+                                         limitprice=self.take_price[0],
+                                         stopprice=self.stop_price[0])
                         self.take_price.pop(0)
                         self.stop_price.pop(0)
+                    else:
+                        transaction_history.append(f'{state.ticker} SELL {cover_amount} {date_data.strftime("%d/%m/%Y")} {open}')
+                        if self.broker.get_cash() + cover_amount * open < starting_cash*2:
+                            self.cover -= 1
+                            self.sell_bracket(size=cover_amount,
+                                              exectype=bt.Order.Market,
+                                              limitprice=self.take_price[0],
+                                              stopprice=self.stop_price[0])
+                            self.take_price.pop(0)
+                            self.stop_price.pop(0)
 
 
 def saveplots(cerebro, numfigs=1, iplot=True, start=None, end=None,

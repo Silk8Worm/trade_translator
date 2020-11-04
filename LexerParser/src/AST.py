@@ -51,8 +51,6 @@ class Lookup(Expr):
             self.data = data_gatherer.get_data(self.state.universe,
                                                self.args[0].upper(), self.state.start, self.state.end, num_days)
 
-
-
         # Does the data lookup form the preinitialized list of values, self.data
         day = self.state.current_day
         ticker = self.state.ticker

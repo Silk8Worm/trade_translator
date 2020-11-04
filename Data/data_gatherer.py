@@ -291,27 +291,27 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash, prices):
         {}, {}, {}, {}, {}, {}
 
     # Finding the correct financial statements for date
-    for i in range(len(bal)):
+    for i in range(len(bal)-1):
         date_check = list(bal.keys())[i]
         if datetime.datetime.strptime(date_check, '%Y-%m-%d') < date:
             correct_bs = bal[date_check]
             previous_bs = bal[list(bal.keys())[i+1]]
             break
-    for i in range(len(inc)):
+    for i in range(len(inc)-1):
         date_check = list(inc.keys())[i]
         if datetime.datetime.strptime(date_check, '%Y-%m-%d') < date:
             correct_is = inc[date_check]
             previous_is = inc[list(inc.keys())[i+1]]
             break
-    for i in range(len(cash)):
+    for i in range(len(cash)-1):
         date_check = list(cash.keys())[i]
         if datetime.datetime.strptime(date_check, '%Y-%m-%d') < date:
             correct_cf = cash[date_check]
             previous_cf = cash[list(cash.keys())[i+1]]
             break
-    # print(correct_bs)
-    # print(correct_is)
-    # print(correct_cf)
+    print(correct_bs)
+    print(correct_is)
+    print(correct_cf)
     for key, value in correct_bs.items():
         if value is None:
             correct_bs[key] = 0
@@ -378,6 +378,8 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash, prices):
         else:
             return 0
     except ZeroDivisionError:
+        return 0
+    except KeyError:
         return 0
 
 
