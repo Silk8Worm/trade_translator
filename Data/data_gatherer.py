@@ -365,6 +365,10 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash, prices):
             return correct_cf['dividendsPaid'] / correct_is['netIncome']
         elif indicator == 'revenue per share':
             return correct_is['totalRevenue'] / correct_bs['commonStock']
+        elif indicator == 'net income growth':
+            return (correct_is['netIncome'] - previous_is['netIncome'])/previous_is['netIncome']
+        elif indicator == 'revenue':
+            return correct_is['totalRevenue']
         elif indicator == 'price to sales':
             try:
                 return prices[date] / (correct_is['totalRevenue'] / correct_bs['commonStock'])
@@ -401,7 +405,8 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
                               'debt to equity', 'debt to assets', 'cash debt coverage ratio',
                               'eps', 'gross margin', 'profit margin', 'roe', 'roa',
                               'current ratio', 'quick ratio', 'payout ratio',
-                              'revenue per share', 'price to sales', 'price to earnings']
+                              'revenue per share', 'price to sales', 'price to earnings',
+                              'net income growth', 'revenue']
 
     if indicator in fundamental_indicators:
         for ticker in tickers:
