@@ -165,10 +165,15 @@ class TreeSignalStrategy(bt.Strategy):
         self.take_price = []
         self.stop_price = []
 
+    def notify_order(self, order):
+        if order.status == order.Margin:
+            transaction_history.pop()
+
     def next_open(self):
         port_vals.append(self.broker.getvalue())
         date_data = self.datetime.date(ago=0)
         state.current_day = date_data.strftime('%d/%m/%Y')
+        self.temp_cash = self.broker.get_cash()
         for i in range(len(tickers)):
             self.data = self.datas[i]
             state.ticker = self.data._name
@@ -189,7 +194,8 @@ class TreeSignalStrategy(bt.Strategy):
                                              limitprice=open*(1+take_profit),
                                              stopprice=open*(1-stop_loss))
                     else:
-                        if not self.position:
+                        if not self.position and self.temp_cash + size*open < min(self.broker.get_cash()*2, starting_cash*2):
+                            self.temp_cash += size*open
                             transaction_history.append(f'{state.ticker} SHORT_SELL {size} {date_data.strftime("%d/%m/%Y")} {open}')
                             self.cover += 1
                             self.take_price.append(open*(1-take_profit))
@@ -210,16 +216,16 @@ class TreeSignalStrategy(bt.Strategy):
                                              limitprice=open*(1+take_profit),
                                              stopprice=open*(1-stop_loss))
                     else:
-                        if not self.position:
+                        if not self.position and self.temp_cash + amount * open < min(self.broker.get_cash()*2, starting_cash*2):
                             transaction_history.append(f'{state.ticker} SHORT_SELL {amount} {date_data.strftime("%d/%m/%Y")} {open}')
                             self.cover += 1
                             self.take_price.append(open*(1-take_profit))
                             self.stop_price.append(open*(1+stop_loss))
-                            if self.broker.get_cash() + amount * open < starting_cash*2:
-                                self.sell_bracket(size=amount,
-                                                  exectype=bt.Order.Market,
-                                                  limitprice=open*(1-take_profit),
-                                                  stopprice=open*(1+stop_loss))
+                            self.temp_cash += amount * open
+                            self.sell_bracket(size=amount,
+                                              exectype=bt.Order.Market,
+                                              limitprice=open*(1-take_profit),
+                                              stopprice=open*(1+stop_loss))
 
             if cover_amount > 0 and cover_ast.evaluate() and self.cover > 0 and self.position:
                 if percentage_cover_trade:
@@ -231,37 +237,40 @@ class TreeSignalStrategy(bt.Strategy):
                         self.cover -= 1
                         self.buy_bracket(size=size,
                                          exectype=bt.Order.Market,
-                                         limitprice=self.take_price[0],
-                                         stopprice=self.stop_price[0])
+                                         limitprice=max(self.take_price[0], self.stop_price[0]),
+                                         stopprice=min(self.stop_price[0], self.take_price[0]))
                         self.take_price.pop(0)
                         self.stop_price.pop(0)
                     else:
-                        transaction_history.append(f'{state.ticker} SELL {size} {date_data.strftime("%d/%m/%Y")} {open}')
-                        self.cover -= 1
-                        self.sell_bracket(size=size,
-                                          exectype=bt.Order.Market,
-                                          limitprice=self.take_price[0],
-                                          stopprice=self.stop_price[0])
-                        self.take_price.pop(0)
-                        self.stop_price.pop(0)
+                        if self.temp_cash + size*open < min(starting_cash*2, self.broker.get_cash()*2):
+                            self.temp_cash += size*open
+                            transaction_history.append(f'{state.ticker} SELL {size} {date_data.strftime("%d/%m/%Y")} {open}')
+                            self.cover -= 1
+                            self.sell_bracket(size=size,
+                                              exectype=bt.Order.Market,
+                                              limitprice=min(self.stop_price[0], self.take_price[0]),
+                                              stopprice=max(self.take_price[0], self.stop_price[0]))
+                            self.take_price.pop(0)
+                            self.stop_price.pop(0)
                 else:
                     if cover_buy_bool:
                         transaction_history.append(f'{state.ticker} BUY {cover_amount} {date_data.strftime("%d/%m/%Y")} {open}')
                         self.cover -= 1
                         self.buy_bracket(size=cover_amount,
                                          exectype=bt.Order.Market,
-                                         limitprice=self.take_price[0],
-                                         stopprice=self.stop_price[0])
+                                         limitprice=max(self.take_price[0], self.stop_price[0]),
+                                         stopprice=min(self.stop_price[0], self.take_price[0]))
                         self.take_price.pop(0)
                         self.stop_price.pop(0)
                     else:
                         transaction_history.append(f'{state.ticker} SELL {cover_amount} {date_data.strftime("%d/%m/%Y")} {open}')
-                        if self.broker.get_cash() + cover_amount * open < starting_cash*2:
+                        if self.temp_cash + cover_amount * open < min(self.broker.get_cash()*2, starting_cash*2):
+                            self.temp_cash += cover_amount * open
                             self.cover -= 1
                             self.sell_bracket(size=cover_amount,
                                               exectype=bt.Order.Market,
-                                              limitprice=self.take_price[0],
-                                              stopprice=self.stop_price[0])
+                                              limitprice=min(self.stop_price[0], self.take_price[0]),
+                                              stopprice=max(self.take_price[0], self.stop_price[0]))
                             self.take_price.pop(0)
                             self.stop_price.pop(0)
 

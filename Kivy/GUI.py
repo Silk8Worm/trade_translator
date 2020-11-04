@@ -113,7 +113,7 @@ class Trade(Screen):
         popup.universe = universe
         popup.take_profit = take_profit
         popup.stop_loss = stop_loss
-        if self.trade in ['Buy %', 'Sell %']:
+        if self.cover_trade in ['Buy %', 'Sell %']:
             popup.cover_trade = cover_trade + '%'
         else:
             popup.cover_trade = cover_trade
@@ -132,7 +132,7 @@ class Trade(Screen):
         popup.universe = universe
         popup.take_profit = take_profit
         popup.stop_loss = stop_loss
-        if self.trade in ['Buy %', 'Sell %']:
+        if self.cover_trade in ['Buy %', 'Sell %']:
             popup.cover_trade = cover_trade + '%'
         else:
             popup.cover_trade = cover_trade
