@@ -333,7 +333,7 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash, prices):
             return (this_year-last_year)/last_year
         elif indicator == 'leverage ratio':
             return ((previous_bs['totalAssets']+correct_bs['totalAssets'])/2)/((previous_bs['shareholderEquity']+correct_bs['shareholderEquity'])/2)
-        elif indicator == 'net debt/ebitda':
+        elif indicator == 'net debt to ebitda':
             return (correct_bs['totalLiabilities'] - correct_bs['currentCash']) / (correct_is['operatingIncome'] + correct_cf['depreciation'])
         elif indicator == 'operating margin':
             return correct_is['operatingIncome'] / correct_is['totalRevenue']
@@ -349,6 +349,8 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash, prices):
             return correct_cf['cashFlow'] / ((correct_bs['totalLiabilities'] + previous_bs['totalLiabilities'])/2)
         elif indicator == 'eps':
             return correct_is['netIncomeBasic'] / correct_bs['commonStock']
+        elif indicator == 'eps growth':
+            return ((correct_is['netIncomeBasic'] / correct_bs['commonStock']) - (previous_is['netIncomeBasic'] / previous_bs['commonStock']))/(previous_is['netIncomeBasic'] / previous_bs['commonStock'])
         elif indicator == 'gross margin':
             return correct_is['grossProfit'] / correct_is['totalRevenue']
         elif indicator == 'profit margin':
@@ -369,6 +371,23 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash, prices):
             return (correct_is['netIncome'] - previous_is['netIncome'])/previous_is['netIncome']
         elif indicator == 'revenue':
             return correct_is['totalRevenue']
+        elif indicator == 'book value to share':
+            return correct_bs['shareholderEquity'] / correct_bs['commonStock']
+        elif indicator == 'price to book value':
+            try:
+                return prices[date] / (correct_bs['shareholderEquity'] / correct_bs['commonStock'])
+            except KeyError:
+                return 0
+        elif indicator == 'price to revenue':
+            try:
+                return prices[date] * correct_bs['commonStock'] / correct_is['totalRevenue']
+            except KeyError:
+                return 0
+        elif indicator == 'dividend yield':
+            try:
+                return (correct_cf['dividendsPaid'] / correct_bs['commonStock']) / prices[date]
+            except KeyError:
+                return 0
         elif indicator == 'price to sales':
             try:
                 return prices[date] / (correct_is['totalRevenue'] / correct_bs['commonStock'])
@@ -394,12 +413,12 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
                             'bb low', 'high bb', 'bb high', 'atr', 'rsi', 'obv',
                             'ema', 'macd', 'proper macd', 'macd proper',
                             'signal macd', 'macd signal', 'divergent macd',
-                            'macd divergent']
-    fundamental_indicators = ['eps', 'book value/share',
+                            'macd divergent', 'sma']
+    fundamental_indicators = ['eps', 'book value to share',
                               'dividend yield', 'ebitda growth', 'eps growth',
                               'leverage ratio', 'ebitda',
-                              'net debt/ebitda', 'operating margin',
-                              'price/book value', 'price/earnings','price/revenue',
+                              'net debt to ebitda', 'operating margin',
+                              'price to book value', 'price to revenue',
                               'revenue growth', 'short interest',
                               #TODO: To be added
                               'debt to equity', 'debt to assets', 'cash debt coverage ratio',
