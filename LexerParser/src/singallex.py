@@ -24,8 +24,14 @@ tokens = [
 # Reserved Keywords
 keywords = ['if', 'greater', 'less', 'than', 'equal', 'to', 'above', 'below',
             'crosses', 'and', 'or', 'is']
-combinational_indicators = ['bbands', 'high', 'low', 'ebitda', 'growth', 'leverage', 'ratio', 'operating',
-                            'margin', 'revenue', 'growth', 'yesterday', 'open', 'close', 'net', 'debt']
+combinational_indicators = ['cash', 'ratio', 'yield', 'growth', 'low',
+                            'current', 'revenue', 'price', 'share', 'quick',
+                            'high', 'per', 'dividend', 'assets', 'bbands',
+                            'price', 'book', 'gross', 'close', 'eps', 'profit',
+                            'debt', 'operating', 'roe', 'equity', 'sales',
+                            'earnings', 'net', 'coverage', 'roa', 'margin',
+                            'leverage', 'ebitda', 'book', 'yesterday', 'payout',
+                            'open', 'value', 'short', 'interest']
 
 # Makes a dict mapping keywords to token types and adds the tokens to the list
 reserved = {k: k.upper() for k in keywords + combinational_indicators}

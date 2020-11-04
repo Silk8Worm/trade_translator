@@ -8,11 +8,11 @@
 import logging
 
 import ply.yacc as yacc
-from singallex import tokens
+from LexerParser.src.singallex import tokens
 from ply.lex import LexToken
 
 # Used for building the AST
-from AST import *
+from LexerParser.src.AST import *
 from operator import gt, lt, eq, and_, or_
 
 # Sets the precedence for the LALR parser for and and or
@@ -180,7 +180,28 @@ def p_fundamental(p):
                    | EBITDA GROWTH
                    | LEVERAGE RATIO
                    | OPERATING MARGIN
-                   | REVENUE GROWTH'''
+                   | REVENUE GROWTH
+                   | EPS
+                   | BOOK VALUE TO SHARE
+                   | DIVIDEND YIELD
+                   | EPS GROWTH
+                   | NET DEBT TO EBITDA
+                   | PRICE TO BOOK VALUE
+                   | PRICE TO REVENUE
+                   | SHORT INTEREST
+                   | DEBT TO EQUITY
+                   | DEBT TO ASSETS
+                   | CASH DEBT COVERAGE RATIO
+                   | GROSS MARGIN
+                   | PROFIT MARGIN
+                   | ROE
+                   | ROA
+                   | CURRENT RATIO
+                   | QUICK RATIO
+                   | PAYOUT RATIO
+                   | REVENUE PER SHARE
+                   | PRICE TO SALES
+                   | PRICE TO EARNINGS'''
     p[0] = " ".join([str(x) for x in p[1:]])
 
 
@@ -282,8 +303,8 @@ if __name__ == '__main__':
         "if 20 day sma crosses below 5 day ema",
         "if 20 day ema crosses above 5 day sma or 20 day sma crosses below 5 day ema",
         "30 day rsi less than 10 day rsi",
-        "macd crosses above rsi"]
-        #FIXME: Second if and is, close and macd and rsi don't have # days printed out
+        "macd crosses above rsi",
+         "if roa = 5"]
     for i in range(len(values)):
         ast = build_ast(values[i], ASTState("", "", ""), debug=True)
         print(f'{i:2}) {values[i]}')
