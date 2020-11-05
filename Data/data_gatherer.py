@@ -69,7 +69,19 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         output = df['Close'][period:]
 
     elif indicator == 'high':
-        output = df['High'][period:]
+        if period == 1:
+            # Return the daily high
+            output = df['High'][period:]
+        else:
+            # Return the highest price among the last period of days
+            high = df['High'][1:]
+
+            output = np.zeros(len(high))
+
+            for i in range(period-1, len(high)):
+                output[i] = high[i - period + 1:i+1].max()
+
+            output = output.tolist()[period-1:]
 
     elif indicator == 'low':
         output = df['Low'][period:]
@@ -461,7 +473,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    x = get_data(['NFLX'], 'bbands', '08/10/2020', '20/10/2020', 14)
+    x = get_data(['NFLX'], 'high', '09/10/2020', '20/10/2020', 14)
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
