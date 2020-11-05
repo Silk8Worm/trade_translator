@@ -85,6 +85,17 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         bb_high = ta.volatility.bollinger_hband(df["Close"][1:], n=period, ndev=2, fillna=True)
         output = bb_high[period-1:]
 
+    elif indicator == 'bbands':  # Bollinger Band Range
+        high = get_technical('high bb', period, duration, df, startdate)
+        low = get_technical('low bb', period, duration, df, startdate)
+
+        difference = {}
+
+        for key in high:
+            difference[key] = high[key] - low[key]
+
+        return difference
+
     elif indicator == 'atr':  # Average True Range
         high = df['High'][1:]
         low = df['Low'][1:]
@@ -412,7 +423,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
     data_dict = {}
     technical_indicators = ['open', 'close', 'high', 'low', 'volume', 'low bb',
-                            'bb low', 'high bb', 'bb high', 'atr', 'rsi', 'obv',
+                            'bb low', 'high bb', 'bb high', 'bbands', 'atr', 'rsi', 'obv',
                             'ema', 'macd', 'proper macd', 'macd proper',
                             'signal macd', 'macd signal', 'divergent macd',
                             'macd divergent', 'sma', 'bbands']
@@ -450,7 +461,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    x = get_data(['AAPL'], 'BB low', '09/09/2020', '25/09/2020', 5)
+    x = get_data(['NFLX'], 'bbands', '08/10/2020', '20/10/2020', 14)
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
