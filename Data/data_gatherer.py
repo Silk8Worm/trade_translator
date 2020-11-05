@@ -65,6 +65,25 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
 
             if found_first:
                 duration += 1
+    elif indicator == 'macd':
+        bigger_period = max(26, indicator_range_specification)
+        smaller_period = min(26, indicator_range_specification)
+        duration = 0
+        found_first = False
+
+        i = 0
+        while not found_first:
+            pointer = dates[bigger_period+i]
+            pointer = str(pointer)[:10]
+            pointer = datetime.datetime.strptime(pointer, '%Y-%m-%d')
+
+            if found_first is False and pointer.day >= startdate.day and pointer.month >= startdate.month and pointer.year >= startdate.year:
+                startdate = pointer
+                found_first = True
+
+            i += 1
+        df = df[i-1:]
+
 
     else:
         found_first = False
@@ -86,7 +105,6 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
                             found_first = True
                     elif pointer.month > startdate.month:
                         found_first = True
-
         duration = len(df) - extra
         extra -= indicator_range_specification
         df = df[extra:]
@@ -264,8 +282,7 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
         output = ema.tolist()[period:]
 
     elif indicator == 'macd':  # Moving Average Convergence Divergence
-        other_startdate = np.busday_offset(startdate.isoformat()[:10], -(abs(26-period)), roll='forward', holidays=HOLIDAYS_LIST)
-        other_startdate = datetime.datetime.strptime(str(other_startdate), '%Y-%m-%d')
+        other_startdate = df.axes[0][period]
 
         macd = {}
 
@@ -521,7 +538,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    x = get_data(['NFLX'], 'atr', '07/10/2020', '20/10/2020', 5)
+    x = get_data(['NFLX'], 'macd', '25/09/2020', '20/10/2020', 12)
 
     print('Data from <x>')
     for date in x:
