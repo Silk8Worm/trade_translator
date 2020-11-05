@@ -398,6 +398,8 @@ def get_fundamental(date: datetime, indicator: str, bal, inc, cash, prices):
                 return prices[date] / (correct_is['netIncomeBasic'] / correct_bs['commonStock'])
             except KeyError:
                 return 0
+        elif indicator == 'short interest':
+            return 0
         else:
             return 0
     except ZeroDivisionError:
@@ -413,18 +415,19 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
                             'bb low', 'high bb', 'bb high', 'atr', 'rsi', 'obv',
                             'ema', 'macd', 'proper macd', 'macd proper',
                             'signal macd', 'macd signal', 'divergent macd',
-                            'macd divergent', 'sma']
+                            'macd divergent', 'sma', 'bbands']
     fundamental_indicators = ['eps', 'book value to share',
                               'dividend yield', 'ebitda growth', 'eps growth',
                               'leverage ratio', 'ebitda',
                               'net debt to ebitda', 'operating margin',
                               'price to book value', 'price to revenue',
-                              'revenue growth', 'short interest',
+                              'revenue growth', 'short interest', # Short interest only returns 0, revenue growth not added to lexer parser
                               #TODO: To be added
                               'debt to equity', 'debt to assets', 'cash debt coverage ratio',
                               'eps', 'gross margin', 'profit margin', 'roe', 'roa',
                               'current ratio', 'quick ratio', 'payout ratio',
                               'revenue per share', 'price to sales', 'price to earnings',
+                              # The two below have not been added as valid indicators on the lexer parser side
                               'net income growth', 'revenue']
 
     if indicator in fundamental_indicators:
@@ -447,11 +450,11 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    # get_data(['AAPL'], 'BB low', '09/09/2020', '25/09/2020', 5)
+    x = get_data(['AAPL'], 'BB low', '09/09/2020', '25/09/2020', 5)
     # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
     # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
 
-    x = get_data(['NFLX'], 'gross margin', '25/09/2020', '20/10/2020', 5)
+    # x = get_data(['NFLX'], 'gross margin', '25/09/2020', '20/10/2020', 5)
     # x = get_data(['NFLX'], 'EMA', '25/09/2020', '20/10/2020', 26)
     # print(x)
 
