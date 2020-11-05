@@ -45,9 +45,9 @@ class Lookup(Expr):
             if len(self.args) == 1:
                 num_days = 14
             else:
-                # FIXME: Weeks and Months???
-                num_days = self.args[1][0]
-
+                len_conversion = {"day": 1, "week": 7, "month": 30, "year": 365}
+                num_days = self.args[1][0] * len_conversion[self.args[1][1]]
+            print(num_days)
             self.data = data_gatherer.get_data(self.state.universe,
                                                self.args[0].upper(), self.state.start, self.state.end, num_days)
 
@@ -55,7 +55,6 @@ class Lookup(Expr):
         day = self.state.current_day
         ticker = self.state.ticker
 
-        # FIXME: Is this the behaviour you want???
         # If the lookup doesn't exist return 0
         return self.data.setdefault(day, {}).setdefault(ticker, 0)
 

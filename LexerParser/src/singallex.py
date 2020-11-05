@@ -82,7 +82,7 @@ def t_STRING(t):
     if t.value in ['volume', 'obv', 'atr', 'rsi', 'macd',
                    'ema', 'sma']:
         t.type = 'INDICATOR'
-    elif t.value in ['days', 'months', "years", "day", "month", "year"]:
+    elif t.value in ["day", "month", "year", 'week']:
         t.type = 'LENGTH'
     else:
         t.type = reserved.get(t.value, 'UNKNOWN')

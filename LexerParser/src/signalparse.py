@@ -174,7 +174,6 @@ def p_indicator_yesterady(p):
 
 
 # Defines the fundamentals
-# FIXME:  'net debt/EBITDA'
 def p_fundamental(p):
     '''fundamental : EBITDA
                    | EBITDA GROWTH
@@ -310,3 +309,4 @@ if __name__ == '__main__':
         print(f'{i:2}) {values[i]}')
         print(ast)
         print("_"*20)
+
