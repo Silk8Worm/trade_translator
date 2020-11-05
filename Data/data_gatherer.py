@@ -4,26 +4,16 @@ import pandas_datareader as pdr
 from pandas import Series
 import ta
 from ta.volatility import BollingerBands
-from ta.momentum import RSIIndicator
 import requests
 import json
 
 # ta documentation
 # https://technical-analysis-library-in-python.readthedocs.io/en/latest/ta.html#volatility-indicators
 
-API_KEY = 'PK4W268R10HW802W8SN9'  # keys from alpaca
-SECRET_API_KEY = 'oFK1SOul4uEqwj4phpdFBAZG0CZqRraijzYQUkZH'
-MARKET_URL = 'https://data.alpaca.markets'
-
 TECHNICAL_DATABASE = {}  # dictionaries allow you to assume a key already exists
 #  TECHNICAL_DATABASE[ticker][indicator][date][value] <- whats being used
 #  TODO: Make pull_data search Database first
-#  TODO: Make Database behave well with holidays
 #  Alpaca does not not behave well with stock splits!!
-
-# BDD = np.busdaycalendar(holidays=['2020-09-07'])
-HOLIDAYS_LIST = ['2020-01-01', '2020-01-20', '2020-02-17', '2020-04-10', '2020-05-25',
-                 '2020-06-03', '2020-09-07', '2020-11-26', '2020-12-25']
 
 
 def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: str, indicator_range_specification: int):
@@ -35,11 +25,12 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
 
     # <firstdate> obtains extra days of data; some indicators calculate from preexisting values
     # obtains exactly <period> many extra days
-    firstdate = np.busday_offset(startdate.isoformat()[:10], -(indicator_range_specification), roll='forward', holidays=HOLIDAYS_LIST)
+    firstdate = np.busday_offset(startdate.isoformat()[:10], -(indicator_range_specification+2), roll='forward')
+
     # Special case for MACD
     if indicator == 'macd':
         if indicator_range_specification < 26:
-            firstdate = np.busday_offset(startdate.isoformat()[:10], -(26), roll='forward', holidays=HOLIDAYS_LIST)
+            firstdate = np.busday_offset(startdate.isoformat()[:10], -(26+2), roll='forward')
         elif indicator_range_specification == 26:
             print('26 is invalid input')
             return
@@ -48,6 +39,22 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
     # Fetch with pandas data reader
     df = pdr.get_data_yahoo(ticker, firstdate, enddate)
     # print(type(df)) # pandas dataframe data type
+
+    # Cull <df> to sufficient size
+    extra = 0
+    dates = df.axes[0]
+
+    for date in dates:
+        pointer = str(date)[:10]
+        pointer = datetime.datetime.strptime(pointer, '%Y-%m-%d')
+
+        if pointer != startdate:
+            extra += 1
+        else:
+            break
+
+    extra -= indicator_range_specification
+    df = df[extra:]
 
     output = get_technical(indicator, indicator_range_specification, duration, df, startdate)
 
@@ -244,27 +251,17 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
     # Return in dictionary with mapping [date:value]
     data = {}
 
-    # TODO: Rewrite this to use the dataframe
     if isinstance(output, Series):
         output = Series.tolist(output)
     # <output> is a list
-    key = startdate  # <key> is a datetime object
-    friday = False
-    for i in range(0, len(output)):
-        left = np.busday_offset(key.isoformat()[:10], 1, roll='backward', holidays=HOLIDAYS_LIST)  # TODO: I think this is suppose to be 'forward'
-        left = datetime.datetime.strptime(str(left), '%Y-%m-%d')
-        right = key + datetime.timedelta(days=1)
-        if not (left == right):
-            # <key is a friday>
-            friday = True
-        # keys are strings, if you want datetime object as key then remove .isoformat()
-        data[key.strftime("%d/%m/%Y")] = output[i]
-        key = key + datetime.timedelta(days=1)
-        if friday:
-            # Set key to next business day
-            key = left
-            # key = key + datetime.timedelta(days=2)  # TODO: Use <busday>, this is bad with holidays and 3-day weekends
-            friday = False
+
+    dates = df.axes[0][period:]
+    for i in range(len(dates)):
+        date = dates[i].isoformat()[:10]
+        date = datetime.datetime.strptime(str(date), '%Y-%m-%d')
+        date = date.strftime('%d/%m/%Y')
+        data[date] = output[i]
+
 
     return data
 
@@ -473,13 +470,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    x = get_data(['NFLX'], 'high', '09/10/2020', '20/10/2020', 14)
-    # get_data(['AAPL'], 'BB high', '20/09/2020', '25/09/2020', 10)
-    # get_data(['PTON'], 'ATR', '14/09/2020', '29/09/2020', 20)
-
-    # x = get_data(['NFLX'], 'gross margin', '25/09/2020', '20/10/2020', 5)
-    # x = get_data(['NFLX'], 'EMA', '25/09/2020', '20/10/2020', 26)
-    # print(x)
+    x = get_data(['NFLX'], 'rsi', '09/09/2020', '20/10/2020', 14)
 
     print('Data from <x>')
     for date in x:
