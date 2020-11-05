@@ -35,9 +35,11 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
             return
     elif indicator in ['high', 'low'] and indicator_range_specification != 1:
         # Special case for high and low
-        year = startdate.year
-        firstdate = startdate.replace(year=year-1)
-        firstdate = np.datetime64(firstdate.strftime('%Y-%m-%d'))
+        # year = startdate.year
+        # firstdate = startdate.replace(year=year-1)
+        # firstdate = np.datetime64(firstdate.strftime('%Y-%m-%d'))
+
+        firstdate = np.busday_offset(startdate.isoformat()[:10], -indicator_range_specification, roll='forward')
 
 
     firstdate = datetime.datetime.strptime(str(firstdate), '%Y-%m-%d')
@@ -138,7 +140,8 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
             output = np.zeros(duration)
 
             for i in range(len(output)):
-                output[i] = high[i:len(high)-duration+i].max()
+                slice = high[i+1:len(high)-duration+i+1]
+                output[i] = slice.max()
 
             output = output.tolist()
 
@@ -153,7 +156,7 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
             output = np.zeros(duration)
 
             for i in range(len(output)):
-                output[i] = low[i:len(low)-duration+i].min()
+                output[i] = low[i+1:len(low)-duration+i+1].min()
 
             output = output.tolist()
 
@@ -537,7 +540,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    x = get_data(['NFLX'], 'macd', '10/09/2018', '17/09/2018', 1)
+    x = get_data(['NFLX'], 'low', '09/10/2020', '20/10/2020', 14)
 
     print('Data from <x>')
     for date in x:
