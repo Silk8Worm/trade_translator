@@ -21,19 +21,25 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
     # Handle dates with datetime
     startdate = datetime.datetime.strptime(startdate, '%d/%m/%Y')
     enddate = datetime.datetime.strptime(enddate, '%d/%m/%Y')
-    duration = np.busday_count(startdate.isoformat()[:10], enddate.isoformat()[:10]) + 1
 
     # <firstdate> obtains extra days of data; some indicators calculate from preexisting values
     # obtains exactly <period> many extra days
     firstdate = np.busday_offset(startdate.isoformat()[:10], -(indicator_range_specification+20), roll='forward')
 
-    # Special case for MACD
     if indicator == 'macd':
+        # Special case for MACD
         if indicator_range_specification < 26:
             firstdate = np.busday_offset(startdate.isoformat()[:10], -(26+20), roll='forward')
         elif indicator_range_specification == 26:
             print('26 is invalid input')
             return
+    elif indicator in ['high', 'low'] and indicator_range_specification != 1:
+        # Special case for high and low
+        year = startdate.year
+        firstdate = startdate.replace(year=year-1)
+        firstdate = np.datetime64(firstdate.strftime('%Y-%m-%d'))
+
+
     firstdate = datetime.datetime.strptime(str(firstdate), '%Y-%m-%d')
 
     # Fetch with pandas data reader
@@ -51,10 +57,12 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
         if pointer != startdate:
             extra += 1
         else:
+            duration = len(dates) - extra
             break
 
     extra -= indicator_range_specification
-    df = df[extra:]
+    if extra > 0:
+        df = df[extra:]
 
     output = get_technical(indicator, indicator_range_specification, duration, df, startdate)
 
@@ -81,17 +89,29 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
             output = df['High'][period:]
         else:
             # Return the highest price among the last period of days
-            high = df['High'][1:]
+            high = df['High']
 
-            output = np.zeros(len(high))
+            output = np.zeros(duration)
 
-            for i in range(period-1, len(high)):
-                output[i] = high[i - period + 1:i+1].max()
+            for i in range(len(output)):
+                output[i] = high[i:len(high)-duration+i].max()
 
-            output = output.tolist()[period-1:]
+            output = output.tolist()
 
     elif indicator == 'low':
-        output = df['Low'][period:]
+        if period == 1:
+            # Return the daily low
+            output = df['Low'][period:]
+        else:
+            # Return the lowest price among the last period of days
+            low = df['Low']
+
+            output = np.zeros(duration)
+
+            for i in range(len(output)):
+                output[i] = low[i:len(low)-duration+i].min()
+
+            output = output.tolist()
 
     elif indicator == 'volume':
         output = df['Volume'][period:]
@@ -256,12 +276,16 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
     # <output> is a list
 
     dates = df.axes[0][period:]
+
+    if indicator in ['high', 'low'] and period != 1:
+        # Special case for period high/low
+        dates = df.axes[0][len(df)-len(output):]
+
     for i in range(len(dates)):
         date = dates[i].isoformat()[:10]
         date = datetime.datetime.strptime(str(date), '%Y-%m-%d')
         date = date.strftime('%d/%m/%Y')
         data[date] = output[i]
-
 
     return data
 
@@ -470,7 +494,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    x = get_data(['NFLX'], 'high', '09/09/2020', '20/10/2020', 365)
+    x = get_data(['NFLX'], 'high', '02/09/2020', '11/09/2020', 365)
 
     print('Data from <x>')
     for date in x:
