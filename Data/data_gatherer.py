@@ -84,7 +84,6 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
             i += 1
         df = df[i-1:]
 
-
     else:
         found_first = False
         for date in dates:
@@ -538,7 +537,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    x = get_data(['NFLX'], 'macd', '25/09/2020', '20/10/2020', 12)
+    x = get_data(['NFLX'], 'macd', '10/09/2018', '17/09/2018', 1)
 
     print('Data from <x>')
     for date in x:
