@@ -50,18 +50,34 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
     extra = 0
     dates = df.axes[0]
 
-    for date in dates:
-        pointer = str(date)[:10]
-        pointer = datetime.datetime.strptime(pointer, '%Y-%m-%d')
+    if indicator in ['high', 'low'] and indicator_range_specification != 1:
+        found_first = False
+        duration = 0
+        for date in dates:
+            pointer = str(date)[:10]
+            pointer = datetime.datetime.strptime(pointer, '%Y-%m-%d')
 
-        if pointer != startdate:
-            extra += 1
-        else:
-            duration = len(dates) - extra
-            break
+            # if pointer != firstdate:
+            # print(pointer.day > firstdate.day)
+            if found_first is False and pointer.day >= startdate.day and pointer.month >= startdate.month and pointer.year >= startdate.year:
+                firstdate = pointer
+                found_first = True
 
-    extra -= indicator_range_specification
-    if extra > 0:
+            if found_first:
+                duration += 1
+
+    else:
+        for date in dates:
+            pointer = str(date)[:10]
+            pointer = datetime.datetime.strptime(pointer, '%Y-%m-%d')
+
+            if pointer.day < startdate.day and pointer.month <= startdate.month and pointer.year <= startdate.year:
+                extra += 1
+            else:
+                break
+
+        duration = len(dates) - extra
+        extra -= indicator_range_specification
         df = df[extra:]
 
     output = get_technical(indicator, indicator_range_specification, duration, df, startdate)
@@ -75,7 +91,7 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
 
 
 def get_technical(indicator: str, period: int, duration: int, df: str, startdate: datetime):
-    # TODO: Is <duration> redundant here?
+
     # Get Technical Indicator
     if indicator == 'open':
         output = df['Open'][period:]
@@ -494,7 +510,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    x = get_data(['NFLX'], 'high', '02/09/2020', '11/09/2020', 365)
+    x = get_data(['NFLX'], 'macd', '01/11/2019', '03/11/2019', 365)
 
     print('Data from <x>')
     for date in x:
