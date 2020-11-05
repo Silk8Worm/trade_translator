@@ -67,16 +67,27 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
                 duration += 1
 
     else:
+        found_first = False
         for date in dates:
             pointer = str(date)[:10]
             pointer = datetime.datetime.strptime(pointer, '%Y-%m-%d')
 
-            if pointer.day < startdate.day and pointer.month <= startdate.month and pointer.year <= startdate.year:
-                extra += 1
-            else:
-                break
+            if found_first is False:
+                # Check if pointer is the same day as firstdate or past firstdate
+                if pointer.year < startdate.year:
+                    extra += 1
+                elif pointer.year == startdate.year:
+                    if pointer.month < startdate.month:
+                        extra += 1
+                    elif pointer.month == startdate.month:
+                        if pointer.day < startdate.day:
+                            extra += 1
+                        elif pointer.day >= startdate.day:
+                            found_first = True
+                    elif pointer.month > startdate.month:
+                        found_first = True
 
-        duration = len(dates) - extra
+        duration = len(df) - extra
         extra -= indicator_range_specification
         df = df[extra:]
 
@@ -510,7 +521,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    x = get_data(['NFLX'], 'macd', '01/11/2019', '03/11/2019', 365)
+    x = get_data(['NFLX'], 'atr', '07/10/2020', '20/10/2020', 5)
 
     print('Data from <x>')
     for date in x:
