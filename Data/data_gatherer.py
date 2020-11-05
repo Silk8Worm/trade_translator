@@ -25,12 +25,12 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
 
     # <firstdate> obtains extra days of data; some indicators calculate from preexisting values
     # obtains exactly <period> many extra days
-    firstdate = np.busday_offset(startdate.isoformat()[:10], -(indicator_range_specification+2), roll='forward')
+    firstdate = np.busday_offset(startdate.isoformat()[:10], -(indicator_range_specification+20), roll='forward')
 
     # Special case for MACD
     if indicator == 'macd':
         if indicator_range_specification < 26:
-            firstdate = np.busday_offset(startdate.isoformat()[:10], -(26+2), roll='forward')
+            firstdate = np.busday_offset(startdate.isoformat()[:10], -(26+20), roll='forward')
         elif indicator_range_specification == 26:
             print('26 is invalid input')
             return
@@ -470,7 +470,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    x = get_data(['NFLX'], 'rsi', '09/09/2020', '20/10/2020', 14)
+    x = get_data(['NFLX'], 'high', '09/09/2020', '20/10/2020', 365)
 
     print('Data from <x>')
     for date in x:
