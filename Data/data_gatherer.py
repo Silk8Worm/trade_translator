@@ -6,6 +6,7 @@ import ta
 from ta.volatility import BollingerBands
 import requests
 import json
+from datetime import timedelta
 
 # ta documentation
 # https://technical-analysis-library-in-python.readthedocs.io/en/latest/ta.html#volatility-indicators
@@ -39,7 +40,8 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
         # firstdate = startdate.replace(year=year-1)
         # firstdate = np.datetime64(firstdate.strftime('%Y-%m-%d'))
 
-        firstdate = np.busday_offset(startdate.isoformat()[:10], -indicator_range_specification, roll='forward')
+        firstdate = startdate - timedelta(days=indicator_range_specification)
+        firstdate = np.datetime64(firstdate.strftime('%Y-%m-%d'))
 
 
     firstdate = datetime.datetime.strptime(str(firstdate), '%Y-%m-%d')
@@ -67,6 +69,7 @@ def pull_technical_data(ticker: str, indicator: str, startdate: str, enddate: st
 
             if found_first:
                 duration += 1
+
     elif indicator == 'macd':
         bigger_period = max(26, indicator_range_specification)
         smaller_period = min(26, indicator_range_specification)
@@ -156,7 +159,8 @@ def get_technical(indicator: str, period: int, duration: int, df: str, startdate
             output = np.zeros(duration)
 
             for i in range(len(output)):
-                output[i] = low[i+1:len(low)-duration+i+1].min()
+                slice = low[i + 1:len(low) - duration + i + 1]
+                output[i] = slice.min()
 
             output = output.tolist()
 
@@ -540,7 +544,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    x = get_data(['NFLX'], 'macd', '01/10/2020', '20/10/2020', 30)
+    x = get_data(['NFLX'], 'macd', '10/09/2018', '17/09/2018', 1)
 
     print('Data from <x>')
     for date in x:
