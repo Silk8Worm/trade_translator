@@ -540,7 +540,7 @@ def get_data(tickers: list, indicator: str, start_date: str, end_date: str, peri
 
 
 if __name__ == '__main__':
-    x = get_data(['NFLX'], 'low', '09/10/2020', '20/10/2020', 14)
+    x = get_data(['NFLX'], 'macd', '01/10/2020', '20/10/2020', 30)
 
     print('Data from <x>')
     for date in x:
