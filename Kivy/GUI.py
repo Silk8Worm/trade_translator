@@ -343,8 +343,8 @@ class BackTest(Screen):
 
     def submit(self):
         app = App.get_running_app()
-        self.signal_amount.strip('%')
-        self.cover_signal_amount.strip('%')
+        self.signal_amount = self.signal_amount.strip('%')
+        self.cover_signal_amount = self.cover_signal_amount.strip('%')
         if self.sortino_ratio == 'Infinity':
             sortino_submit = 0
         else:
@@ -360,8 +360,8 @@ class BackTest(Screen):
                                 "cover_signal": self.cover_signal,
                                 "enter_instruction": self.enter_instruction,
                                 "exit_instruction": self.exit_instruction,
-                                "take_profit": int(self.take_profit),
-                                "stop_loss": int(self.stop_loss),
+                                "take_profit": float(self.take_profit),
+                                "stop_loss": float(self.stop_loss),
                                 "signal_amount": int(self.signal_amount),
                                 "cover_signal_amount": int(self.cover_signal_amount),
                                 "transaction_history": self.transaction_history,
