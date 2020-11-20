@@ -256,6 +256,7 @@ class BackTestPopup(Popup):
             app.manager.current = 'backtest'
             app.manager.get_screen('backtest').chart(a, b, c, d)
             app.manager.get_screen('backtest').submit_enabled = False
+            app.manager.get_screen('backtest').submit_text = 'SUBMIT'
 
 
 class CasePopup(Popup):
@@ -302,6 +303,7 @@ class CasePopup(Popup):
             app.manager.get_screen('backtest').signal_amount = self.trade
             app.manager.get_screen('backtest').cover_signal_amount = self.cover_trade
             app.manager.get_screen('backtest').transaction_history = e
+            app.manager.get_screen('backtest').submit_text = 'SUBMIT'
             app.manager.current = 'backtest'
 
 
@@ -345,11 +347,19 @@ class BackTest(Screen):
         app = App.get_running_app()
         self.signal_amount = self.signal_amount.strip('%')
         self.cover_signal_amount = self.cover_signal_amount.strip('%')
+        if self.take_profit == '':
+            self.take_profit = '0'
+        if self.stop_loss == '':
+            self.stop_loss = '0'
+        if self.signal_amount == '':
+            self.signal_amount = '0'
+        if self.cover_signal_amount == '':
+            self.cover_signal_amount = '0'
         if self.sortino_ratio == 'Infinity':
             sortino_submit = 0
         else:
             sortino_submit = float(self.sortino_ratio)
-        r = requests.post('https://tranquil-beyond-74281.herokuapp.com/info/cases/submit/',
+        r = requests.post('https://tranquil-beyond-74281.herokuapp.com/info/cases/ext-submit/',
                           data={"username": app.username, "case": self.casename,
                                 "equity": float(self.final_equity.strip('$')),
                                 "return": float(self.cumulative_return.strip('$')),
@@ -364,10 +374,10 @@ class BackTest(Screen):
                                 "stop_loss": float(self.stop_loss),
                                 "signal_amount": int(self.signal_amount),
                                 "cover_signal_amount": int(self.cover_signal_amount),
-                                "transaction_history": self.transaction_history,
+                                "transaction_history": ', '.join(self.transaction_history),
                                 "infinite_sortino": self.infinite_sortino})
-        print(r.json())
-        if r.text == 'false':
+        print(r.text)
+        if r.text.lower() == 'false':
             self.submit_text = 'ERROR'
 
 

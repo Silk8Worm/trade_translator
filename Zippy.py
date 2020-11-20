@@ -144,11 +144,8 @@ def zippy(signal: str, trade: str, amt: str, cover_signal: str, universe: str,
     cropped_img = img.crop(area)
     cropped_img.save('Kivy/chart.png')
 
-    port_vals_daily = []
-    for i in range(len(tickers), len(port_vals), len(tickers)):
-        port_vals_daily.append(port_vals[i])
-    sharpe = rolling_sharpe(port_vals_daily, starting_cash)
-    sortino = rolling_Sortino(port_vals_daily, starting_cash)
+    sharpe = rolling_sharpe(port_vals, starting_cash)
+    sortino = rolling_Sortino(port_vals, starting_cash)
     if not sharpe:
         sharpe = 0
     if not sortino:
@@ -314,8 +311,8 @@ if __name__ == '__main__':
     # signal = "if 5 day bollinger bands greater than 20"
 
     # universe = "AAPL, TSLA, GOOG, TTM, XOM, F, T, MSFT, AMZN, COTY, GE, GM, NIO, ALL, NVDA, REAL, NFLX, BAC, BABA"
-    universe = "AAPL,TSLA,GOOG"
+    universe = "BABA"
 
-    zippy('if rsi greater than 0', 'Buy', '1000', 'if rsi less than 40',
+    a,b,c,d,e = zippy('if rsi than 0', 'Buy', '1000', 'if rsi less than 40',
           universe, '50', '50',
           'Sell', '0', '18/03/2020', '25/03/2020')
