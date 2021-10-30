@@ -1,0 +1,147 @@
+<BackTest>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'Kivy/Background_Images/backtest.png'
+
+    FloatLayout:
+        size_hint: 1, .99
+
+        canvas.before:
+            Color:
+                rgba: 0,0,0,.8
+            Rectangle:
+                pos: self.width/28.5, self.height/26
+                size: self.width*.9295154185, self.height*.78
+
+        Label:
+            text: 'TRADE TRANSLATOR'
+            font_name: 'Kivy/Fonts/DroidSans-Bold'
+            size_hint: .55, .1
+            font_size: min(self.width/10.404167, self.height/1.066667)
+            pos: self.width/2.444444, self.height*8.6
+
+        Label:
+            text: 'FINAL EQUITY'
+            font_name: 'Kivy/Fonts/DroidSans-Bold'
+            font_size: min(self.width/10.574878, self.height/2.497561)
+            size_hint: .191, .08
+            text_size: self.size
+            pos: self.width*.332, self.height*9.4
+
+        Label:
+            text: root.final_equity
+            font_size: min(self.width/7.226167, self.height/1.706667)
+            color: 0, 0, 0, 1
+            size_hint: .191, .08
+            pos: self.width*.328, self.height*8.3
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.width, self.height
+
+        Label:
+            text: 'CUMULATIVE RETURN'
+            font_name: 'Kivy/Fonts/DroidSans-Bold'
+            font_size: min(self.width/10.574878, self.height/2.497561)
+            size_hint: .191, .08
+            text_size: self.size
+            pos: self.width*1.522, self.height*9.4
+
+        Label:
+            text: root.cumulative_return
+            font_size: min(self.width/7.226167, self.height/1.706667)
+            color: 0, 0, 0, 1
+            size_hint: .191, .08
+            pos: self.width*1.518, self.height*8.3
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.width, self.height
+
+        Label:
+            text: 'SHARPE RATIO'
+            font_name: 'Kivy/Fonts/DroidSans-Bold'
+            font_size: min(self.width/10.574878, self.height/2.497561)
+            size_hint: .191, .08
+            text_size: self.size
+            pos: self.width*2.713, self.height*9.4
+
+        Label:
+            text: root.sharpe_ratio
+            font_size: min(self.width/7.226167, self.height/1.706667)
+            color: 0, 0, 0, 1
+            size_hint: .191, .08
+            pos: self.width*2.709, self.height*8.3
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.width, self.height
+
+        Label:
+            text: 'SORTINO RATIO'
+            font_name: 'Kivy/Fonts/DroidSans-Bold'
+            font_size: min(self.width/10.574878, self.height/2.497561)
+            size_hint: .191, .08
+            text_size: self.size
+            pos: self.width*3.903, self.height*9.4
+
+        Label:
+            text: root.sortino_ratio
+            font_size: min(self.width/7.226167, self.height/1.706667)
+            color: 0, 0, 0, 1
+            size_hint: .191, .08
+            pos: self.width*3.899, self.height*8.3
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.width, self.height
+
+        Button:
+            text: 'BACK'
+            on_release: root.back()
+            size_hint: .12, .08
+            pos: self.width*.55, self.height*10.85
+            font_name: 'Kivy/Fonts/DroidSans-Bold'
+            font_size: min(self.width/7.09375, self.height/2.133333)
+            background_color: .65, .65, .65, 1
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1.2
+                    rectangle: self.x, self.y, self.width, self.height
+
+        Button:
+            text: root.submit_text
+            visible: root.submit_enabled
+            opacity: 1 if root.submit_enabled else 0
+            disabled: not self.visible
+            on_release: root.submit()
+            size_hint: .12, .08
+            pos: self.width*6.8, self.height*10.85
+            font_name: 'Kivy/Fonts/DroidSans-Bold'
+            font_size: min(self.width/7.09375, self.height/2.133333)
+            background_color: .65, .65, .65, 1
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1.2
+                    rectangle: self.x, self.y, self.width, self.height
+
+        Image:
+            source: root.image
+            allow_stretch: True
+            keep_ratio: False
+            size_hint: .8733, .53
+            pos: self.width*.0715, self.height*.15

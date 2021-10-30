@@ -1,0 +1,35 @@
+<CasePopup>:
+    title: 'Backtest Case'
+    size_hint: None, None
+    size: (500, 160)
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+
+            Label:
+                id: caselabel
+                visible: root.case_enabled
+                text: root.case_name
+                opacity: 1 if self.visible else 0
+                font_size: 30
+                font_name: 'Kivy/Fonts/DroidSans-Bold'
+            BoxLayout:
+                padding: [20,20,20,20]
+                Button:
+                    id: case_button
+                    visible: root.case_enabled
+                    text: 'Backtest'
+                    opacity: 1 if self.visible else 0
+                    disabled: not self.visible
+                    font_name: 'Kivy/Fonts/DroidSans-Bold'
+                    font_size: 30
+                    background_color: .65, .65, .65, 1
+                    on_release: root.dismiss()
+                    on_release: root.case()
+                    canvas.before:
+                        Color:
+                            rgba: 1, 1, 1, 1
+                        Line:
+                            width: 2
+                            rectangle: self.x, self.y, self.width, self.height

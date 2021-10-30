@@ -23,7 +23,7 @@ from datetime import datetime
 from datetime import timedelta
 import requests
 import time
-import Zippy
+import requests
 
 class TradeTranslator(Screen):
 
@@ -218,7 +218,7 @@ class ErrorPopup(Popup):
 class BackTestPopup(Popup):
 
     def backtest(self, first_date, second_date):
-
+        time.sleep(5)
         try:
             date1test = datetime.strptime(first_date, '%d/%m/%Y')
             date2test = datetime.strptime(second_date, '%d/%m/%Y')
@@ -241,11 +241,32 @@ class BackTestPopup(Popup):
             Trade.error_text(app.manager.get_screen('trade'), first_date+' - '+second_date, 'Backtest Dates', ['Invalid date format.'])
             return
 
-        a, b, c, d, e = Zippy.zippy(self.signal,self.buy,self.trade,
-                                 self.cover_signal,self.universe,
-                                 self.take_profit,self.stop_loss,
-                                 self.cover_buy,self.cover_trade,
-                                 first_date, second_date)
+        input = {
+                "signal": self.signal,
+                "trade": self.buy,
+                "amt": self.trade,
+                "cover_signal": self.cover_signal,
+                "universe": self.universe,
+                "tProfit": self.take_profit,
+                "s_loss": self.stop_loss,
+                "cover_trade": self.cover_buy,
+                "cover_amt": self.cover_trade,
+                "first_date": first_date,
+                "second_date": second_date
+                }
+        print("BASHAAAR")
+        try:
+            out = requests.post(url="https://tranquil-beyond-74281.herokuapp.com/info/algo/translator/", data=input)
+            out = out.json()
+            a,b,c,d,e = out[0], out[1], out[2], out[3], out[4]
+        except:
+            print("BROOOOOO")
+        print("BASH MAN")
+        #Zippy.zippy(self.signal,self.buy,self.trade,
+                        #         self.cover_signal,self.universe,
+                        #         self.take_profit,self.stop_loss,
+                        #         self.cover_buy,self.cover_trade,
+                        #         first_date, second_date)
 
         if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered', 'Negative Values Not Accepted']:
             app = App.get_running_app()
@@ -277,11 +298,28 @@ class CasePopup(Popup):
             self.caseend = r.json()['cases'][0]['endDate']
 
     def case(self):
-        a, b, c, d, e = Zippy.zippy(self.signal,self.buy,self.trade,
-                                 self.cover_signal,self.universe,
-                                 self.take_profit,self.stop_loss,
-                                 self.cover_buy,self.cover_trade,
-                                 self.casestart, self.caseend)
+        input = {
+                "signal": self.signal,
+                "trade": self.buy,
+                "amt": self.trade,
+                "cover_signal": self.cover_signal,
+                "universe": self.universe,
+                "tProfit": self.take_profit,
+                "s_loss": self.stop_loss,
+                "cover_trade": self.cover_buy,
+                "cover_amt": self.cover_trade,
+                "first_date": self.casestart,
+                "second_date": self.caseend
+                }
+        out = requests.post(url="https://tranquil-beyond-74281.herokuapp.com/info/algo/translator/", data=input)
+        out = out.json()
+        a,b,c,d,e = out[0], out[1], out[2], out[3], out[4]
+        
+        #a, b, c, d, e = Zippy.zippy(self.signal,self.buy,self.trade,
+        #                         self.cover_signal,self.universe,
+        #                         self.take_profit,self.stop_loss,
+        #                         self.cover_buy,self.cover_trade,
+        #                         self.casestart, self.caseend)
 
         if a in ['Invalid Input', 'Invalid Ticker List', 'No Tickers Entered', 'Negative Values Not Accepted']:
             app = App.get_running_app()
@@ -399,3 +437,7 @@ class TradeTranslatorApp(App):
         # Window.top = Window.top-60
 
         return self.manager
+
+
+if __name__ == "__main__":
+    TradeTranslatorApp().run()

@@ -1,0 +1,93 @@
+#:include Kivy/trade.kv
+
+<TradeTranslator>:
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: 'Kivy/Background_Images/sign_in.png'
+
+    FloatLayout:
+
+        Label:
+            text: 'Invalid login. Please try again.'
+            size_hint: .2, .05
+            font_name: 'Kivy/Fonts/Dosis-Light'
+            font_size: 20
+            pos: self.width*2.3, self.height*3.6
+            color: 1,0.156863,0,1
+            visible: root.login_error
+            opacity: 1 if self.visible else 0
+
+        Label:
+            text: 'TRADE\nTRANSLATOR'
+            pos: self.width*1.2, self.height*2.6
+            size_hint: .38, .25
+            font_size: min(self.width/6, self.height/2.2258)
+            font_name: 'Kivy/Fonts/DroidSans-Bold'
+
+        Label:
+            text: 'Username'
+            font_name: 'Kivy/Fonts/Dosis-Light'
+            size_hint: .15, .05
+            pos: self.width*3.05, self.height*11
+            font_size: min(self.width/5.675,self.height/1.0667)
+            text_size: self.size
+
+        TextInput:
+            text: 'bashaar'
+            id: signin
+            hint_text: 'username'
+            multiline:False
+            size_hint: .4, .078
+            pos: self.width*1.139, self.height*5.9
+            font_name: 'Kivy/Fonts/Dosis-Light'
+            font_size: min(self.width/17.4615, self.height/1.92)
+            background_color: .12,.12,.12,1
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1
+                    rectangle: self.x, self.y, self.width, self.height
+
+        Label:
+            text: 'Password'
+            font_name: 'Kivy/Fonts/Dosis-Light'
+            size_hint: .15, .05
+            pos: self.width*3.05, self.height*7.7
+            font_size: min(self.width/5.675,self.height/1.0667)
+            text_size: self.size
+
+        TextInput:
+            text: '12345'
+            id: password
+            hint_text: 'password'
+            multiline:False
+            password:True
+            size_hint: .4, .078
+            pos: self.width*1.139, self.height*3.78
+            font_name: 'Kivy/Fonts/Dosis-Light'
+            font_size: min(self.width/17.4615, self.height/1.92)
+            background_color: .12,.12,.12,1
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1
+                    rectangle: self.x, self.y, self.width, self.height
+
+        Button:
+            text: 'Sign In'
+            on_release: root.do_signin(signin.text, password.text)
+            size_hint: .17, .07
+            pos: self.width*4.032, self.height*2.4
+            font_name: 'Kivy/Fonts/Dosis-Medium'
+            font_size: min(self.width/7, self.height/1.695)
+            background_color: .65, .65, .65, 1
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    width: 1
+                    rectangle: self.x, self.y, self.width, self.height
