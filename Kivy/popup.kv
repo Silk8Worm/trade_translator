@@ -13,7 +13,7 @@
                 text: root.case_name
                 opacity: 1 if self.visible else 0
                 font_size: 30
-                font_name: 'Kivy/Fonts/DroidSans-Bold'
+                font_name: 'Fonts/DroidSans-Bold'
             BoxLayout:
                 padding: [20,20,20,20]
                 Button:
@@ -22,7 +22,7 @@
                     text: 'Backtest'
                     opacity: 1 if self.visible else 0
                     disabled: not self.visible
-                    font_name: 'Kivy/Fonts/DroidSans-Bold'
+                    font_name: 'Fonts/DroidSans-Bold'
                     font_size: 30
                     background_color: .65, .65, .65, 1
                     on_release: root.dismiss()

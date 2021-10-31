@@ -1,14 +1,14 @@
-#:include Kivy/backtest.kv
-#:include Kivy/popup.kv
-#:include Kivy/popup2.kv
-#:include Kivy/popup3.kv
+#:include backtest.kv
+#:include popup.kv
+#:include popup2.kv
+#:include popup3.kv
 
 <Trade>:
     canvas.before:
         Rectangle:
             pos: self.pos
             size: self.size
-            source: 'Kivy/Background_Images/trade_screen.jpg'
+            source: 'Background_Images/trade_screen.jpg'
 
     FloatLayout:
         size_hint: 1, .99
@@ -22,14 +22,14 @@
 
         Label:
             text: 'TRADE TRANSLATOR'
-            font_name: 'Kivy/Fonts/DroidSans-Bold'
+            font_name: 'Fonts/DroidSans-Bold'
             size_hint: .55, .1
             font_size: min(self.width/10.404167, self.height/1.066667)
             pos: self.width/2.444444, self.height*8.6
 
         Label:
             text: 'SIGNAL'
-            font_name: 'Kivy/Fonts/Dosis-Light'
+            font_name: 'Fonts/Dosis-Light'
             size_hint: .15, .042
             font_size: min(self.width/7.09375, self.height/1.107692)
             pos: self.width*.45, self.height*17.5
@@ -47,7 +47,7 @@
 
         Label:
             text: 'COVER SIGNAL'
-            font_name: 'Kivy/Fonts/Dosis-Light'
+            font_name: 'Fonts/Dosis-Light'
             size_hint: .15, .042
             font_size: min(self.width/7.09375, self.height/1.107692)
             pos: self.width*.45, self.height*10.5
@@ -65,7 +65,7 @@
 
         Label:
             text: 'UNIVERSE'
-            font_name: 'Kivy/Fonts/Dosis-Light'
+            font_name: 'Fonts/Dosis-Light'
             size_hint: .15, .042
             font_size: min(self.width/7.09375, self.height/1.107692)
             pos: self.width*3.475, self.height*10.5
@@ -82,7 +82,7 @@
 
         Label:
             text: 'TRADE'
-            font_name: 'Kivy/Fonts/Dosis-Light'
+            font_name: 'Fonts/Dosis-Light'
             size_hint: .15, .042
             font_size: min(self.width/7.09375, self.height/1.107692)
             pos: self.width*3.475, self.height*17.5
@@ -91,7 +91,7 @@
         Button:
             text: root.trade
             background_color: (1,1,1,1)
-            font_name: 'Kivy/Fonts/DroidSans-Bold'
+            font_name: 'Fonts/DroidSans-Bold'
             size_hint: .13, .06
             font_size: min(self.width/5.675, self.height/1.476923)
             pos: self.width*4.01, self.height*11
@@ -115,7 +115,7 @@
 
         Label:
             text: 'COVER TRADE'
-            font_name: 'Kivy/Fonts/Dosis-Light'
+            font_name: 'Fonts/Dosis-Light'
             size_hint: .15, .042
             font_size: min(self.width/7.09375, self.height/1.107692)
             pos: self.width*3.475, self.height*14.2
@@ -124,7 +124,7 @@
         Button:
             text: root.cover_trade
             background_color: (1,1,1,1)
-            font_name: 'Kivy/Fonts/DroidSans-Bold'
+            font_name: 'Fonts/DroidSans-Bold'
             size_hint: .13, .06
             font_size: min(self.width/5.675, self.height/1.476923)
             pos: self.width*4.01, self.height*8.7
@@ -148,7 +148,7 @@
 
         Label:
             text: 'TAKE PROFIT'
-            font_name: 'Kivy/Fonts/Dosis-Light'
+            font_name: 'Fonts/Dosis-Light'
             size_hint: .15, .042
             font_size: min(self.width/7.09375, self.height/1.107692)
             pos: self.width*.45, self.height*3.5
@@ -172,7 +172,7 @@
 
         Label:
             text: 'STOP LOSS'
-            font_name: 'Kivy/Fonts/Dosis-Light'
+            font_name: 'Fonts/Dosis-Light'
             size_hint: .15, .042
             font_size: min(self.width/7.09375, self.height/1.107692)
             pos: self.width*1.845, self.height*3.5
@@ -199,7 +199,7 @@
             on_release: root.backtest_case(signal.text, trade.text, cover_signal.text, universe.text, take_profit.text, stop_loss.text, cover_trade.text)
             size_hint: .185, .08
             pos: self.width*2.815, self.height*1.05
-            font_name: 'Kivy/Fonts/Dosis-Medium'
+            font_name: 'Fonts/Dosis-Medium'
             font_size: min(self.width/8.075961, self.height/1.969231)
             background_color: .65, .65, .65, 1
             canvas.before:
@@ -214,7 +214,7 @@
             on_release: root.backtest(signal.text, trade.text, cover_signal.text, universe.text, take_profit.text, stop_loss.text, cover_trade.text)
             size_hint: .185, .08
             pos: self.width*4.043, self.height*1.05
-            font_name: 'Kivy/Fonts/Dosis-Medium'
+            font_name: 'Fonts/Dosis-Medium'
             font_size: min(self.width/8.075961, self.height/1.969231)
             background_color: .65, .65, .65, 1
             canvas.before:
